@@ -51,3 +51,79 @@ Users are able to:
 - choose a scheduled pickup date and time
 - receive an online receipt and order confirmation after successful checkout
 - view previous orders in order history
+
+
+### Meal Sharing Features
+Users are able to:
+- save favourite meals
+- share favourite meals with other users
+- view favourite meals shared by other users
+
+## Admin Side Features
+
+Administrators are able to:
+- view registered customer accounts
+- manage customer account records
+- view customer profile information
+- monitor newly registered users
+- add new menu items
+- edit existing menu items
+- remove menu items
+- update prices, descriptions, ingredients, categories, and availability status
+- view customer orders
+- track scheduled pickup times
+- monitor order history
+- update order status such as Pending, Confirmed, Preparing, Ready for Pickup, and Completed
+- view sales and income records
+- display monthly income using simple charts for business monitoring
+
+## Example User Workflow
+
+A typical user workflow is as follows:
+
+1. Register an account or log in
+2. Browse the menu
+3. View meal details
+4. Add items to cart
+5. Review cart contents, order summary, and total price
+6. Proceed to checkout
+7. Select a payment method and complete the simulated payment process
+8. Choose a scheduled pickup date and time
+9. Confirm the order
+10. Receive an online receipt and order confirmation
+11. View the order in order history
+12. Save and share favourite meals
+13. Browse favourite meals shared by other users
+
+## Example Admin Workflow
+
+A typical admin workflow is as follows:
+
+1. Log in as an administrator
+2. View newly registered users
+3. Manage customer account records
+4. Update menu items and availability
+5. View incoming customer orders
+6. Track scheduled pickup times
+7. Update order status
+8. Review monthly income using charts
+
+## Example Menu Categories
+
+The menu is based on a Vietnamese restaurant and may include items such as:
+
+- **Banh Mi**
+- **Bun Bo Hue**
+- **Pho**
+- **Rice Paper Rolls**
+- **Rice Dishes**
+- **Drinks**
+
+Each menu item may contain:
+- item name
+- category
+- price
+- ingredients
+- short description
+- availability status
+
