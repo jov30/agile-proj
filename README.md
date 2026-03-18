@@ -21,3 +21,33 @@ The application is designed to be:
 - **Engaging** through a clean and appealing restaurant-style interface
 - **Effective** by making food ordering more convenient for users
 - **Intuitive** through a simple workflow for browsing, ordering, and sharing meals
+
+## System Roles
+
+The platform contains two main sides:
+
+- **User Side** for customers
+- **Admin Side** for restaurant administrators
+
+## User Side Features
+
+### User Account Features
+Users are able to:
+- register a new account
+- log in and log out
+- view and update profile information
+
+### Ordering Features
+Users are able to:
+- browse the restaurant menu
+- view meal details, including description, price, and ingredients
+- add meals to cart
+- update meal quantities in cart
+- view cart contents and order summary information
+- view the total price of their order before checkout
+- proceed to checkout
+- make a payment through the system
+- place an online order
+- choose a scheduled pickup date and time
+- receive an online receipt and order confirmation after successful checkout
+- view previous orders in order history
