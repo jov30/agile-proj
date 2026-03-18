@@ -11,3 +11,13 @@ The application is intended to satisfy the project requirements by including:
 - user registration, login, and logout
 - persistent user data stored in a database
 - the ability for users to view data shared by other users
+
+## Purpose of the Application
+
+The purpose of this application is to solve a real business need by providing an online scheduled pickup ordering system for a restaurant that currently does not have one. It also adds a community element by allowing users to share favourite meals, which makes the platform more interactive and helps satisfy the requirement that users can view data from other users.
+
+The application is designed to be:
+
+- **Engaging** through a clean and appealing restaurant-style interface
+- **Effective** by making food ordering more convenient for users
+- **Intuitive** through a simple workflow for browsing, ordering, and sharing meals
