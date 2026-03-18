@@ -5,6 +5,15 @@ The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a 
 
 This project is based on a realistic restaurant scenario where customers want a more convenient way to order food online before arriving at the restaurant. The platform is designed as a **client-server web application** and focuses on providing a user-friendly ordering experience while also supporting social interaction through meal sharing.
 
+## Team Members
+
+| UWA ID | Name | GitHub Username |
+|--------|------|-----------------|
+| 24307608 | Tony Le | utle23 |
+| 23957425 | Jovan Pui | jov30 |
+| 24220908 | Samuel Ou | slimoftheshady |
+| 24181084 | Thomas Zeng | zxx457 |
+
 The application is intended to satisfy the project requirements by including:
 
 - a client-server architecture
@@ -127,3 +136,61 @@ Each menu item may contain:
 - short description
 - availability status
 
+## Application Design
+
+The application follows a traditional web architecture using technologies approved for the unit.
+
+### Client Side
+The client side is responsible for displaying web pages, handling user interactions, and sending requests to the server.
+
+### Server Side
+The server side handles authentication, ordering logic, profile management, meal sharing, admin management, and sales tracking.
+
+### Database
+The database stores persistent data such as:
+
+- user accounts
+- login details
+- profile information
+- menu items
+- orders
+- favourite meals
+- shared meal posts
+- sales records
+
+## Technologies Used
+
+This project uses only technologies allowed in the unit specification.
+
+### Frontend
+- HTML
+- CSS
+- JavaScript
+- Tailwind CSS
+
+### Backend
+- Flask
+
+### Database
+- SQLite
+- SQLAlchemy
+
+### Additional Tools
+- Jinja templates
+- Flask plugins introduced in the unit
+- AJAX where needed
+- a chart library for income visualisation
+
+### Version Control
+- Git
+- GitHub
+
+
+
+## Running the Application
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/jov30/agile-proj.git
+cd your-private-repository
