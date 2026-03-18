@@ -58,7 +58,7 @@ Users are able to:
 - make a payment through the system
 - place an online order
 - choose a scheduled pickup date and time
-- receive an online receipt and order confirmation after successful checkout
+- receive an online PDF receipt and order confirmation after successful checkout
 - view previous orders in order history
 
 
@@ -187,10 +187,196 @@ This project uses only technologies allowed in the unit specification.
 
 
 
-## Running the Application
+
 
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/jov30/agile-proj.git
+
+
+
+
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-organisation/your-private-repository.git
 cd your-private-repository
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+
+# On Windows:
+venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Set up environment variables
+
+Create a `.env` file in the project root if required by your application.
+
+Example:
+
+```env
+SECRET_KEY=your-secret-key
+```
+
+If the project does not use additional external APIs, no further environment variables are required.
+
+### 5. Initialize the database
+
+```bash
+flask init-db
+```
+
+If your project uses another database setup method, replace this command with the correct one.
+
+## Running the Application
+
+Start the Flask server:
+
+```bash
+flask run
+
+# Or, if your main entry file is app.py:
+python app.py
+```
+
+Then open your browser and go to:
+
+```text
+http://127.0.0.1:5000
+```
+
+## Running the Tests
+
+To run the test suite:
+
+```bash
+pytest
+
+# If your project uses a specific test folder:
+pytest tests/
+
+# If your team uses unittest instead:
+python -m unittest discover -s tests
+```
+
+## Project Structure
+
+```text
+project-root/
+│
+├── app.py
+├── requirements.txt
+├── README.md
+├── models.py
+├── forms.py
+├── routes/
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── login.html
+│   ├── register.html
+│   ├── menu.html
+│   ├── cart.html
+│   ├── checkout.html
+│   ├── orders.html
+│   ├── profile.html
+│   ├── shared_meals.html
+│   ├── admin_dashboard.html
+│   ├── admin_users.html
+│   ├── admin_menu.html
+│   ├── admin_orders.html
+│   └── admin_income.html
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── instance/
+└── tests/
+```
+
+## Notes on Scope
+
+This project focuses on **scheduled pickup ordering** rather than real-time queue management. This decision keeps the project manageable for a student development team while still meeting the core requirements of the unit.
+
+The payment process in this project is **simulated for demonstration purposes** and is not connected to a real payment gateway.
+
+The meal sharing feature was included to ensure that users can view data shared by other users in a meaningful and relevant way.
+
+The admin dashboard and monthly income chart were included to provide useful restaurant-side management features while remaining within the scope of a student web application project.
+
+## Troubleshooting
+
+### Database Issues
+
+If you encounter problems with the database, try reinitializing it:
+
+```bash
+flask init-db
+```
+
+### Missing Dependencies
+
+Make sure all required packages are installed:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Application Startup Errors
+
+Check that your virtual environment is activated and that all required environment variables are set correctly.
+
+### General Errors
+
+Check the Flask server logs for error messages and stack traces.
+
+## External Sources Used
+
+Possible external sources and libraries used in this project may include:
+
+- Tailwind CSS
+- Chart.js or another chart library
+- Google Fonts
+- Font Awesome or another icon library
+- Restaurant images or placeholder images used for UI design
+
+This section should be updated to reflect the actual external resources used by the final project.
+
+## Future Improvements
+
+Possible future improvements include:
+
+- downloadable PDF receipts
+- add feature instant online order
+- email confirmation
+- recommendation features based on user preferences
+- more advanced restaurant analytics
+- role-based staff accounts with different permission levels
+- real-time queue management for instant pickup orders
+
+## Conclusion
+
+The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a realistic and achievable web application project that combines restaurant ordering functionality with a small social sharing feature. It meets the key requirements of the unit by using a client-server architecture, supporting authentication, storing persistent user data, and allowing users to view content shared by others. In addition, it provides admin-side tools for customer management, order tracking, menu control, and monthly income monitoring.
+
+
+
+
+
+
+
+
