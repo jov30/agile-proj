@@ -1,0 +1,219 @@
+## Project Structure
+
+```text
+project-root/
+│
+├── app.py
+├── requirements.txt
+├── README.md
+├── config.py
+├── models.py
+├── forms.py
+├── routes/
+│   ├── auth.py
+│   ├── user.py
+│   ├── menu.py
+│   ├── orders.py
+│   └── admin.py
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── auth/
+│   │   ├── login.html
+│   │   └── register.html
+│   ├── user/
+│   │   ├── profile.html
+│   │   ├── orders.html
+│   │   └── shared_meals.html
+│   ├── menu/
+│   │   ├── menu.html
+│   │   ├── cart.html
+│   │   └── checkout.html
+│   └── admin/
+│       ├── dashboard.html
+│       ├── users.html
+│       ├── menu.html
+│       ├── orders.html
+│       └── income.html
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   ├── cart.js
+│   │   ├── checkout.js
+│   │   └── admin.js
+│   └── images/
+├── instance/
+│   └── app.db
+└── tests/
+    ├── test_auth.py
+    ├── test_orders.py
+    ├── test_menu.py
+    └── test_admin.py
+```
+
+
+
+
+I think the most reasonable way to divide our project is into **four main roles**, with each person having a clear set of files and responsibilities. This way, everyone has a meaningful contribution, and it should also make collaboration easier.
+
+## **Role 1: Core Ordering Flow and User Interface**
+
+This role focuses on the main customer journey of the application, especially the most important ordering features and the user-facing interface.
+
+**Main files:**
+
+* `templates/base.html`
+* `templates/index.html`
+* `templates/menu/menu.html`
+* `templates/menu/cart.html`
+* `templates/menu/checkout.html`
+* `static/css/`
+* `static/js/` for menu, cart, and checkout interactions
+
+**Main responsibilities:**
+
+* design and build the main customer-side pages
+* create the overall user flow for browsing meals, adding to cart, and checking out
+* display order summary and total price clearly
+* design buttons, navigation, and layout for the ordering process
+* make sure the interface is clean, consistent, and easy to use
+* help connect the frontend ordering pages with backend routes when needed
+
+---
+
+## **Role 2: Authentication and Account Features**
+
+This role focuses on user authentication and account-related functionality.
+
+**Main files:**
+
+* `templates/auth/login.html`
+* `templates/auth/register.html`
+* `forms.py`
+* `routes/auth.py`
+
+**Main responsibilities:**
+
+* implement user registration
+* implement login and logout
+* handle session management
+* validate authentication forms
+* connect authentication logic with the user database
+* make sure account access works properly and securely
+
+---
+
+## **Role 3: User Features and Social Features**
+
+This role focuses on features that belong to the user after logging in, including profile management, order history, and shared meal features.
+
+**Main files:**
+
+* `templates/user/profile.html`
+* `templates/user/orders.html`
+* `templates/user/shared_meals.html`
+* `routes/user.py`
+
+**Main responsibilities:**
+
+* build the user profile page
+* implement profile viewing and updating
+* create the order history page
+* implement favourite meal saving and sharing
+* allow users to view favourite meals shared by other users
+* handle the main user-side logic after authentication
+
+---
+
+## **Role 4: Admin Side, Testing, and Documentation**
+
+This role focuses on the restaurant management side of the system, as well as testing and project documentation.
+
+**Main files:**
+
+* `templates/admin/dashboard.html`
+* `templates/admin/users.html`
+* `templates/admin/menu.html`
+* `templates/admin/orders.html`
+* `templates/admin/income.html`
+* `routes/admin.py`
+* `README.md`
+* `tests/`
+* `requirements.txt`
+
+**Main responsibilities:**
+
+* build the admin dashboard
+* manage customer account records
+* manage menu items
+* view and update customer orders
+* display monthly income charts
+* write and organise test files
+* maintain the README
+* help manage repository structure and project setup
+
+---
+
+## **Shared Backend Files**
+
+Some files will affect multiple roles, so we should treat them as shared files and coordinate carefully when editing them.
+
+**Shared files:**
+
+* `app.py`
+* `models.py`
+* `requirements.txt`
+
+**How to handle them:**
+
+* the person responsible for the relevant feature should take the lead when editing the related section
+* we should communicate before making major changes
+* we should avoid editing the same parts at the same time to reduce merge conflicts
+
+For example:
+
+* Role 2 would mainly handle the `User` authentication-related parts in `models.py`
+* Role 3 would mainly handle user feature models such as favourites or shared meals
+* Role 1 and Role 3 may coordinate on order-related logic
+* Role 4 would mainly handle admin-related logic and tests
+
+---
+
+## **Suggested Route Structure**
+
+To make collaboration easier, I think we should split the `routes/` folder into separate files:
+
+* `routes/auth.py`
+* `routes/user.py`
+* `routes/menu.py`
+* `routes/orders.py`
+* `routes/admin.py`
+
+This will reduce Git conflicts and make responsibilities clearer.
+
+If we do that, then:
+
+* **Role 1** mainly handles `routes/menu.py` and parts of `routes/orders.py`
+* **Role 2** mainly handles `routes/auth.py`
+* **Role 3** mainly handles `routes/user.py`
+* **Role 4** mainly handles `routes/admin.py`
+
+---
+
+## **Summary**
+
+So the four roles would be:
+
+1. **Core Ordering Flow and User Interface**
+   Menu, cart, checkout, buttons, layout, and main customer UI
+
+2. **Authentication and Account Features**
+   Login, register, logout, session handling, and auth forms
+
+3. **User Features and Social Features**
+   Profile, order history, favourite meals, and shared meals
+
+4. **Admin Side, Testing, and Documentation**
+   Admin dashboard, admin management pages, income chart, tests, and README
+
