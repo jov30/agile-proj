@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Order Vietnamese Street Food | MCQ{% endblock %}
+
+{% block head %}
+<style>
+  .hero {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    padding: 2rem;
+    background: linear-gradient(120deg, rgba(28, 140, 79, 0.08), rgba(160, 50, 140, 0.08));
+    border-radius: 1.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    margin: 0;
+    color: #0f172a;
+  }
+
+  .hero p {
+    font-size: 1.05rem;
+    color: #475569;
+    margin: 0.5rem 0 0;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .hero-actions a {
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 600;
+    color: #fff;
+    background: #1c8c4f;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hero-actions a.secondary {
+    background: #fff;
+    color: #1c8c4f;
+    border: 1px solid rgba(28, 140, 79, 0.3);
+  }
+
+  .hero-actions a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(28, 140, 79, 0.25);
+  }
+
+  .info-grid {
+    margin-top: 3rem;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .info-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    box-shadow: 0 15px 35px rgba(15, 23, 42, 0.05);
+  }
+
+  .info-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: #0f172a;
+  }
+
+  .info-card p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.95rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Pickup-ready Vietnamese street food, prepared your way.</h1>
+    <p>
+      Plan your meal, schedule a pickup window, and share favourite dishes with the MCQ community. The brand
+      header above reuses the official restaurant logo, so every page carries consistent visual identity.
+    </p>
+    <div class="hero-actions">
+      <a href="/menu">Browse Menu</a>
+      <a href="/shared-meals" class="secondary">See Shared Meals</a>
+    </div>
+  </div>
+  <div>
+    <p><strong>Logo usage tip:</strong> the logo is served from <code>static/images/mcq-logo.jpg</code>.</p>
+    <p>
+      Any future page can inherit this design simply by extending <code>base.html</code>; no extra markup is required to
+      render the brand banner.
+    </p>
+  </div>
+</section>
+
+<section class="info-grid">
+  <article class="info-card">
+    <h3>Schedule Pickup</h3>
+    <p>Choose the time that works for you and receive a confirmation receipt instantly.</p>
+  </article>
+  <article class="info-card">
+    <h3>Share Meals</h3>
+    <p>Save favourite items and publish quick notes so friends know what to try next.</p>
+  </article>
+  <article class="info-card">
+    <h3>Track Orders</h3>
+    <p>Stay on top of every order status—from Pending to Ready for Pickup—inside your dashboard.</p>
+  </article>
+</section>
+{% endblock %}

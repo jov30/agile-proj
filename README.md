@@ -1,4 +1,6 @@
 # MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform
+
+![MCQ Vietnamese Street Food Logo](static/images/mcq-logo.jpg)
 ## Description
 
 The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a web application designed for a Vietnamese restaurant. It allows users to create accounts, browse the menu, place food orders for **scheduled pickup**, and share their favourite meals with other users.
@@ -157,6 +159,17 @@ The database stores persistent data such as:
 - favourite meals
 - shared meal posts
 - sales records
+
+## Branding and Layout Notes
+
+- The MCQ Vietnamese Street Food logo asset lives at `static/images/mcq-logo.jpg`.
+- When creating or updating layouts, reference it with Jinja so any template can render the logo:
+
+```html
+<img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ Vietnamese Street Food Logo" class="h-12 w-auto" />
+```
+- The `class` attribute above is an example Tailwind utility combination—adjust sizing or spacing per page while keeping the same `url_for` call.
+- The shared `templates/base.html` layout already renders the logo inside the header; extend this template from pages such as `index.html` so all customer- and admin-facing screens inherit the same branding automatically.
 
 ## Technologies Used
 
@@ -372,9 +385,6 @@ Possible future improvements include:
 ## Conclusion
 
 The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a realistic and achievable web application project that combines restaurant ordering functionality with a small social sharing feature. It meets the key requirements of the unit by using a client-server architecture, supporting authentication, storing persistent user data, and allowing users to view content shared by others. In addition, it provides admin-side tools for customer management, order tracking, menu control, and monthly income monitoring.
-
-
-
 
 
 

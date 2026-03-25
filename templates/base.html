@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}MCQ Vietnamese Street Food{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <style>
+      :root {
+        color-scheme: light;
+        --brand-green: #1c8c4f;
+        --brand-yellow: #f7b733;
+        --brand-purple: #a0328c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #f8fafc;
+        color: #1f2933;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-header {
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+      }
+
+      .brand img {
+        height: 48px;
+        width: auto;
+      }
+
+      .brand-text {
+        line-height: 1.2;
+      }
+
+      .brand-title {
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--brand-green);
+      }
+
+      .brand-subtitle {
+        font-size: 0.85rem;
+        color: #4b5563;
+      }
+
+      .main-nav {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+
+      .main-nav a {
+        text-decoration: none;
+        color: #111827;
+        transition: color 0.2s ease-in-out;
+      }
+
+      .main-nav a:hover {
+        color: var(--brand-purple);
+      }
+
+      .app-main {
+        width: min(1100px, 100%);
+        flex: 1;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 3rem;
+      }
+
+      .app-footer {
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
+        padding: 1.5rem;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6b7280;
+      }
+
+      @media (max-width: 720px) {
+        .app-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .main-nav {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="/" class="brand">
+        <img
+          src="{{ url_for('static', filename='images/mcq-logo.jpg') }}"
+          alt="MCQ Vietnamese Street Food Logo"
+        />
+        <div class="brand-text">
+          <div class="brand-title">MCQ Vietnamese Street Food</div>
+          <div class="brand-subtitle">Scheduled pickup ordering & meal sharing</div>
+        </div>
+      </a>
+      <nav class="main-nav">
+        <a href="/">Home</a>
+        <a href="/menu">Menu</a>
+        <a href="/orders">Orders</a>
+        <a href="/profile">Profile</a>
+      </nav>
+    </header>
+    <main class="app-main">{% block content %}{% endblock %}</main>
+    <footer class="app-footer">
+      &copy; {{ current_year|default(2026, true) }} MCQ Vietnamese Street Food. All rights reserved.
+    </footer>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
