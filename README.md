@@ -198,19 +198,6 @@ This project uses only technologies allowed in the unit specification.
 - Git
 - GitHub
 
-
-
-
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/jov30/agile-proj.git
-
-
-
-
-
 ## Installation
 
 ### 1. Clone the repository
@@ -218,34 +205,39 @@ git clone https://github.com/jov30/agile-proj.git
 ```bash
 git clone https://github.com/jov30/agile-proj.git
 cd agile-proj
+git checkout main
 ```
 
 ### 2. Create and activate a virtual environment
 
+#### macOS / Linux
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+python3 -m pip install -r requirements.txt
+```
 
-# On Windows:
+#### Windows
+
+```powershell
+py -m venv venv
 venv\Scripts\activate
+py -m pip install -r requirements.txt
 ```
 
-### 3. Install dependencies
+### 3. Run the application
 
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Environment variables
-
-No extra environment variables are required for the current public-site build.
-
-## Running the Application
-
-Start the Flask server:
+#### macOS / Linux
 
 ```bash
 python3 -m flask --app app run --host 127.0.0.1 --port 5000
+```
+
+#### Windows
+
+```powershell
+py -m flask --app app run --host 127.0.0.1 --port 5000
 ```
 
 Then open your browser and go to:
@@ -254,19 +246,17 @@ Then open your browser and go to:
 http://127.0.0.1:5000
 ```
 
+### 4. Environment variables
+
+No extra environment variables are required for the current public-site build.
+
+## Running the Application
+
+If your virtual environment is already activated, use the same Flask command above for your operating system.
+
 ## Running the Tests
 
-To run the test suite:
-
-```bash
-pytest
-
-# If your project uses a specific test folder:
-pytest tests/
-
-# If your team uses unittest instead:
-python -m unittest discover -s tests
-```
+Test files are currently placeholders and the automated test suite is not fully set up yet.
 
 ## Project Structure
 
@@ -274,33 +264,72 @@ python -m unittest discover -s tests
 project-root/
 │
 ├── app.py
+├── feature_pages.py
 ├── requirements.txt
 ├── README.md
+├── config.py
 ├── models.py
 ├── forms.py
+├── data/
+│   ├── menu-image-sources.json
+│   ├── menu-prices.json
+│   ├── menu-source.txt
+│   └── visual-inspiration-sources.json
 ├── routes/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── auth.py
+│   ├── helpers.py
+│   ├── menu.py
+│   ├── orders.py
+│   └── user.py
+├── scripts/
+│   ├── build_menu_json.py
+│   └── download_menu_images.py
 ├── templates/
 │   ├── base.html
+│   ├── feature-page.html
 │   ├── index.html
-│   ├── login.html
-│   ├── register.html
-│   ├── menu.html
-│   ├── cart.html
-│   ├── checkout.html
-│   ├── orders.html
-│   ├── profile.html
-│   ├── shared_meals.html
-│   ├── admin_dashboard.html
-│   ├── admin_users.html
-│   ├── admin_menu.html
-│   ├── admin_orders.html
-│   └── admin_income.html
+│   ├── admin/
+│   │   ├── dashboard.html
+│   │   ├── income.html
+│   │   ├── menu.html
+│   │   ├── orders.html
+│   │   └── users.html
+│   ├── auth/
+│   │   ├── login.html
+│   │   └── register.html
+│   ├── menu/
+│   │   ├── cart.html
+│   │   ├── checkout.html
+│   │   └── menu.html
+│   └── user/
+│       ├── orders.html
+│       ├── profile.html
+│       └── shared_meals.html
 ├── static/
 │   ├── css/
+│   │   ├── main.css
+│   │   └── style.css
+│   ├── data/
+│   │   └── menu.json
 │   ├── js/
+│   │   ├── admin.js
+│   │   ├── cart.js
+│   │   └── checkout.js
 │   └── images/
+│       ├── brand/
+│       ├── inspiration/
+│       ├── menu/
+│       ├── mcq-logo.jpg
+│       └── .gitkeep
 ├── instance/
+│   └── app.db
 └── tests/
+    ├── test_admin.py
+    ├── test_auth.py
+    ├── test_menu.py
+    └── test_orders.py
 ```
 
 ## Menu Data & Assets
@@ -332,12 +361,22 @@ The current public-site build does not require a database initialization step be
 Make sure all required packages are installed:
 
 ```bash
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
+```
+
+On Windows:
+
+```powershell
+py -m pip install -r requirements.txt
 ```
 
 ### Application Startup Errors
 
-Check that your virtual environment is activated and that all required environment variables are set correctly.
+Check that:
+- your virtual environment is activated
+- dependencies were installed from `requirements.txt`
+- you are running the app from the project root
+- you are on the `main` branch if you want the default project version
 
 ### General Errors
 
@@ -370,5 +409,3 @@ Possible future improvements include:
 ## Conclusion
 
 The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a realistic and achievable web application project that combines restaurant ordering functionality with a small social sharing feature. It meets the key requirements of the unit by using a client-server architecture, supporting authentication, storing persistent user data, and allowing users to view content shared by others. In addition, it provides admin-side tools for customer management, order tracking, menu control, and monthly income monitoring.
-
-
