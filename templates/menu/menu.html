@@ -203,6 +203,10 @@
     margin-bottom: 1.4rem;
   }
 
+  .menu-browser__header-copy {
+    max-width: 48ch;
+  }
+
   .menu-browser__header h2 {
     margin: 0.3rem 0 0;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
@@ -211,9 +215,36 @@
 
   .menu-browser__header p {
     margin: 0;
-    max-width: 48ch;
     color: var(--text-muted);
     line-height: 1.7;
+  }
+
+  .menu-browser__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .menu-browser__hint {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+    white-space: nowrap;
+  }
+
+  .menu-browser__control {
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    box-shadow: 0 16px 28px rgba(255, 106, 19, 0.22);
+    cursor: pointer;
   }
 
   .menu-categories {
@@ -290,15 +321,41 @@
     line-height: 1.7;
   }
 
+  .menu-items-rail {
+    overflow-x: auto;
+    padding-bottom: 0.55rem;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(235, 81, 48, 0.5) rgba(112, 85, 66, 0.08);
+  }
+
+  .menu-items-rail::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .menu-items-rail::-webkit-scrollbar-track {
+    background: rgba(112, 85, 66, 0.08);
+    border-radius: 999px;
+  }
+
+  .menu-items-rail::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-radius: 999px;
+  }
+
   .menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(285px, 340px);
     gap: 1.2rem;
+    width: max-content;
   }
 
   .menu-card {
     display: flex;
     flex-direction: column;
+    width: min(340px, calc(100vw - 3.6rem));
     overflow: hidden;
     border-radius: 28px;
     border: 1px solid rgba(112, 85, 66, 0.12);
@@ -306,6 +363,7 @@
       linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
       #fff;
     box-shadow: 0 22px 42px rgba(53, 30, 20, 0.09);
+    scroll-snap-align: start;
     transition: transform 0.22s ease, box-shadow 0.22s ease;
   }
 
@@ -470,6 +528,11 @@
       align-items: flex-start;
     }
 
+    .menu-browser__controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+
     .menu-utility__header {
       flex-direction: column;
       align-items: flex-start;
@@ -482,6 +545,10 @@
     .menu-category-tab {
       width: 100%;
       justify-content: space-between;
+    }
+
+    .menu-grid {
+      grid-auto-columns: minmax(82vw, 300px);
     }
   }
 </style>
@@ -559,19 +626,40 @@
 
 <section class="menu-browser section-panel">
   <div class="menu-browser__header">
-    <div>
+    <div class="menu-browser__header-copy">
       <p class="eyebrow">Choose a counter</p>
       <h2>Category browsing with more personality</h2>
+      <p>
+        Move through the menu like switching between food counters. Each lane updates the hero image and keeps the item
+        cards visually rich, not just informational.
+      </p>
     </div>
-    <p>
-      Move through the menu like switching between food counters. Each lane updates the hero image and keeps the item
-      cards visually rich, not just informational.
-    </p>
+    <div class="menu-browser__controls" aria-label="Menu item controls">
+      <span class="menu-browser__hint">Swipe the dishes</span>
+      <button
+        class="menu-browser__control"
+        type="button"
+        data-menu-shift="-1"
+        aria-label="Scroll menu items left"
+      >
+        &larr;
+      </button>
+      <button
+        class="menu-browser__control"
+        type="button"
+        data-menu-shift="1"
+        aria-label="Scroll menu items right"
+      >
+        &rarr;
+      </button>
+    </div>
   </div>
 
   <div id="menu-categories" class="menu-categories" role="tablist" aria-label="Menu categories"></div>
   <div id="menu-category-note" class="menu-category-note" hidden></div>
-  <div id="menu-items" class="menu-grid" aria-live="polite"></div>
+  <div id="menu-items-rail" class="menu-items-rail" aria-live="polite">
+    <div id="menu-items" class="menu-grid"></div>
+  </div>
 </section>
 
 <template id="menu-card-template">
@@ -601,12 +689,14 @@ const staticBase = "{{ url_for('static', filename='') }}";
 const fallbackImage = "{{ url_for('static', filename='images/menu/pho-classic.jpg') }}";
 const categoriesEl = document.getElementById('menu-categories');
 const itemsEl = document.getElementById('menu-items');
+const itemsRailEl = document.getElementById('menu-items-rail');
 const noteEl = document.getElementById('menu-category-note');
 const heroImg = document.getElementById('menu-hero-image');
 const cardTemplate = document.getElementById('menu-card-template');
 const categoryTotalEl = document.getElementById('menu-category-total');
 const itemTotalEl = document.getElementById('menu-item-total');
 const activeCategoryEl = document.getElementById('menu-active-category');
+const menuRailButtons = document.querySelectorAll('[data-menu-shift]');
 
 let menuCategories = [];
 
@@ -653,6 +743,10 @@ function renderCategory(index) {
 
   const category = menuCategories[index];
   if (!category) return;
+
+  if (itemsRailEl) {
+    itemsRailEl.scrollTo({ left: 0, behavior: 'smooth' });
+  }
 
   activeCategoryEl.textContent = category.title;
   if (category.image) {
@@ -723,5 +817,15 @@ function buildCard(item, categoryTitle) {
 
   return clone;
 }
+
+menuRailButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!itemsRailEl) return;
+    const card = itemsRailEl.querySelector('.menu-card');
+    const step = card ? card.getBoundingClientRect().width + 19 : itemsRailEl.clientWidth * 0.82;
+    const direction = Number(button.dataset.menuShift || '1');
+    itemsRailEl.scrollBy({ left: step * direction, behavior: 'smooth' });
+  });
+});
 </script>
 {% endblock %}
