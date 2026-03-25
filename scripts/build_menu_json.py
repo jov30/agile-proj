@@ -22,6 +22,8 @@ CATEGORY_MAP = {
     'SMOOTHIES': 'Smoothies',
     'VIETNAMESE COFFEE': 'Vietnamese Coffee',
     'LEMONADE DRINKS': 'Lemonade Drinks',
+    'DESSERTS': 'Desserts',
+    'PASTRIES': 'Pastries',
 }
 
 CATEGORY_IMAGES = {
@@ -56,9 +58,12 @@ SUMMARY_HINTS = {
     'SMOOTHIES': 'Blended fruit smoothies with a creamy base.',
     'VIETNAMESE COFFEE': 'Traditional phin-brewed iced coffee.',
     'LEMONADE DRINKS': 'House lemonade infusions.',
+    'DESSERTS': 'Vietnamese sweet soups and chilled dessert bowls.',
+    'PASTRIES': 'Fresh baked pastries for a quick add-on treat.',
 }
 
 PRICE_FILE = Path('data/menu-prices.json')
+ITEM_IMAGE_DIR = Path('static/images/menu/items')
 
 
 def slugify(value: str) -> str:
@@ -86,6 +91,14 @@ def load_price_map() -> Dict[str, str]:
     for key, value in data.items():
         formatted[key.lower()] = format_price(value)
     return formatted
+
+
+def item_image_path(name: str, fallback: Optional[str]) -> Optional[str]:
+    filename = f"{slugify(name)}.jpg"
+    candidate = ITEM_IMAGE_DIR / filename
+    if candidate.exists():
+        return f"images/menu/items/{filename}"
+    return fallback
 
 
 def parse_lines(lines: List[str]):
@@ -160,10 +173,11 @@ def build_payload(items_by_category, category_order, category_notes, price_map):
     for key in category_order:
         display = CATEGORY_MAP[key]
         image_file = CATEGORY_IMAGES.get(key)
+        category_image = f"images/menu/{image_file}" if image_file else None
         category_entry = {
             'id': slugify(display),
             'title': display,
-            'image': f"images/menu/{image_file}" if image_file else None,
+            'image': category_image,
             'items': [],
             'note': category_notes.get(key),
         }
@@ -188,8 +202,10 @@ def build_payload(items_by_category, category_order, category_notes, price_map):
             else:
                 summary = SUMMARY_HINTS.get(key, 'House-made specialty from MCQ.')
             item['summary'] = summary
-            item['image'] = f"images/menu/{image_file}" if image_file else None
+            item['image'] = item_image_path(item['name'], category_image)
             category_entry['items'].append(item)
+        if not category_entry['image'] and category_entry['items']:
+            category_entry['image'] = category_entry['items'][0].get('image')
         categories_output.append(category_entry)
     return categories_output
 

@@ -1,21 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}MCQ Vietnamese Street Food | Saigon Alley Experience{% endblock %}
+{% block title %}MCQ Vietnamese Street Food | Vietnam Street Food Online{% endblock %}
 
 {% block head %}
 <style>
   .landing-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
     gap: 2rem;
     align-items: center;
-    padding: clamp(1.5rem, 3vw, 3rem);
+    padding: clamp(1.4rem, 3vw, 3rem);
   }
 
   .landing-hero__content,
   .landing-hero__visual,
-  .story-strip__copy,
-  .story-strip__stats {
+  .launchpad__header,
+  .support-story__copy,
+  .support-story__panel {
     position: relative;
     z-index: 1;
   }
@@ -26,11 +27,11 @@
 
   .hero-stage {
     position: relative;
-    min-height: 590px;
+    min-height: 640px;
     padding: 1rem;
-    border-radius: 30px;
+    border-radius: 34px;
     background:
-      linear-gradient(180deg, rgba(33, 23, 19, 0.94), rgba(61, 38, 28, 0.88)),
+      linear-gradient(180deg, rgba(33, 23, 19, 0.96), rgba(61, 38, 28, 0.92)),
       rgba(32, 23, 19, 0.94);
     box-shadow: var(--shadow-strong);
     overflow: hidden;
@@ -41,35 +42,51 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 22%),
-      radial-gradient(circle at 82% 18%, rgba(255, 216, 115, 0.18), transparent 14rem),
-      radial-gradient(circle at 14% 90%, rgba(217, 76, 121, 0.18), transparent 18rem);
+      radial-gradient(circle at 82% 16%, rgba(255, 216, 115, 0.2), transparent 14rem),
+      radial-gradient(circle at 12% 88%, rgba(217, 76, 121, 0.16), transparent 18rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 24%);
     pointer-events: none;
   }
 
   .hero-stage__sign {
     position: absolute;
-    top: 1.1rem;
-    left: 1.2rem;
-    z-index: 2;
-    padding: 0.45rem 0.9rem;
+    top: 1rem;
+    left: 1rem;
+    z-index: 3;
+    padding: 0.5rem 0.9rem;
     border-radius: 999px;
     font-family: "Bebas Neue", sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     letter-spacing: 0.18em;
     color: #2a160b;
     background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
-    box-shadow: 0 12px 24px rgba(255, 106, 19, 0.28);
+    box-shadow: 0 12px 26px rgba(255, 106, 19, 0.3);
+  }
+
+  .hero-stage__ticket {
+    position: absolute;
+    right: 1.15rem;
+    top: 1.1rem;
+    z-index: 3;
+    max-width: 190px;
+    padding: 0.85rem 0.95rem;
+    border-radius: 22px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: rgba(255, 247, 239, 0.88);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
   }
 
   .hero-stage__panel {
     position: absolute;
     overflow: hidden;
-    border-radius: 26px;
+    border-radius: 28px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 251, 245, 0.12);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 251, 245, 0.14);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(14px);
   }
 
   .hero-stage__panel img {
@@ -80,177 +97,406 @@
   }
 
   .hero-stage__panel--market {
-    inset: 4.6rem 4.4rem 8.6rem 3rem;
-    background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.03)),
-      rgba(255, 248, 241, 0.14);
+    left: 1.1rem;
+    right: 8.8rem;
+    top: 4.8rem;
+    height: 300px;
   }
 
-  .hero-stage__panel--market img {
-    object-fit: contain;
-    padding: 2rem;
+  .hero-stage__panel--street {
+    right: 1.2rem;
+    top: 9rem;
+    width: 180px;
+    height: 250px;
+    transform: rotate(4deg);
   }
 
-  .hero-stage__panel--dish {
-    left: 1.4rem;
-    bottom: 1.5rem;
-    width: min(270px, 56%);
+  .hero-stage__panel--noodle {
+    left: 1.3rem;
+    bottom: 1.35rem;
+    width: min(310px, 56%);
+    height: 230px;
     background: rgba(255, 247, 237, 0.96);
-    color: var(--text-main);
   }
 
-  .hero-stage__panel--dish img {
-    height: 210px;
+  .hero-stage__panel--city {
+    right: 1.4rem;
+    bottom: 1.5rem;
+    width: 225px;
+    height: 220px;
+    transform: rotate(-5deg);
   }
 
-  .hero-stage__panel--dish p {
-    margin: 0;
-    padding: 1rem 1.1rem 1.15rem;
-    font-size: 0.92rem;
-    line-height: 1.55;
-    color: var(--text-muted);
+  .hero-stage__label {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 20px;
+    color: var(--text-inverse);
+    background: linear-gradient(180deg, rgba(22, 16, 15, 0.2), rgba(22, 16, 15, 0.8));
   }
 
-  .hero-stage__panel--banhmi {
-    right: 1.5rem;
-    bottom: 2rem;
-    width: 190px;
-    height: 210px;
-    border-radius: 30px;
-    transform: rotate(6deg);
+  .hero-stage__label span {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.16em;
+    color: rgba(255, 216, 115, 0.9);
   }
 
-  .experience-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.2rem;
-  }
-
-  .experience-card {
-    position: relative;
-    overflow: hidden;
-    padding: 1.6rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--line-soft);
-    background:
-      linear-gradient(180deg, rgba(255, 251, 246, 0.95), rgba(247, 235, 220, 0.94)),
-      #fff;
-    box-shadow: var(--shadow-soft);
-  }
-
-  .experience-card h3 {
-    margin: 0.15rem 0 0.7rem;
+  .hero-stage__label strong {
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.02rem;
+    text-align: right;
   }
 
-  .experience-card p {
+  .launchpad {
+    padding: clamp(1.4rem, 3vw, 2.2rem);
+  }
+
+  .launchpad__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.6rem;
+    align-items: end;
+    margin-bottom: 1.25rem;
+  }
+
+  .launchpad__header h2 {
+    margin: 0.3rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.8rem, 2.5vw, 2.8rem);
+  }
+
+  .launchpad__header p {
     margin: 0;
+    max-width: 50ch;
     color: var(--text-muted);
     line-height: 1.7;
   }
 
-  .experience-card__index {
+  .launchpad__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .launch-card {
+    padding: 1.3rem;
+    border-radius: 26px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 38px rgba(53, 30, 20, 0.08);
+  }
+
+  .launch-card__kicker {
+    margin: 0;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.96rem;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+  }
+
+  .launch-card h3 {
+    margin: 0.35rem 0 0.55rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.3rem;
+  }
+
+  .launch-card p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .launch-card__actions {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  .feature-button {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.82rem 0.95rem;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: 700;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .feature-button::after {
+    content: "->";
+    color: var(--brand-red);
+  }
+
+  .feature-button--accent {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-color: transparent;
+  }
+
+  .feature-button--accent::after {
+    color: rgba(255, 247, 239, 0.9);
+  }
+
+  .street-gallery {
+    padding: clamp(1.35rem, 3vw, 2rem);
+  }
+
+  .street-gallery__header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    align-items: end;
+    margin-bottom: 1.2rem;
+  }
+
+  .street-gallery__header-copy {
+    max-width: 60ch;
+  }
+
+  .street-gallery__header h2 {
+    margin: 0.3rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.8rem, 2.5vw, 2.8rem);
+  }
+
+  .street-gallery__header p {
+    margin: 0.85rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .street-gallery__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .street-gallery__hint {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+    white-space: nowrap;
+  }
+
+  .street-gallery__control {
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    box-shadow: 0 16px 28px rgba(255, 106, 19, 0.22);
+    cursor: pointer;
+  }
+
+  .street-gallery__rail {
+    position: relative;
+    z-index: 1;
+    overflow-x: auto;
+    padding-bottom: 0.55rem;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(235, 81, 48, 0.5) rgba(112, 85, 66, 0.08);
+  }
+
+  .street-gallery__rail::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .street-gallery__rail::-webkit-scrollbar-track {
+    background: rgba(112, 85, 66, 0.08);
+    border-radius: 999px;
+  }
+
+  .street-gallery__rail::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-radius: 999px;
+  }
+
+  .street-gallery__grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(285px, 340px);
+    gap: 1rem;
+    width: max-content;
+  }
+
+  .gallery-card {
+    width: min(340px, calc(100vw - 3.4rem));
+    overflow: hidden;
+    border-radius: 26px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.08);
+    scroll-snap-align: start;
+  }
+
+  .gallery-card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gallery-card__body {
+    padding: 1rem 1rem 1.1rem;
+  }
+
+  .gallery-card__tag {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 2.2rem;
-    height: 2.2rem;
+    padding: 0.34rem 0.66rem;
     border-radius: 999px;
-    background: rgba(255, 106, 19, 0.12);
-    color: var(--brand-red);
+    font-size: 0.76rem;
     font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
   }
 
-  .experience-card--mural {
-    background:
-      radial-gradient(circle at top right, rgba(217, 76, 121, 0.2), transparent 11rem),
-      linear-gradient(180deg, rgba(255, 251, 246, 0.97), rgba(247, 235, 220, 0.94));
+  .gallery-card h3 {
+    margin: 0.75rem 0 0.45rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.2rem;
   }
 
-  .experience-card--market {
-    background:
-      radial-gradient(circle at top right, rgba(255, 180, 54, 0.22), transparent 11rem),
-      linear-gradient(180deg, rgba(255, 251, 246, 0.97), rgba(247, 235, 220, 0.94));
+  .gallery-card p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.65;
   }
 
-  .experience-card--pickup {
-    background:
-      radial-gradient(circle at top right, rgba(0, 111, 116, 0.16), transparent 11rem),
-      linear-gradient(180deg, rgba(255, 251, 246, 0.97), rgba(247, 235, 220, 0.94));
-  }
-
-  .story-strip {
+  .support-story {
     display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
     gap: 1.5rem;
     padding: clamp(1.4rem, 3vw, 2.2rem);
     align-items: center;
   }
 
-  .story-strip__stats {
+  .support-story__panel {
     display: grid;
     gap: 1rem;
   }
 
-  .story-stat {
-    padding: 1rem 1.1rem;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(112, 85, 66, 0.12);
+  .support-card {
+    padding: 1.15rem;
+    border-radius: 24px;
+    background:
+      linear-gradient(135deg, rgba(255, 180, 54, 0.12), rgba(255, 106, 19, 0.08)),
+      rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 180, 54, 0.18);
     box-shadow: 0 16px 30px rgba(53, 30, 20, 0.06);
   }
 
-  .story-stat strong {
+  .support-card strong {
     display: block;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: 1.15rem;
+    font-size: 1.14rem;
   }
 
-  .story-stat span {
+  .support-card span {
     color: var(--text-muted);
-    line-height: 1.6;
+    line-height: 1.65;
+  }
+
+  @media (max-width: 1180px) {
+    .launchpad__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   @media (max-width: 1080px) {
     .landing-hero,
-    .story-strip {
+    .support-story,
+    .launchpad__header,
+    .street-gallery__header {
       grid-template-columns: 1fr;
-    }
-
-    .experience-grid {
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 
   @media (max-width: 720px) {
-    .landing-hero {
+    .landing-hero,
+    .launchpad,
+    .street-gallery,
+    .support-story {
       padding: 1.2rem;
     }
 
     .hero-stage {
-      min-height: 500px;
+      min-height: 560px;
+    }
+
+    .hero-stage__ticket {
+      display: none;
     }
 
     .hero-stage__panel--market {
-      inset: 4.6rem 1.2rem 11rem;
-    }
-
-    .hero-stage__panel--dish {
-      left: 1rem;
-      width: calc(100% - 8.5rem);
-    }
-
-    .hero-stage__panel--dish img {
-      height: 170px;
-    }
-
-    .hero-stage__panel--banhmi {
-      width: 110px;
-      height: 140px;
       right: 1rem;
+      height: 240px;
+    }
+
+    .hero-stage__panel--street {
+      width: 120px;
+      height: 170px;
+      top: 7rem;
+    }
+
+    .hero-stage__panel--noodle {
+      width: calc(100% - 9rem);
+      height: 180px;
+    }
+
+    .hero-stage__panel--city {
+      width: 120px;
+      height: 150px;
       bottom: 1.2rem;
+    }
+
+    .hero-stage__label {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .hero-stage__label strong {
+      text-align: left;
+    }
+
+    .launchpad__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .street-gallery__controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .street-gallery__grid {
+      grid-auto-columns: minmax(82vw, 300px);
     }
   }
 </style>
@@ -259,98 +505,328 @@
 {% block content %}
 <section class="landing-hero section-panel">
   <div class="landing-hero__content">
-    <p class="eyebrow">Saigon alley online</p>
-    <h1 class="section-title">A more magnetic MCQ website with food-hall glow and market drama.</h1>
+    <p class="eyebrow">Vietnam street food online</p>
+    <h1 class="section-title">Scheduled pickup, favourites, and shared meals wrapped in a real Saigon street-food mood.</h1>
     <p class="section-copy">
-      The redesign takes cues from your real storefront photos: warm timber, glowing signage, mural-like colour,
-      fruit-market vibrancy, and the energy of a destination counter. The Ben Thanh Market artwork adds a recognisable
-      Saigon signature without making the page feel old-fashioned.
+      This concept now leans harder into Vietnamese street-food energy: Ben Thanh character, market-life visuals,
+      warm night-stall colours, and a clearer path into the full user-side feature set described in the project README.
     </p>
     <div class="button-row">
-      <a href="/menu" class="button button--primary">Explore The Menu</a>
-      <a href="/shared-meals" class="button button--secondary">See Shared Meals</a>
+      <a href="/menu" class="button button--primary">Browse Menu</a>
+      <a href="/register" class="button button--secondary">Create Account</a>
+      <a href="/pickup-planner" class="button button--secondary">Plan Pickup</a>
+      <a href="/support" class="button button--secondary">Customer Support</a>
     </div>
     <div class="pill-row">
-      <span class="pill"><strong>Logo-led</strong> built around the MCQ brand mark</span>
-      <span class="pill"><strong>Ben Thanh accent</strong> iconic Saigon identity</span>
-      <span class="pill"><strong>Modern palette</strong> amber neon, timber, teal, and cream</span>
+      <span class="pill"><strong>Project-ready</strong> built around scheduled pickup and meal sharing</span>
+      <span class="pill"><strong>Street food visuals</strong> Ben Thanh, floating markets, grills, fresh rolls, and bowls</span>
+      <span class="pill"><strong>Feature buttons</strong> register, payment, pickup planner, receipt, and support</span>
     </div>
   </div>
 
   <div class="landing-hero__visual">
     <div class="hero-stage">
-      <div class="hero-stage__sign">SAIGON ALLEY</div>
+      <div class="hero-stage__sign">SAIGON STREETFOOD</div>
+      <div class="hero-stage__ticket">
+        Real project direction: browse menu, build cart, schedule pickup, save favourites, and share meals with others.
+      </div>
       <div class="hero-stage__panel hero-stage__panel--market">
+        <img src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}" alt="Ben Thanh Market illustration" />
+      </div>
+      <div class="hero-stage__panel hero-stage__panel--street">
         <img
-          src="{{ url_for('static', filename='images/ben-thanh-market-accent.svg') }}"
-          alt="Ben Thanh Market accent illustration"
+          src="{{ url_for('static', filename='images/inspiration/streetfood-6.jpg') }}"
+          alt="Vietnamese late-night grill inspiration"
         />
       </div>
-      <div class="hero-stage__panel hero-stage__panel--dish">
+      <div class="hero-stage__panel hero-stage__panel--noodle">
         <img
-          src="{{ url_for('static', filename='images/menu/items/mcq-special-pho.jpg') }}"
-          alt="MCQ Special Pho"
+          src="{{ url_for('static', filename='images/inspiration/noodle-bowl-unsplash.jpg') }}"
+          alt="Vietnamese noodle bowl inspiration"
         />
-        <p>Hero imagery now behaves like a storefront poster wall instead of a flat ordering banner.</p>
       </div>
-      <div class="hero-stage__panel hero-stage__panel--banhmi">
-        <img src="{{ url_for('static', filename='images/menu/banh-mi.jpg') }}" alt="Banh mi highlight" />
+      <div class="hero-stage__panel hero-stage__panel--city">
+        <img
+          src="{{ url_for('static', filename='images/inspiration/streetfood-4.jpg') }}"
+          alt="Vietnamese floating market inspiration"
+        />
+      </div>
+      <div class="hero-stage__label">
+        <span>MCQ digital storefront</span>
+        <strong>From market inspiration to practical ordering flow for real customer use.</strong>
       </div>
     </div>
   </div>
 </section>
 
-<section class="experience-grid">
-  <article class="experience-card experience-card--mural">
-    <div class="experience-card__index">01</div>
-    <h3>Neon Sign Presence</h3>
+<section class="launchpad section-panel">
+  <div class="launchpad__header">
+    <div>
+      <p class="eyebrow">User-side launchpad</p>
+      <h2>Buttons ready for the feature set in the README</h2>
+    </div>
     <p>
-      Bold display type, warm glow, and layered contrast make the website feel closer to a real food hall frontage
-      than a standard campus project interface.
+      The homepage now exposes the planned customer journey more clearly: account setup, menu browsing, cart,
+      checkout, payment, pickup scheduling, receipt, order history, favourites, shared meals, and support.
     </p>
-  </article>
-  <article class="experience-card experience-card--market">
-    <div class="experience-card__index">02</div>
-    <h3>Fresh Market Colour</h3>
-    <p>
-      Amber, papaya orange, herb green, and cream tones echo the produce-barrel atmosphere from the shop photos while
-      keeping the interface refined and readable.
-    </p>
-  </article>
-  <article class="experience-card experience-card--pickup">
-    <div class="experience-card__index">03</div>
-    <h3>Pickup Flow With Style</h3>
-    <p>
-      The new layout stays practical for ordering, but the presentation feels more premium, more memorable, and more
-      brand-specific from the first screen.
-    </p>
-  </article>
+  </div>
+  <div class="launchpad__grid">
+    <article class="launch-card">
+      <p class="launch-card__kicker">Account</p>
+      <h3>Get customers in fast</h3>
+      <p>Registration, login, and profile access now have visible entry points instead of being hidden future tasks.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/register">Register</a>
+        <a class="feature-button" href="/login">Login</a>
+        <a class="feature-button" href="/profile">Profile</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Ordering</p>
+      <h3>Support the pickup flow</h3>
+      <p>These buttons map directly to the ordering path described in the project: menu, cart, checkout, and history.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/menu">Browse Menu</a>
+        <a class="feature-button" href="/cart">Cart</a>
+        <a class="feature-button" href="/checkout">Checkout</a>
+        <a class="feature-button" href="/orders">Order History</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Payment and Pickup</p>
+      <h3>Cover the missing core steps</h3>
+      <p>Payment, scheduled pickup planning, and receipt confirmation are all called out in the README and now have dedicated entry points.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/payment">Payment</a>
+        <a class="feature-button" href="/pickup-planner">Pickup Planner</a>
+        <a class="feature-button" href="/receipt">Receipt</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Community</p>
+      <h3>Keep meal sharing visible</h3>
+      <p>Meal sharing is part of the project identity, so favourites and shared meals are now surfaced as first-class actions.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/favorites">Favourites</a>
+        <a class="feature-button" href="/shared-meals">Shared Meals</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Support</p>
+      <h3>Help is always nearby</h3>
+      <p>The floating chatbox is backed by a visible support route and phone contact so customers always have a help path.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/support">Customer Support</a>
+        <a class="feature-button" href="tel:+61892485623">08 9248 5623</a>
+      </div>
+    </article>
+  </div>
 </section>
 
-<section class="story-strip section-panel">
-  <div class="story-strip__copy">
-    <p class="eyebrow">Design direction</p>
+<section class="street-gallery section-panel">
+  <div class="street-gallery__header">
+    <div class="street-gallery__header-copy">
+      <p class="eyebrow">Street food inspiration</p>
+      <h2>Ben Thanh character plus your street-food photo set</h2>
+      <p>
+        The refreshed visual direction now mixes your supplied Ben Thanh artwork with your new street-food images and a
+        small amount of appetite imagery already in the project to keep the interface varied and more lived-in.
+      </p>
+    </div>
+    <div class="street-gallery__controls" aria-label="Street food inspiration controls">
+      <span class="street-gallery__hint">Swipe or slide</span>
+      <button
+        class="street-gallery__control"
+        type="button"
+        data-gallery-shift="-1"
+        aria-label="Scroll street food inspiration left"
+      >
+        &larr;
+      </button>
+      <button
+        class="street-gallery__control"
+        type="button"
+        data-gallery-shift="1"
+        aria-label="Scroll street food inspiration right"
+      >
+        &rarr;
+      </button>
+    </div>
+  </div>
+  <div class="street-gallery__rail" id="street-gallery-rail">
+  <div class="street-gallery__grid">
+    <article class="gallery-card">
+      <img src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}" alt="Ben Thanh Market inspired artwork" />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Local asset</span>
+        <h3>Ben Thanh Signature</h3>
+        <p>Your attached Ben Thanh illustration now anchors the Saigon identity instead of being a loose reference.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/street-food-life.jpg') }}"
+        alt="Street food scene inspiration"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Online source</span>
+        <h3>Street-side Energy</h3>
+        <p>Used to bring in the feel of everyday Vietnamese food culture and a busier, more lived-in atmosphere.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-1.jpg') }}"
+        alt="Vietnamese tray meal with herbs and noodles"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Tray-and-Herb Street Detail</h3>
+        <p>This image adds a more casual curb-side meal moment and helps the feature pages feel less repetitive.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-4.jpg') }}"
+        alt="Vietnamese floating market boats"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Floating Market Colour</h3>
+        <p>Boat markets add a broader Vietnam mood and make the brand world feel bigger than one single food counter.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-5.jpg') }}"
+        alt="Vietnamese produce market stall"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Wet Market Produce</h3>
+        <p>Vegetable baskets and market colour help the site feel rooted in daily Vietnamese food culture, not just plated dishes.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-6.jpg') }}"
+        alt="Vietnamese grilled meat over open flame"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Charcoal Grill Heat</h3>
+        <p>This adds real night-stall intensity and gives the homepage a hotter, more energetic food-street feeling.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-7.jpg') }}"
+        alt="Vietnamese shrimp rice paper rolls"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Fresh Roll Texture</h3>
+        <p>Transparent rice paper and dipping sauce introduce a cleaner, cooler visual note among the hotter grill scenes.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-8.jpg') }}"
+        alt="Vietnamese banh xeo cooking and serving"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Kitchen-to-Plate Motion</h3>
+        <p>The split cooking-and-plating shot helps communicate that MCQ is both a real kitchen and a digital ordering experience.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-9.jpg') }}"
+        alt="Vietnamese skewers and fish balls street stall"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Skewer Bar Variety</h3>
+        <p>Rows of skewers and snacks make the site feel fuller and more spontaneous, like browsing a real street-food lane.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-10.jpg') }}"
+        alt="Vietnamese market grill and skewer spread"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Your image</span>
+        <h3>Street Stall Abundance</h3>
+        <p>The dense market spread pushes the overall design closer to a lively Saigon snack counter instead of a quiet cafe layout.</p>
+      </div>
+    </article>
+    <article class="gallery-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/noodle-bowl-unsplash.jpg') }}"
+        alt="Vietnamese noodle bowl inspiration"
+      />
+      <div class="gallery-card__body">
+        <span class="gallery-card__tag">Online source</span>
+        <h3>Bowl-Led Appetite Appeal</h3>
+        <p>A strong food close-up still matters, so the noodle bowl stays as a cleaner appetite anchor among the busier street scenes.</p>
+      </div>
+    </article>
+  </div>
+  </div>
+</section>
+
+<section class="support-story section-panel">
+  <div class="support-story__copy">
+    <p class="eyebrow">MCQ Supermarket</p>
     <h2 class="section-title" style="font-size: clamp(1.9rem, 3vw, 3.4rem);">
-      Designed to feel like a destination counter, not a generic menu page.
+      Need Help?
     </h2>
     <p class="section-copy">
-      Instead of using plain white cards and generic green buttons, the experience now leans into signage, murals,
-      layered surfaces, and distinctive Vietnamese market references so the MCQ identity comes through immediately.
+      Visit our Customer Support for assistance or call us at 08 9248 5623. The floating chatbox now stays pinned to
+      the bottom of the website so customers always have a visible support entry point while browsing.
     </p>
+    <div class="button-row">
+      <a href="/support" class="button button--primary">Visit Customer Support</a>
+      <a href="/payment" class="button button--secondary">Payment Flow</a>
+      <a href="/pickup-planner" class="button button--secondary">Pickup Planner</a>
+      <a href="tel:+61892485623" class="button button--secondary">Call 08 9248 5623</a>
+    </div>
   </div>
-  <div class="story-strip__stats">
-    <div class="story-stat">
-      <strong>Storefront-inspired hierarchy</strong>
-      <span>Big hero messaging, glowing sign details, and stronger focal points guide the eye naturally.</span>
+  <div class="support-story__panel">
+    <div class="support-card">
+      <strong>Built around the project brief</strong>
+      <span>User registration, login, menu browsing, cart, checkout, payment, scheduled pickup, receipt, order history, favourites, and shared meals are all represented in the new layout.</span>
     </div>
-    <div class="story-stat">
-      <strong>Ben Thanh market signature</strong>
-      <span>The custom illustration gives the site a recognisable Saigon symbol without relying on stock visuals.</span>
+    <div class="support-card">
+      <strong>Chat support entry point</strong>
+      <span>The always-on bottom chatbox is designed as a future customer assistance surface for menu, payment, pickup, and order questions.</span>
     </div>
-    <div class="story-stat">
-      <strong>Consistent visual language</strong>
-      <span>The same materials, colours, and rounded forms carry from the homepage into the menu browser.</span>
+    <div class="support-card">
+      <strong>Stronger Vietnam street-food identity</strong>
+      <span>Ben Thanh, market-life photography, your street-food images, and warmer Saigon-inspired materials now shape the whole homepage experience.</span>
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const galleryRail = document.getElementById('street-gallery-rail');
+    const galleryButtons = document.querySelectorAll('[data-gallery-shift]');
+
+    if (!galleryRail || !galleryButtons.length) return;
+
+    galleryButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const card = galleryRail.querySelector('.gallery-card');
+        const step = card ? card.getBoundingClientRect().width + 16 : galleryRail.clientWidth * 0.8;
+        const direction = Number(button.dataset.galleryShift || '1');
+        galleryRail.scrollBy({ left: step * direction, behavior: 'smooth' });
+      });
+    });
+  })();
+</script>
 {% endblock %}

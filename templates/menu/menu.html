@@ -60,6 +60,7 @@
     inset: 0 0 auto auto;
     width: min(92%, 440px);
     filter: drop-shadow(0 28px 42px rgba(32, 18, 12, 0.18));
+    border-radius: 28px;
   }
 
   .menu-hero__feature {
@@ -74,6 +75,27 @@
       linear-gradient(180deg, rgba(35, 24, 20, 0.92), rgba(23, 19, 21, 0.92)),
       rgba(32, 23, 19, 0.92);
     box-shadow: var(--shadow-strong);
+  }
+
+  .menu-hero__street-card {
+    position: absolute;
+    top: 2rem;
+    left: 1.2rem;
+    width: 190px;
+    height: 240px;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.24);
+    transform: rotate(-4deg);
+  }
+
+  .menu-hero__street-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .menu-hero__feature img {
@@ -102,6 +124,71 @@
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
     font-size: 1.2rem;
     text-align: right;
+  }
+
+  .menu-utility {
+    padding: clamp(1.2rem, 3vw, 1.7rem);
+  }
+
+  .menu-utility__header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.3rem;
+    align-items: end;
+    margin-bottom: 1rem;
+  }
+
+  .menu-utility__header h2 {
+    margin: 0.3rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.5rem, 2.1vw, 2.2rem);
+  }
+
+  .menu-utility__header p {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .menu-utility__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .menu-utility__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.95rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 800;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.06);
+  }
+
+  .menu-utility__link::after {
+    content: "->";
+    color: var(--brand-red);
+  }
+
+  .menu-utility__link--accent {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-color: transparent;
+  }
+
+  .menu-utility__link--accent::after {
+    color: rgba(255, 247, 239, 0.9);
   }
 
   .menu-browser {
@@ -332,10 +419,15 @@
     .menu-hero__metrics {
       grid-template-columns: 1fr;
     }
+
+    .menu-utility__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   @media (max-width: 720px) {
     .menu-hero,
+    .menu-utility,
     .menu-browser {
       padding: 1.2rem;
     }
@@ -347,6 +439,13 @@
     .menu-hero__market {
       width: 100%;
       max-width: none;
+    }
+
+    .menu-hero__street-card {
+      width: 120px;
+      height: 150px;
+      top: 1rem;
+      left: 0.8rem;
     }
 
     .menu-hero__feature {
@@ -369,6 +468,15 @@
     .menu-browser__header {
       flex-direction: column;
       align-items: flex-start;
+    }
+
+    .menu-utility__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .menu-utility__grid {
+      grid-template-columns: 1fr;
     }
 
     .menu-category-tab {
@@ -405,10 +513,16 @@
   </div>
 
   <div class="menu-hero__visual">
+    <div class="menu-hero__street-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-7.jpg') }}"
+        alt="Vietnamese fresh roll inspiration"
+      />
+    </div>
     <img
       class="menu-hero__market"
-      src="{{ url_for('static', filename='images/ben-thanh-market-accent.svg') }}"
-      alt="Ben Thanh Market accent illustration"
+      src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}"
+      alt="Ben Thanh Market inspired artwork"
     />
     <div class="menu-hero__feature">
       <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
@@ -417,6 +531,29 @@
         <strong id="menu-active-category">Pho Noodle Soup</strong>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="menu-utility section-panel">
+  <div class="menu-utility__header">
+    <div>
+      <p class="eyebrow">Future user actions</p>
+      <h2>Important customer buttons stay close to the menu</h2>
+    </div>
+    <p>
+      These links reflect the user-side project flow from the README, so the menu page already points toward cart,
+      checkout, payment, pickup planning, receipt, and the community features customers will use most.
+    </p>
+  </div>
+  <div class="menu-utility__grid">
+    <a class="menu-utility__link menu-utility__link--accent" href="/cart">Cart</a>
+    <a class="menu-utility__link" href="/checkout">Checkout</a>
+    <a class="menu-utility__link" href="/payment">Payment</a>
+    <a class="menu-utility__link" href="/pickup-planner">Pickup Planner</a>
+    <a class="menu-utility__link" href="/receipt">Receipt</a>
+    <a class="menu-utility__link" href="/favorites">Favourites</a>
+    <a class="menu-utility__link" href="/shared-meals">Shared Meals</a>
+    <a class="menu-utility__link" href="/support">Support</a>
   </div>
 </section>
 

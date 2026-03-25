@@ -500,4 +500,89 @@ LEMONADE DRINKS
 53. Pineapple Lemonade
 54. Aloe Vera Lemonade
 
+DESSERTS
+55. Thai Dessert (Che Thai)
+Ingredients:
+	•	Jackfruit
+	•	Longan
+	•	Jelly
+	•	Coconut milk
+	•	Crushed ice
 
+56. Red Bean Dessert
+Ingredients:
+	•	Red beans
+	•	Coconut milk
+	•	Sweet syrup
+
+57. Coconut Milk Dessert
+Ingredients:
+	•	Coconut milk
+	•	Jelly
+	•	Tapioca pearls
+
+PASTRIES
+58. Banh Tieu
+Ingredients:
+	•	Fried sesame dough
+	•	Sesame seeds
+
+59. Chao Quay
+Ingredients:
+	•	Crispy fried dough sticks
+
+60. Mung Bean Sesame Ball
+Ingredients:
+	•	Glutinous rice dough
+	•	Mung bean filling
+	•	Sesame seeds
+
+61. Red Bean Sesame Ball
+Ingredients:
+	•	Glutinous rice dough
+	•	Red bean filling
+	•	Sesame seeds
+
+62. Banh Bao
+Ingredients:
+	•	Steamed bun
+	•	Savoury pork filling
+	•	Egg
+
+63. Sticky Rice with Chicken / Savoury Sticky Rice
+Ingredients:
+	•	Sticky rice
+	•	Chicken
+	•	Shallots
+	•	Seasoning
+
+64. Banh Tai Yen
+Ingredients:
+	•	Honeycomb cake batter
+	•	Coconut milk
+	•	Sugar
+
+65. Spring Roll
+Ingredients:
+	•	Crispy wrapper
+	•	Savoury filling
+
+66. Batiso
+Ingredients:
+	•	Flaky pastry
+	•	Savoury filling
+
+67. Chicken Curry Puff
+Ingredients:
+	•	Pastry shell
+	•	Chicken curry filling
+
+68. Fried Pork Dumpling
+Ingredients:
+	•	Dumpling wrapper
+	•	Seasoned pork filling
+
+69. Fried Banana
+Ingredients:
+	•	Banana
+	•	Light batter
