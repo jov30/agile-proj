@@ -58,11 +58,34 @@ SUMMARY_HINTS = {
     'LEMONADE DRINKS': 'House lemonade infusions.',
 }
 
+PRICE_FILE = Path('data/menu-prices.json')
+
 
 def slugify(value: str) -> str:
     cleaned = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     cleaned = re.sub(r'[^a-zA-Z0-9]+', '-', cleaned).strip('-').lower()
     return cleaned or 'section'
+
+
+def format_price(raw_price):
+    if raw_price is None:
+        return None
+    if isinstance(raw_price, (int, float)):
+        return f"${raw_price:.2f}".rstrip('0').rstrip('.')
+    text = str(raw_price).strip()
+    if not text:
+        return None
+    return text if text.startswith('$') else f"${text}"
+
+
+def load_price_map() -> Dict[str, str]:
+    if not PRICE_FILE.exists():
+        return {}
+    data = json.loads(PRICE_FILE.read_text(encoding='utf-8'))
+    formatted = {}
+    for key, value in data.items():
+        formatted[key.lower()] = format_price(value)
+    return formatted
 
 
 def parse_lines(lines: List[str]):
@@ -132,7 +155,7 @@ def parse_lines(lines: List[str]):
     return items_by_category, category_order, category_notes
 
 
-def build_payload(items_by_category, category_order, category_notes):
+def build_payload(items_by_category, category_order, category_notes, price_map):
     categories_output = []
     for key in category_order:
         display = CATEGORY_MAP[key]
@@ -156,7 +179,8 @@ def build_payload(items_by_category, category_order, category_notes):
                 else:
                     cleaned_sections.append(section)
             item['sections'] = cleaned_sections
-            item['price'] = price
+            override = price_map.get(item['name'].lower())
+            item['price'] = format_price(price) or override
             main_section = next((sec for sec in item['sections'] if sec['items']), None)
             if main_section and main_section['items']:
                 sample = ', '.join(main_section['items'][:3]).lower()
@@ -182,9 +206,10 @@ def main():
 
     lines = source_path.read_text(encoding='utf-8').splitlines()
     items_by_category, category_order, category_notes = parse_lines(lines)
+    price_map = load_price_map()
     payload = {
         'generated_from': str(source_path),
-        'categories': build_payload(items_by_category, category_order, category_notes),
+        'categories': build_payload(items_by_category, category_order, category_notes, price_map),
     }
 
     output_path = Path(args.output)

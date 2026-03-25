@@ -325,6 +325,7 @@ project-root/
 ## Menu Data & Assets
 
 - `data/menu-source.txt` contains the plain-text export of the menu document you shared so we can regenerate structured data without relying on external files.
+- `data/menu-prices.json` captures the price sheet we inferred from your photo references and the “Price setup” document; tweak numbers here to keep the UI synced with the restaurant boards.
 - `scripts/build_menu_json.py` parses that source and writes `static/data/menu.json`, which powers the interactive menu browser on the site.
 - New hero images live under `static/images/menu/` (sourced from Unsplash as illustrative placeholders) and are referenced per category.
 - Whenever the menu doc changes, run `python3 scripts/build_menu_json.py` to refresh the JSON feed before committing.
@@ -392,7 +393,6 @@ Possible future improvements include:
 ## Conclusion
 
 The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a realistic and achievable web application project that combines restaurant ordering functionality with a small social sharing feature. It meets the key requirements of the unit by using a client-server architecture, supporting authentication, storing persistent user data, and allowing users to view content shared by others. In addition, it provides admin-side tools for customer management, order tracking, menu control, and monthly income monitoring.
-
 
 
 
