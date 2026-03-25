@@ -391,8 +391,18 @@ Ingredients:
 	•	Coriander
 	•	Sliced chili
 
+33. Bánh Mì with Coffee
+Includes:
+	•	Any bánh mì
+	•	One coffee
+
+34. Bánh Mì with Juice
+Includes:
+	•	Any bánh mì
+	•	One juice
+
 RICE PAPER ROLLS
-33. Chicken Rice Paper Roll
+35. Chicken Rice Paper Roll
 Ingredients:
 	•	Rice paper
 	•	Vermicelli noodles
@@ -402,7 +412,7 @@ Served with:
 	•	Hoisin peanut dipping sauce
 	•	Fish sauce with chili
 
-34. Prawn and Pork Rice Paper Roll
+36. Prawn and Pork Rice Paper Roll
 Ingredients:
 	•	Rice paper
 	•	Vermicelli noodles
@@ -413,7 +423,7 @@ Served with:
 	•	Hoisin peanut dipping sauce
 	•	Fish sauce with chili
 
-35. Grilled Beef Rice Paper Roll
+37. Grilled Beef Rice Paper Roll
 Ingredients:
 	•	Rice paper
 	•	Vermicelli noodles
@@ -426,7 +436,7 @@ Served with:
 
 
 MIXED JUICES
-36. Detox Juice
+38. Detox Juice
 Ingredients:
 	•	Celery
 	•	Carrot
@@ -434,7 +444,7 @@ Ingredients:
 	•	Apple
 	•	Mint
 
-37. Immunity Juice
+39. Immunity Juice
 Ingredients:
 	•	Honey
 	•	Ginger
@@ -442,36 +452,36 @@ Ingredients:
 	•	Orange
 	•	Apple
 
-38. Sweet Beets Juice
+40. Sweet Beets Juice
 Ingredients:
 	•	Beetroot
 	•	Apple
 	•	Orange
 
-39. Green Glow Juice
+41. Green Glow Juice
 Ingredients:
 	•	Kiwi
 	•	Pineapple
 	•	Cucumber
 	•	Apple
 
-40. Tropical Juice
+42. Tropical Juice
 Ingredients:
 	•	Apple
 	•	Pineapple
 	•	Orange
 	•	Watermelon
 Watermelon juice
-41. Sugarcane Juice
+43. Sugarcane Juice
 Ingredients:
 	•	Fresh sugarcane juice
 
 SMOOTHIES
-42. Avocado Smoothie
-43. Strawberry Smoothie
-44. Mango Smoothie
-45. Mixed Berry Smoothie
-46. Coconut Smoothie
+44. Avocado Smoothie
+45. Strawberry Smoothie
+46. Mango Smoothie
+47. Mixed Berry Smoothie
+48. Coconut Smoothie
 Smoothie Base Ingredients:
 	•	Milk
 	•	Fresh fruit
@@ -480,12 +490,12 @@ Smoothie Base Ingredients:
 	•	Condensed milk
 
 VIETNAMESE COFFEE
-47. Black Coffee
+49. Black Coffee
 Ingredients:
 	•	Vietnamese coffee
 	•	Ice
 
-48. Milk Coffee
+50. Milk Coffee
 Ingredients:
 	•	Vietnamese coffee
 	•	Condensed milk
@@ -493,15 +503,15 @@ Ingredients:
 	•	Ice
 
 LEMONADE DRINKS
-49. Kiwi Lemonade
-50. Strawberry Lemonade
-51. Watermelon Lemonade
-52. Coconut Lemonade
-53. Pineapple Lemonade
-54. Aloe Vera Lemonade
+51. Kiwi Lemonade
+52. Strawberry Lemonade
+53. Watermelon Lemonade
+54. Coconut Lemonade
+55. Pineapple Lemonade
+56. Aloe Vera Lemonade
 
 DESSERTS
-55. Thai Dessert (Che Thai)
+57. Thai Dessert (Che Thai)
 Ingredients:
 	•	Jackfruit
 	•	Longan
@@ -509,80 +519,80 @@ Ingredients:
 	•	Coconut milk
 	•	Crushed ice
 
-56. Red Bean Dessert
+58. Red Bean Dessert
 Ingredients:
 	•	Red beans
 	•	Coconut milk
 	•	Sweet syrup
 
-57. Coconut Milk Dessert
+59. Coconut Milk Dessert
 Ingredients:
 	•	Coconut milk
 	•	Jelly
 	•	Tapioca pearls
 
 PASTRIES
-58. Banh Tieu
+60. Banh Tieu
 Ingredients:
 	•	Fried sesame dough
 	•	Sesame seeds
 
-59. Chao Quay
+61. Chao Quay
 Ingredients:
 	•	Crispy fried dough sticks
 
-60. Mung Bean Sesame Ball
+62. Mung Bean Sesame Ball
 Ingredients:
 	•	Glutinous rice dough
 	•	Mung bean filling
 	•	Sesame seeds
 
-61. Red Bean Sesame Ball
+63. Red Bean Sesame Ball
 Ingredients:
 	•	Glutinous rice dough
 	•	Red bean filling
 	•	Sesame seeds
 
-62. Banh Bao
+64. Banh Bao
 Ingredients:
 	•	Steamed bun
 	•	Savoury pork filling
 	•	Egg
 
-63. Sticky Rice with Chicken / Savoury Sticky Rice
+65. Sticky Rice with Chicken / Savoury Sticky Rice
 Ingredients:
 	•	Sticky rice
 	•	Chicken
 	•	Shallots
 	•	Seasoning
 
-64. Banh Tai Yen
+66. Banh Tai Yen
 Ingredients:
 	•	Honeycomb cake batter
 	•	Coconut milk
 	•	Sugar
 
-65. Spring Roll
+67. Spring Roll
 Ingredients:
 	•	Crispy wrapper
 	•	Savoury filling
 
-66. Batiso
+68. Batiso
 Ingredients:
 	•	Flaky pastry
 	•	Savoury filling
 
-67. Chicken Curry Puff
+69. Chicken Curry Puff
 Ingredients:
 	•	Pastry shell
 	•	Chicken curry filling
 
-68. Fried Pork Dumpling
+70. Fried Pork Dumpling
 Ingredients:
 	•	Dumpling wrapper
 	•	Seasoned pork filling
 
-69. Fried Banana
+71. Fried Banana
 Ingredients:
 	•	Banana
 	•	Light batter

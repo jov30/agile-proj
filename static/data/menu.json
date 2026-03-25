@@ -819,6 +819,36 @@
           "price": "$12",
           "summary": "Bánh Mì favourite featuring grilled beef, butter, mayonnaise.",
           "image": "images/menu/items/grilled-beef-banh-mi.jpg"
+        },
+        {
+          "name": "Bánh Mì with Coffee",
+          "sections": [
+            {
+              "label": "Includes",
+              "items": [
+                "Any bánh mì",
+                "One coffee"
+              ]
+            }
+          ],
+          "price": "$10",
+          "summary": "Bánh Mì favourite featuring any bánh mì, one coffee.",
+          "image": "images/menu/items/banh-mi-with-coffee.jpg"
+        },
+        {
+          "name": "Bánh Mì with Juice",
+          "sections": [
+            {
+              "label": "Includes",
+              "items": [
+                "Any bánh mì",
+                "One juice"
+              ]
+            }
+          ],
+          "price": "$8",
+          "summary": "Bánh Mì favourite featuring any bánh mì, one juice.",
+          "image": "images/menu/items/banh-mi-with-juice.jpg"
         }
       ],
       "note": null

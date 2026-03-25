@@ -81,9 +81,33 @@ ITEM_SOURCES: Dict[str, Dict[str, object]] = {
     },
     "Grilled Pork Bánh Mì": {"copy_from": "/Users/nhungpham/Downloads/Grilled-Pork-Bahn-Mi..jpg"},
     "Grilled Beef Bánh Mì": {"copy_from": "/Users/nhungpham/Downloads/grilled_beef_banhmi.jpg"},
-    "Chicken Rice Paper Roll": {"queries": ["chicken spring rolls", "fresh chicken spring rolls"]},
-    "Prawn and Pork Rice Paper Roll": {"queries": ["fresh spring rolls prawn pork", "prawn pork rice paper rolls"]},
-    "Grilled Beef Rice Paper Roll": {"queries": ["beef spring rolls", "fresh beef spring rolls"]},
+    "Bánh Mì with Coffee": {"copy_from": "/Users/nhungpham/Downloads/banhmicombo10$.jpg"},
+    "Bánh Mì with Juice": {"copy_from": "/Users/nhungpham/Downloads/banhmijuice8$.jpg"},
+    "Chicken Rice Paper Roll": {
+        "fixed": {
+            "query": None,
+            "title": "Lemongrass-Chicken-Spring-Rolls-13.jpg",
+            "creator": "Extracted from user-provided HTML",
+            "url": "https://www.cooking-therapy.com/wp-content/uploads/2025/02/Lemongrass-Chicken-Spring-Rolls-13.jpg",
+            "landing_page": "https://www.cooking-therapy.com/lemongrass-chicken-spring-rolls/",
+            "license": None,
+            "license_version": None,
+            "source": "derived-from-html",
+        }
+    },
+    "Prawn and Pork Rice Paper Roll": {"copy_from": "/Users/nhungpham/Downloads/praw-ricepaperroll.jpg"},
+    "Grilled Beef Rice Paper Roll": {
+        "fixed": {
+            "query": None,
+            "title": "LEFT-OVER-STIR-FRY-BEEF-RICE-PAPER-ROLLS-_blog-1000-x1000-3.jpg",
+            "creator": "Extracted from user-provided HTML",
+            "url": "https://meatatbillys.com.au/wp-content/uploads/2020/10/LEFT-OVER-STIR-FRY-BEEF-RICE-PAPER-ROLLS-_blog-1000-x1000-3.jpg",
+            "landing_page": "https://meatatbillys.com.au/left-over-stir-fry-beef-rice-paper-rolls/",
+            "license": None,
+            "license_version": None,
+            "source": "derived-from-html",
+        }
+    },
     "Detox Juice": {"copy_from": "/Users/nhungpham/Downloads/detox_jpg.jpeg"},
     "Immunity Juice": {"copy_from": "/Users/nhungpham/Downloads/immunity_juice.jpg"},
     "Sweet Beets Juice": {"queries": ["beet juice"]},
