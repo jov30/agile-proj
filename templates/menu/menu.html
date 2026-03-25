@@ -1,199 +1,437 @@
 {% extends "base.html" %}
 
-{% block title %}Menu & Ingredients | MCQ Vietnamese Street Food{% endblock %}
+{% block title %}Menu Hall | MCQ Vietnamese Street Food{% endblock %}
 
 {% block head %}
 <style>
   .menu-hero {
     display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
+    gap: 1.8rem;
     align-items: center;
-    margin-bottom: 2.5rem;
-    padding: 2rem;
-    border-radius: 1.5rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    background: linear-gradient(135deg, rgba(28, 140, 79, 0.08), rgba(160, 50, 140, 0.06));
+    padding: clamp(1.4rem, 3vw, 2.6rem);
   }
 
-  .menu-hero__eyebrow {
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
+  .menu-hero__content,
+  .menu-hero__visual,
+  .menu-browser__header {
+    position: relative;
+    z-index: 1;
   }
 
   .menu-hero__title {
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    margin: 0 0 1rem;
-    color: #0f172a;
+    font-size: clamp(2.2rem, 4vw, 4.1rem);
   }
 
-  .menu-hero__image {
-    width: 100%;
-    background: #fff;
-    border-radius: 1.25rem;
+  .menu-hero__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 1.4rem;
+  }
+
+  .menu-metric {
     padding: 1rem;
-    box-shadow: 0 20px 55px rgba(15, 23, 42, 0.12);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.06);
   }
 
-  .menu-hero__image img {
+  .menu-metric strong {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.3rem;
+  }
+
+  .menu-metric span {
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .menu-hero__visual {
+    position: relative;
+    min-height: 500px;
+  }
+
+  .menu-hero__market {
+    position: absolute;
+    inset: 0 0 auto auto;
+    width: min(92%, 440px);
+    filter: drop-shadow(0 28px 42px rgba(32, 18, 12, 0.18));
+  }
+
+  .menu-hero__feature {
+    position: absolute;
+    left: 0;
+    right: 3.2rem;
+    bottom: 0;
+    overflow: hidden;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.92), rgba(23, 19, 21, 0.92)),
+      rgba(32, 23, 19, 0.92);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .menu-hero__feature img {
     width: 100%;
-    border-radius: 1rem;
+    height: 320px;
+    object-fit: cover;
     display: block;
   }
 
-  .menu-browser {
+  .menu-hero__feature-copy {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem 1.2rem;
+    color: var(--text-inverse);
+  }
+
+  .menu-hero__feature-copy span {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.16em;
+    color: rgba(255, 216, 115, 0.88);
+  }
+
+  .menu-hero__feature-copy strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.2rem;
+    text-align: right;
+  }
+
+  .menu-browser {
+    padding: clamp(1.3rem, 3vw, 2rem);
+  }
+
+  .menu-browser__header {
+    display: flex;
+    justify-content: space-between;
     gap: 1.5rem;
+    align-items: end;
+    margin-bottom: 1.4rem;
+  }
+
+  .menu-browser__header h2 {
+    margin: 0.3rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.6rem, 2.2vw, 2.4rem);
+  }
+
+  .menu-browser__header p {
+    margin: 0;
+    max-width: 48ch;
+    color: var(--text-muted);
+    line-height: 1.7;
   }
 
   .menu-categories {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.85rem;
     flex-wrap: wrap;
+    margin-bottom: 1rem;
   }
 
   .menu-category-tab {
-    background: #fff;
-    border: 1px solid rgba(15, 23, 42, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.82rem 1.1rem;
     border-radius: 999px;
-    padding: 0.5rem 1.25rem;
-    font-weight: 600;
-    color: #0f172a;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-main);
     cursor: pointer;
-    transition: all 0.2s ease;
+    font: inherit;
+    font-weight: 700;
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.06);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .menu-category-tab:hover {
+    transform: translateY(-2px);
+  }
+
+  .menu-category-tab small {
+    padding: 0.26rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 106, 19, 0.1);
+    color: var(--brand-red);
+    font-size: 0.78rem;
+    line-height: 1;
   }
 
   .menu-category-tab.is-active {
-    background: #1c8c4f;
-    color: #fff;
-    border-color: #1c8c4f;
-    box-shadow: 0 10px 25px rgba(28, 140, 79, 0.25);
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    box-shadow: 0 20px 30px rgba(255, 106, 19, 0.22);
+  }
+
+  .menu-category-tab.is-active small {
+    color: #2a160b;
+    background: rgba(255, 255, 255, 0.84);
   }
 
   .menu-category-note {
-    background: rgba(28, 140, 79, 0.07);
-    border-left: 4px solid #1c8c4f;
-    padding: 1rem 1.5rem;
-    border-radius: 0.75rem;
+    margin-bottom: 1.2rem;
+    padding: 1rem 1.15rem;
+    border-radius: 22px;
+    background:
+      linear-gradient(135deg, rgba(255, 180, 54, 0.14), rgba(255, 106, 19, 0.08)),
+      rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(255, 180, 54, 0.18);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.06);
   }
 
   .menu-category-note__label {
     margin: 0;
-    font-weight: 600;
-    color: #064e3b;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.02rem;
   }
 
   .menu-category-note__items {
-    margin: 0.35rem 0 0;
-    color: #0f172a;
+    margin: 0.45rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.7;
   }
 
   .menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+    gap: 1.2rem;
   }
 
   .menu-card {
     display: flex;
     flex-direction: column;
-    background: #fff;
-    border-radius: 1.25rem;
     overflow: hidden;
-    border: 1px solid rgba(15, 23, 42, 0.05);
-    box-shadow: 0 15px 40px rgba(15, 23, 42, 0.08);
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 22px 42px rgba(53, 30, 20, 0.09);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+
+  .menu-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 26px 48px rgba(53, 30, 20, 0.14);
+  }
+
+  .menu-card__media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .menu-card__media::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 38%;
+    background: linear-gradient(180deg, transparent, rgba(35, 24, 20, 0.42));
+    pointer-events: none;
   }
 
   .menu-card__media img {
     width: 100%;
-    height: 220px;
+    height: 230px;
     object-fit: cover;
     display: block;
   }
 
   .menu-card__body {
-    padding: 1.25rem 1.5rem 1.5rem;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 1rem;
+    padding: 1.15rem 1.2rem 1.3rem;
+  }
+
+  .menu-card__topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .menu-card__label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+  }
+
+  .menu-card__price {
+    margin: 0;
+    font-weight: 800;
+    color: var(--brand-red);
   }
 
   .menu-card__heading h3 {
     margin: 0;
-    font-size: 1.2rem;
-    color: #0f172a;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.3rem;
   }
 
   .menu-card__summary {
-    margin: 0.35rem 0 0;
-    color: #475569;
-    font-size: 0.95rem;
+    margin: 0.45rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.65;
   }
 
-  .menu-card__price {
-    margin: 0.5rem 0 0;
-    font-weight: 600;
-    color: #0f172a;
+  .menu-card__sections {
+    display: grid;
+    gap: 0.85rem;
   }
 
   .menu-card__section {
-    margin-top: 0.75rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(112, 85, 66, 0.1);
   }
 
   .menu-card__section-title {
-    margin: 0 0 0.3rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #1c8c4f;
+    margin: 0 0 0.45rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    color: var(--brand-orange);
   }
 
   .menu-card__list {
-    list-style: disc;
-    padding-left: 1.2rem;
     margin: 0;
-    color: #0f172a;
-    font-size: 0.95rem;
+    padding-left: 1.15rem;
+    color: var(--text-main);
+    line-height: 1.6;
   }
 
   .menu-error {
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    background: #fee2e2;
-    color: #991b1b;
+    padding: 1.3rem;
+    border-radius: 22px;
+    background: rgba(235, 81, 48, 0.12);
+    color: #7c2218;
   }
 
-  @media (max-width: 640px) {
-    .menu-card__media img {
-      height: 180px;
+  @media (max-width: 1080px) {
+    .menu-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .menu-hero__metrics {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .menu-hero,
+    .menu-browser {
+      padding: 1.2rem;
+    }
+
+    .menu-hero__visual {
+      min-height: 420px;
+    }
+
+    .menu-hero__market {
+      width: 100%;
+      max-width: none;
+    }
+
+    .menu-hero__feature {
+      right: 0;
+    }
+
+    .menu-hero__feature img {
+      height: 260px;
+    }
+
+    .menu-hero__feature-copy {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .menu-hero__feature-copy strong {
+      text-align: left;
+    }
+
+    .menu-browser__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .menu-category-tab {
+      width: 100%;
+      justify-content: space-between;
     }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="menu-hero">
-  <div>
-    <p class="menu-hero__eyebrow">Menu</p>
-    <h1 class="menu-hero__title">Everything you need for scheduled pickup.</h1>
-    <p>
-      Browse pho bowls, vermicelli, bánh mì, juices, and drinks straight from the full MCQ kitchen
-      specification. Every item below includes the full list of ingredients and garnishes so you
-      can plan orders ahead of time.
+<section class="menu-hero section-panel">
+  <div class="menu-hero__content">
+    <p class="eyebrow">Menu hall</p>
+    <h1 class="section-title menu-hero__title">Browse the full kitchen like you're standing under the sign.</h1>
+    <p class="section-copy">
+      Pho, rice dishes, hot plates, drinks, pastries, and desserts are now presented like browsing different lanes in a
+      contemporary Saigon market hall. The layout is richer, warmer, and more brand-led without losing menu clarity.
     </p>
-    <p><small>Menu data sourced from the attachment you provided.</small></p>
+    <div class="menu-hero__metrics">
+      <div class="menu-metric">
+        <strong id="menu-category-total">0</strong>
+        <span>menu lanes</span>
+      </div>
+      <div class="menu-metric">
+        <strong id="menu-item-total">0</strong>
+        <span>dishes and drinks</span>
+      </div>
+      <div class="menu-metric">
+        <strong>Pickup-first</strong>
+        <span>designed to stay practical for quick ordering</span>
+      </div>
+    </div>
   </div>
-  <div class="menu-hero__image">
-    <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
+
+  <div class="menu-hero__visual">
+    <img
+      class="menu-hero__market"
+      src="{{ url_for('static', filename='images/ben-thanh-market-accent.svg') }}"
+      alt="Ben Thanh Market accent illustration"
+    />
+    <div class="menu-hero__feature">
+      <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
+      <div class="menu-hero__feature-copy">
+        <span>Featured lane</span>
+        <strong id="menu-active-category">Pho Noodle Soup</strong>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="menu-browser">
+<section class="menu-browser section-panel">
+  <div class="menu-browser__header">
+    <div>
+      <p class="eyebrow">Choose a counter</p>
+      <h2>Category browsing with more personality</h2>
+    </div>
+    <p>
+      Move through the menu like switching between food counters. Each lane updates the hero image and keeps the item
+      cards visually rich, not just informational.
+    </p>
+  </div>
+
   <div id="menu-categories" class="menu-categories" role="tablist" aria-label="Menu categories"></div>
   <div id="menu-category-note" class="menu-category-note" hidden></div>
   <div id="menu-items" class="menu-grid" aria-live="polite"></div>
@@ -205,10 +443,13 @@
       <img src="" alt="" loading="lazy" />
     </div>
     <div class="menu-card__body">
+      <div class="menu-card__topline">
+        <span class="menu-card__label"></span>
+        <p class="menu-card__price" hidden></p>
+      </div>
       <div class="menu-card__heading">
         <h3></h3>
         <p class="menu-card__summary"></p>
-        <p class="menu-card__price" hidden></p>
       </div>
       <div class="menu-card__sections"></div>
     </div>
@@ -226,6 +467,9 @@ const itemsEl = document.getElementById('menu-items');
 const noteEl = document.getElementById('menu-category-note');
 const heroImg = document.getElementById('menu-hero-image');
 const cardTemplate = document.getElementById('menu-card-template');
+const categoryTotalEl = document.getElementById('menu-category-total');
+const itemTotalEl = document.getElementById('menu-item-total');
+const activeCategoryEl = document.getElementById('menu-active-category');
 
 let menuCategories = [];
 
@@ -234,15 +478,17 @@ fetch(menuDataUrl)
   .then((data) => {
     menuCategories = data.categories || [];
     if (!menuCategories.length) {
-      itemsEl.innerHTML = '<p class=\"menu-error\">Menu data is unavailable right now.</p>';
+      itemsEl.innerHTML = '<p class="menu-error">Menu data is unavailable right now.</p>';
       return;
     }
+    categoryTotalEl.textContent = menuCategories.length;
+    itemTotalEl.textContent = menuCategories.reduce((count, category) => count + (category.items || []).length, 0);
     renderCategoryTabs();
     renderCategory(0);
   })
   .catch((error) => {
     console.error('Menu load failed', error);
-    itemsEl.innerHTML = '<p class=\"menu-error\">Unable to load the menu right now. Please try again soon.</p>';
+    itemsEl.innerHTML = '<p class="menu-error">Unable to load the menu right now. Please try again soon.</p>';
   });
 
 function renderCategoryTabs() {
@@ -252,9 +498,9 @@ function renderCategoryTabs() {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'menu-category-tab';
-    button.textContent = category.title;
     button.setAttribute('role', 'tab');
     button.setAttribute('aria-selected', index === 0);
+    button.innerHTML = `<span>${category.title}</span><small>${(category.items || []).length}</small>`;
     button.addEventListener('click', () => renderCategory(index));
     fragment.appendChild(button);
   });
@@ -267,33 +513,39 @@ function renderCategory(index) {
     tab.classList.toggle('is-active', isActive);
     tab.setAttribute('aria-selected', isActive);
   });
+
   const category = menuCategories[index];
   if (!category) return;
+
+  activeCategoryEl.textContent = category.title;
   if (category.image) {
     heroImg.src = staticBase + category.image;
     heroImg.alt = category.title + ' feature';
   }
+
   if (category.note && category.note.items && category.note.items.length) {
     noteEl.hidden = false;
     noteEl.innerHTML = `
-      <p class=\"menu-category-note__label\">${category.note.label}</p>
-      <p class=\"menu-category-note__items\">${category.note.items.join(', ')}</p>
+      <p class="menu-category-note__label">${category.note.label}</p>
+      <p class="menu-category-note__items">${category.note.items.join(', ')}</p>
     `;
   } else {
     noteEl.hidden = true;
     noteEl.innerHTML = '';
   }
+
   itemsEl.innerHTML = '';
   const fragment = document.createDocumentFragment();
   category.items.forEach((item) => {
-    fragment.appendChild(buildCard(item));
+    fragment.appendChild(buildCard(item, category.title));
   });
   itemsEl.appendChild(fragment);
 }
 
-function buildCard(item) {
+function buildCard(item, categoryTitle) {
   const clone = cardTemplate.content.cloneNode(true);
   const img = clone.querySelector('img');
+  const label = clone.querySelector('.menu-card__label');
   const title = clone.querySelector('h3');
   const summary = clone.querySelector('.menu-card__summary');
   const priceEl = clone.querySelector('.menu-card__price');
@@ -301,14 +553,17 @@ function buildCard(item) {
 
   img.src = item.image ? staticBase + item.image : fallbackImage;
   img.alt = item.name;
+  label.textContent = categoryTitle;
   title.textContent = item.name;
   summary.textContent = item.summary || '';
+
   if (item.price) {
     priceEl.hidden = false;
-    priceEl.textContent = `Price: ${item.price}`;
+    priceEl.textContent = item.price;
   } else {
     priceEl.hidden = true;
   }
+
   sectionsWrapper.innerHTML = '';
   (item.sections || []).forEach((section) => {
     if (!section.items || !section.items.length) return;
@@ -328,6 +583,7 @@ function buildCard(item) {
     sectionEl.appendChild(list);
     sectionsWrapper.appendChild(sectionEl);
   });
+
   return clone;
 }
 </script>

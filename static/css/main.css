@@ -1,1 +1,454 @@
-/* Shared stylesheet placeholder for the Flask preview shell. */
+:root {
+  color-scheme: light;
+  --bg-deep: #1b1412;
+  --bg-wood: #2c201b;
+  --bg-cream: #f6ecdf;
+  --bg-sand: #efe0cb;
+  --surface: rgba(255, 248, 238, 0.88);
+  --surface-strong: #fff7ed;
+  --surface-dark: rgba(32, 23, 19, 0.84);
+  --line-soft: rgba(125, 88, 53, 0.18);
+  --line-strong: rgba(246, 166, 35, 0.28);
+  --text-main: #231814;
+  --text-muted: #6c584f;
+  --text-inverse: #fff7ef;
+  --brand-amber: #ffb436;
+  --brand-orange: #ff6a13;
+  --brand-red: #eb5130;
+  --brand-green: #28724d;
+  --brand-teal: #006f74;
+  --brand-gold: #ffd873;
+  --brand-rose: #d94c79;
+  --shadow-soft: 0 18px 50px rgba(53, 30, 20, 0.11);
+  --shadow-strong: 0 28px 80px rgba(32, 18, 12, 0.2);
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 14px;
+  --page-width: 1280px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Be Vietnam Pro", "Segoe UI", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top right, rgba(255, 180, 54, 0.12), transparent 26rem),
+    radial-gradient(circle at top left, rgba(0, 111, 116, 0.12), transparent 24rem),
+    linear-gradient(180deg, #1b1412 0, #221815 9rem, #f6ecdf 9rem, #f4eadb 100%);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent 38%),
+    radial-gradient(circle at 15% 20%, rgba(255, 212, 115, 0.08), transparent 14rem),
+    radial-gradient(circle at 82% 11%, rgba(235, 81, 48, 0.08), transparent 16rem);
+  z-index: 0;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+.app-header,
+.app-main,
+.app-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.app-header {
+  padding: 1rem 1.2rem 0;
+}
+
+.app-header__inner {
+  width: min(var(--page-width), 100%);
+  margin: 0 auto;
+  padding: 1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 208, 138, 0.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(120deg, rgba(48, 32, 25, 0.96), rgba(27, 20, 18, 0.92)),
+    rgba(32, 23, 19, 0.92);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.brand {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 72px;
+  height: 72px;
+  padding: 0.35rem;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 216, 115, 0.86), rgba(255, 106, 19, 0.1) 55%),
+    rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 18px 32px rgba(0, 0, 0, 0.24);
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.brand-text {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.brand-kicker {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  color: rgba(255, 216, 115, 0.88);
+}
+
+.brand-title {
+  font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(1.15rem, 1.4vw, 1.4rem);
+  line-height: 1;
+  font-weight: 800;
+  color: var(--text-inverse);
+}
+
+.brand-subtitle {
+  color: rgba(255, 247, 239, 0.72);
+  font-size: 0.9rem;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.main-nav a {
+  padding: 0.8rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  color: rgba(255, 247, 239, 0.82);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.main-nav a:hover,
+.main-nav a.is-active {
+  color: var(--text-inverse);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 216, 115, 0.16);
+  transform: translateY(-1px);
+}
+
+.header-cta {
+  white-space: nowrap;
+  padding: 0.9rem 1.35rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #2a160b;
+  background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+  box-shadow: 0 18px 30px rgba(255, 106, 19, 0.26);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.header-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 36px rgba(255, 106, 19, 0.34);
+}
+
+.app-main {
+  width: min(var(--page-width), calc(100% - 2rem));
+  flex: 1;
+  margin: 0 auto;
+  padding: 2rem 0 3.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.96), rgba(250, 239, 224, 0.92)),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.section-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(255, 216, 115, 0.16), transparent 14rem);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 0.9rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-family: "Bebas Neue", sans-serif;
+  letter-spacing: 0.16em;
+  font-size: 0.95rem;
+  color: var(--brand-red);
+  background: rgba(255, 106, 19, 0.1);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
+  box-shadow: 0 0 0 5px rgba(255, 106, 19, 0.12);
+}
+
+.section-title {
+  margin: 0;
+  font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(2.2rem, 4.2vw, 4.6rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.section-copy {
+  margin: 1rem 0 0;
+  max-width: 58ch;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.7rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.95rem 1.45rem;
+  font-weight: 700;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.button--primary {
+  color: #26160e;
+  background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+  box-shadow: 0 20px 34px rgba(255, 106, 19, 0.24);
+}
+
+.button--secondary {
+  color: var(--brand-teal);
+  background: rgba(0, 111, 116, 0.08);
+  border: 1px solid rgba(0, 111, 116, 0.18);
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button--primary:hover {
+  box-shadow: 0 24px 40px rgba(255, 106, 19, 0.32);
+}
+
+.button--secondary:hover {
+  background: rgba(0, 111, 116, 0.12);
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.3rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(112, 85, 66, 0.12);
+  color: var(--text-main);
+  font-size: 0.92rem;
+  box-shadow: 0 10px 24px rgba(53, 30, 20, 0.06);
+}
+
+.pill strong {
+  font-weight: 800;
+}
+
+.app-footer {
+  padding: 0 1.2rem 1.2rem;
+}
+
+.app-footer__inner {
+  width: min(var(--page-width), 100%);
+  margin: 0 auto;
+  padding: 2rem 2rem 2.2rem;
+  display: grid;
+  gap: 1.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(35, 24, 20, 0.98), rgba(23, 19, 21, 0.94)),
+    var(--surface-dark);
+  border: 1px solid rgba(255, 214, 140, 0.12);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
+  color: rgba(255, 247, 239, 0.84);
+}
+
+.footer-sign {
+  margin: 0 0 0.45rem;
+  font-family: "Bebas Neue", sans-serif;
+  letter-spacing: 0.18em;
+  color: var(--brand-gold);
+}
+
+.app-footer__inner h2 {
+  margin: 0;
+  font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(1.8rem, 2.2vw, 2.6rem);
+  color: var(--text-inverse);
+}
+
+.app-footer__inner p {
+  margin: 0.8rem 0 0;
+  line-height: 1.7;
+}
+
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.footer-meta span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 0.9rem;
+  border-radius: 999px;
+  color: rgba(255, 247, 239, 0.9);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 216, 115, 0.12);
+}
+
+@media (max-width: 1040px) {
+  .app-header__inner {
+    border-radius: 30px;
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    padding-inline: 0.8rem;
+  }
+
+  .app-main {
+    width: min(var(--page-width), calc(100% - 1rem));
+    padding-top: 1.25rem;
+    gap: 1.2rem;
+  }
+
+  .brand {
+    align-items: flex-start;
+  }
+
+  .brand-mark {
+    width: 60px;
+    height: 60px;
+  }
+
+  .brand-subtitle {
+    font-size: 0.82rem;
+  }
+
+  .header-cta {
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 10vw, 3.3rem);
+  }
+
+  .app-footer {
+    padding-inline: 0.8rem;
+  }
+
+  .app-footer__inner {
+    padding: 1.4rem;
+  }
+}
