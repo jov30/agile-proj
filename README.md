@@ -216,8 +216,8 @@ git clone https://github.com/jov30/agile-proj.git
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-organisation/your-private-repository.git
-cd your-private-repository
+git clone https://github.com/jov30/agile-proj.git
+cd agile-proj
 ```
 
 ### 2. Create and activate a virtual environment
@@ -236,35 +236,16 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Set up environment variables
+### 4. Environment variables
 
-Create a `.env` file in the project root if required by your application.
-
-Example:
-
-```env
-SECRET_KEY=your-secret-key
-```
-
-If the project does not use additional external APIs, no further environment variables are required.
-
-### 5. Initialize the database
-
-```bash
-flask init-db
-```
-
-If your project uses another database setup method, replace this command with the correct one.
+No extra environment variables are required for the current public-site build.
 
 ## Running the Application
 
 Start the Flask server:
 
 ```bash
-flask run
-
-# Or, if your main entry file is app.py:
-python app.py
+python3 -m flask --app app run --host 127.0.0.1 --port 5000
 ```
 
 Then open your browser and go to:
@@ -344,11 +325,7 @@ The admin dashboard and monthly income chart were included to provide useful res
 
 ### Database Issues
 
-If you encounter problems with the database, try reinitializing it:
-
-```bash
-flask init-db
-```
+The current public-site build does not require a database initialization step before startup.
 
 ### Missing Dependencies
 
@@ -393,6 +370,5 @@ Possible future improvements include:
 ## Conclusion
 
 The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a realistic and achievable web application project that combines restaurant ordering functionality with a small social sharing feature. It meets the key requirements of the unit by using a client-server architecture, supporting authentication, storing persistent user data, and allowing users to view content shared by others. In addition, it provides admin-side tools for customer management, order tracking, menu control, and monthly income monitoring.
-
 
 
