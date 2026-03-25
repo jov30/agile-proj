@@ -1,0 +1,503 @@
+MENU ITEMS AND INGREDIENTS
+PHỞ NOODLE SOUP
+1. Raw Beef Pho
+Ingredients:
+	•	Rice noodles
+	•	Beef broth
+	•	Raw beef slices
+Herb Toppings:
+	•	Bean sprouts
+	•	Mint
+	•	Sliced chili
+	•	Lime
+	•	Green onion
+	•	Coriander
+	•	Sliced onion
+Sauces:
+	•	Chili sauce
+	•	Hoisin sauce
+
+2. Raw Beef and Beef Balls Pho
+Ingredients:
+	•	Rice noodles
+	•	Beef broth
+	•	Raw beef slices
+	•	Beef balls
+Herb Toppings:
+	•	Bean sprouts
+	•	Mint
+	•	Sliced chili
+	•	Lime
+	•	Green onion
+	•	Coriander
+	•	Sliced onion
+Sauces:
+	•	Chili sauce
+	•	Hoisin sauce
+
+3. Beef Brisket Pho
+Ingredients:
+	•	Rice noodles
+	•	Beef broth
+	•	Beef brisket
+Herb Toppings:
+	•	Bean sprouts
+	•	Mint
+	•	Sliced chili
+	•	Lime
+	•	Green onion
+	•	Coriander
+	•	Sliced onion
+Sauces:
+	•	Chili sauce
+	•	Hoisin sauce
+
+4. Slow-Cooked Beef Rib Pho
+Ingredients:
+	•	Rice noodles
+	•	Beef broth
+	•	Slow-cooked beef rib
+Herb Toppings:
+	•	Bean sprouts
+	•	Mint
+	•	Sliced chili
+	•	Lime
+	•	Green onion
+	•	Coriander
+	•	Sliced onion
+Sauces:
+	•	Chili sauce
+	•	Hoisin sauce
+
+5. MCQ Special Pho
+Ingredients:
+	•	Rice noodles
+	•	Beef broth
+	•	Raw beef slices
+	•	Beef brisket
+	•	Beef balls
+Herb Toppings:
+	•	Bean sprouts
+	•	Mint
+	•	Sliced chili
+	•	Lime
+	•	Green onion
+	•	Coriander
+	•	Sliced onion
+Sauces:
+	•	Chili sauce
+	•	Hoisin sauce
+
+6. Chicken Pho
+Ingredients:
+	•	Rice noodles
+	•	Broth
+	•	Sliced chicken meat
+Herb Toppings:
+	•	Bean sprouts
+	•	Mint
+	•	Sliced chili
+	•	Lime
+	•	Green onion
+	•	Coriander
+	•	Sliced onion
+Sauces:
+	•	Chili sauce
+	•	Hoisin sauce
+
+7. Beef Balls Pho
+Ingredients:
+	•	Rice noodles
+	•	Beef broth
+	•	Beef balls
+Herb Toppings:
+	•	Bean sprouts
+	•	Mint
+	•	Sliced chili
+	•	Lime
+	•	Green onion
+	•	Coriander
+	•	Sliced onion
+Sauces:
+	•	Chili sauce
+	•	Hoisin sauce
+
+8. Bun Bo Hue
+Ingredients:
+	•	XL vermicelli noodles
+	•	Beef broth
+	•	Beef shank
+	•	Pork ham
+	•	Pork hock
+	•	Satay
+	•	Bun Bo Hue sauce
+
+PHO CUPS
+9. Beef Pho Cup
+Ingredients:
+	•	Rice noodles
+	•	Broth
+	•	Choice of one type of beef:
+	•	Raw beef
+	•	Beef brisket
+	•	Beef balls
+	•	Or special combination:
+	•	Raw beef
+	•	Beef brisket
+	•	Beef balls
+	•	Coriander
+	•	Green onion
+	•	Sliced onion
+
+10. Chicken Pho Cup
+Ingredients:
+	•	Rice noodles
+	•	Broth
+	•	Sliced chicken
+	•	Coriander
+	•	Green onion
+	•	Sliced onion
+
+11. Bun Bo Hue Cup
+Ingredients:
+	•	XL vermicelli noodles
+	•	Broth
+	•	Beef shank
+	•	Pork ham
+	•	Pork hock
+	•	Coriander
+	•	Green onion
+	•	Sliced onion
+
+PHO COMBO
+12. Pho Combo
+Includes:
+	•	Any pho
+	•	One coffee
+	•	Any juice
+Price:
+	•	$20
+
+RICE DISHES
+13. Grilled Pork Chop with Broken Rice
+Ingredients:
+	•	Broken rice
+	•	Grilled pork chop
+	•	Shredded pork (bì)
+	•	Pork and egg meatloaf (chả trứng)
+	•	Pickles
+	•	Cucumber
+	•	Tomato
+	•	Tangy sweet fish sauce
+
+14. Roast Pork Rice
+Ingredients:
+	•	Steamed rice
+	•	Roast pork
+	•	Pickles
+	•	Cucumber
+	•	Tomato
+	•	Tangy sweet sauce
+
+15. Grilled Chicken Rice
+Ingredients:
+	•	Steamed rice
+	•	Grilled chicken
+	•	Pickles
+	•	Cucumber
+	•	Tomato
+	•	Tangy sweet sauce
+
+16. Grilled Beef Rice
+Ingredients:
+	•	Steamed rice
+	•	Grilled beef
+	•	Pickles
+	•	Cucumber
+	•	Tomato
+	•	Tangy sweet sauce
+
+17. Stir-Fried Tofu Rice
+Ingredients:
+	•	Steamed rice
+	•	Stir-fried tofu
+	•	Pickles
+	•	Cucumber
+	•	Tomato
+	•	Soy sauce
+
+MCQ SIZZLING HOT PLATES
+18. Chicken Sizzling Hot Plate
+Ingredients:
+	•	Chicken
+	•	Pickles
+	•	Onion
+	•	Rice
+	•	savory meat Sauce
+	•	Sunny side up egg
+
+19. Beef Sizzling Hot Plate
+Ingredients:
+	•	grilled Beef
+	•	Pickles
+	•	Onion
+	•	Rice
+	•	Sauce
+	•	Sunny side up egg
+
+20. Pork Sizzling Hot Plate
+Ingredients:
+	•	grilled Pork
+	•	Pickles
+	•	Onion
+	•	Rice
+	•	Sauce
+	•	Sunny side up egg
+
+21. Tofu Sizzling Hot Plate
+Ingredients:
+	•	fried Tofu
+	•	Pickles
+	•	Onion
+	•	Rice
+	•	Sauce
+	•	Sunny side up egg
+
+22. MCQ Sizzling Beef with Bread
+Ingredients:
+	•	Beef steak
+	•	Sunny side up egg
+	•	Pâté
+	•	Vietnamese sausage
+	•	Onion
+	•	Bread
+
+DRY NOODLES
+23. Roast Pork Dry Noodles
+Ingredients:
+	•	Dry noodles
+	•	Roast pork
+	•	Lettuce
+	•	Pickles
+	•	Cucumber
+	•	Mint
+	•	Fish sauce with chili
+	•	Onion oil
+	•	Fried shallots
+
+24. Grilled Lemongrass Chicken Dry Noodles
+Ingredients:
+	•	Dry noodles
+	•	Grilled lemongrass chicken
+	•	Lettuce
+	•	Pickles
+	•	Cucumber
+	•	Mint
+	•	Fish sauce with chili
+	•	Onion oil
+	•	Fried shallots
+
+25. Grilled Lemongrass Beef Dry Noodles
+Ingredients:
+	•	Dry noodles
+	•	Grilled lemongrass beef
+	•	Lettuce
+	•	Pickles
+	•	Cucumber
+	•	Mint
+	•	Fish sauce with chili
+	•	Onion oil
+	•	Fried shallots
+
+26. Grilled Lemongrass Pork Dry Noodles
+Ingredients:
+	•	Dry noodles
+	•	Grilled lemongrass pork
+	•	Lettuce
+	•	Pickles
+	•	Cucumber
+	•	Mint
+	•	Fish sauce with chili
+	•	Onion oil
+	•	Fried shallots
+
+27. Stir-Fried Tofu Dry Noodles
+Ingredients:
+	•	Dry noodles
+	•	Stir-fried tofu
+	•	Lettuce
+	•	Pickles
+	•	Cucumber
+	•	Mint
+	•	Soy sauce
+	•	Onion oil
+	•	Fried shallots
+
+
+BÁNH MÌ
+28. Roast Pork Bánh Mì
+Ingredients:
+	•	Crispy roast pork
+	•	Pâté
+	•	Butter
+	•	Soy sauce
+	•	Savory meat sauce
+	•	Cucumber
+	•	Pickled vegetables
+	•	Coriander
+	•	Sliced chili
+
+29. Traditional Pork Bánh Mì
+Ingredients:
+	•	Grilled pork
+	•	Pork head cheese
+	•	Pork ham
+	•	Pâté
+	•	Butter
+	•	Soy sauce
+	•	Savory meat sauce
+	•	Cucumber
+	•	Pickled vegetables
+	•	Coriander
+	•	Sliced chili
+
+30. Grilled Chicken Bánh Mì
+Ingredients:
+	•	Grilled chicken
+	•	Butter
+	•	Mayonnaise
+	•	Cucumber
+	•	Pickled vegetables
+	•	Coriander
+	•	Sliced chili
+
+31. Grilled Pork Bánh Mì
+Ingredients:
+	•	Grilled pork
+	•	Butter
+	•	Mayonnaise
+	•	Cucumber
+	•	Pickled vegetables
+	•	Coriander
+	•	Sliced chili
+
+32. Grilled Beef Bánh Mì
+Ingredients:
+	•	Grilled beef
+	•	Butter
+	•	Mayonnaise
+	•	Cucumber
+	•	Pickled vegetables
+	•	Coriander
+	•	Sliced chili
+
+RICE PAPER ROLLS
+33. Chicken Rice Paper Roll
+Ingredients:
+	•	Rice paper
+	•	Vermicelli noodles
+	•	Grilled chicken
+	•	Lettuce
+Served with:
+	•	Hoisin peanut dipping sauce
+	•	Fish sauce with chili
+
+34. Prawn and Pork Rice Paper Roll
+Ingredients:
+	•	Rice paper
+	•	Vermicelli noodles
+	•	Prawn
+	•	Pork
+	•	Lettuce
+Served with:
+	•	Hoisin peanut dipping sauce
+	•	Fish sauce with chili
+
+35. Grilled Beef Rice Paper Roll
+Ingredients:
+	•	Rice paper
+	•	Vermicelli noodles
+	•	Grilled beef
+	•	Lettuce
+Served with:
+	•	Hoisin peanut dipping sauce
+	•	Fish sauce with chili
+
+
+
+MIXED JUICES
+36. Detox Juice
+Ingredients:
+	•	Celery
+	•	Carrot
+	•	Cucumber
+	•	Apple
+	•	Mint
+
+37. Immunity Juice
+Ingredients:
+	•	Honey
+	•	Ginger
+	•	Carrot
+	•	Orange
+	•	Apple
+
+38. Sweet Beets Juice
+Ingredients:
+	•	Beetroot
+	•	Apple
+	•	Orange
+
+39. Green Glow Juice
+Ingredients:
+	•	Kiwi
+	•	Pineapple
+	•	Cucumber
+	•	Apple
+
+40. Tropical Juice
+Ingredients:
+	•	Apple
+	•	Pineapple
+	•	Orange
+	•	Watermelon
+Watermelon juice
+41. Sugarcane Juice
+Ingredients:
+	•	Fresh sugarcane juice
+
+SMOOTHIES
+42. Avocado Smoothie
+43. Strawberry Smoothie
+44. Mango Smoothie
+45. Mixed Berry Smoothie
+46. Coconut Smoothie
+Smoothie Base Ingredients:
+	•	Milk
+	•	Fresh fruit
+	•	Ice
+	•	Sugar
+	•	Condensed milk
+
+VIETNAMESE COFFEE
+47. Black Coffee
+Ingredients:
+	•	Vietnamese coffee
+	•	Ice
+
+48. Milk Coffee
+Ingredients:
+	•	Vietnamese coffee
+	•	Condensed milk
+	•	Milk
+	•	Ice
+
+LEMONADE DRINKS
+49. Kiwi Lemonade
+50. Strawberry Lemonade
+51. Watermelon Lemonade
+52. Coconut Lemonade
+53. Pineapple Lemonade
+54. Aloe Vera Lemonade
+
+

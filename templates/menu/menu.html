@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}Menu & Ingredients | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .menu-hero {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: linear-gradient(135deg, rgba(28, 140, 79, 0.08), rgba(160, 50, 140, 0.06));
+  }
+
+  .menu-hero__eyebrow {
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+
+  .menu-hero__title {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    margin: 0 0 1rem;
+    color: #0f172a;
+  }
+
+  .menu-hero__image {
+    width: 100%;
+    background: #fff;
+    border-radius: 1.25rem;
+    padding: 1rem;
+    box-shadow: 0 20px 55px rgba(15, 23, 42, 0.12);
+  }
+
+  .menu-hero__image img {
+    width: 100%;
+    border-radius: 1rem;
+    display: block;
+  }
+
+  .menu-browser {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .menu-categories {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .menu-category-tab {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 999px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .menu-category-tab.is-active {
+    background: #1c8c4f;
+    color: #fff;
+    border-color: #1c8c4f;
+    box-shadow: 0 10px 25px rgba(28, 140, 79, 0.25);
+  }
+
+  .menu-category-note {
+    background: rgba(28, 140, 79, 0.07);
+    border-left: 4px solid #1c8c4f;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .menu-category-note__label {
+    margin: 0;
+    font-weight: 600;
+    color: #064e3b;
+  }
+
+  .menu-category-note__items {
+    margin: 0.35rem 0 0;
+    color: #0f172a;
+  }
+
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .menu-card {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    box-shadow: 0 15px 40px rgba(15, 23, 42, 0.08);
+  }
+
+  .menu-card__media img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .menu-card__body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .menu-card__heading h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #0f172a;
+  }
+
+  .menu-card__summary {
+    margin: 0.35rem 0 0;
+    color: #475569;
+    font-size: 0.95rem;
+  }
+
+  .menu-card__price {
+    margin: 0.5rem 0 0;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .menu-card__section {
+    margin-top: 0.75rem;
+  }
+
+  .menu-card__section-title {
+    margin: 0 0 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #1c8c4f;
+  }
+
+  .menu-card__list {
+    list-style: disc;
+    padding-left: 1.2rem;
+    margin: 0;
+    color: #0f172a;
+    font-size: 0.95rem;
+  }
+
+  .menu-error {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  @media (max-width: 640px) {
+    .menu-card__media img {
+      height: 180px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="menu-hero">
+  <div>
+    <p class="menu-hero__eyebrow">Menu</p>
+    <h1 class="menu-hero__title">Everything you need for scheduled pickup.</h1>
+    <p>
+      Browse pho bowls, vermicelli, bánh mì, juices, and drinks straight from the full MCQ kitchen
+      specification. Every item below includes the full list of ingredients and garnishes so you
+      can plan orders ahead of time.
+    </p>
+    <p><small>Menu data sourced from the attachment you provided.</small></p>
+  </div>
+  <div class="menu-hero__image">
+    <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
+  </div>
+</section>
+
+<section class="menu-browser">
+  <div id="menu-categories" class="menu-categories" role="tablist" aria-label="Menu categories"></div>
+  <div id="menu-category-note" class="menu-category-note" hidden></div>
+  <div id="menu-items" class="menu-grid" aria-live="polite"></div>
+</section>
+
+<template id="menu-card-template">
+  <article class="menu-card">
+    <div class="menu-card__media">
+      <img src="" alt="" loading="lazy" />
+    </div>
+    <div class="menu-card__body">
+      <div class="menu-card__heading">
+        <h3></h3>
+        <p class="menu-card__summary"></p>
+        <p class="menu-card__price" hidden></p>
+      </div>
+      <div class="menu-card__sections"></div>
+    </div>
+  </article>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const menuDataUrl = "{{ url_for('static', filename='data/menu.json') }}";
+const staticBase = "{{ url_for('static', filename='') }}";
+const fallbackImage = "{{ url_for('static', filename='images/menu/pho-classic.jpg') }}";
+const categoriesEl = document.getElementById('menu-categories');
+const itemsEl = document.getElementById('menu-items');
+const noteEl = document.getElementById('menu-category-note');
+const heroImg = document.getElementById('menu-hero-image');
+const cardTemplate = document.getElementById('menu-card-template');
+
+let menuCategories = [];
+
+fetch(menuDataUrl)
+  .then((resp) => resp.json())
+  .then((data) => {
+    menuCategories = data.categories || [];
+    if (!menuCategories.length) {
+      itemsEl.innerHTML = '<p class=\"menu-error\">Menu data is unavailable right now.</p>';
+      return;
+    }
+    renderCategoryTabs();
+    renderCategory(0);
+  })
+  .catch((error) => {
+    console.error('Menu load failed', error);
+    itemsEl.innerHTML = '<p class=\"menu-error\">Unable to load the menu right now. Please try again soon.</p>';
+  });
+
+function renderCategoryTabs() {
+  categoriesEl.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  menuCategories.forEach((category, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'menu-category-tab';
+    button.textContent = category.title;
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-selected', index === 0);
+    button.addEventListener('click', () => renderCategory(index));
+    fragment.appendChild(button);
+  });
+  categoriesEl.appendChild(fragment);
+}
+
+function renderCategory(index) {
+  document.querySelectorAll('.menu-category-tab').forEach((tab, tabIndex) => {
+    const isActive = tabIndex === index;
+    tab.classList.toggle('is-active', isActive);
+    tab.setAttribute('aria-selected', isActive);
+  });
+  const category = menuCategories[index];
+  if (!category) return;
+  if (category.image) {
+    heroImg.src = staticBase + category.image;
+    heroImg.alt = category.title + ' feature';
+  }
+  if (category.note && category.note.items && category.note.items.length) {
+    noteEl.hidden = false;
+    noteEl.innerHTML = `
+      <p class=\"menu-category-note__label\">${category.note.label}</p>
+      <p class=\"menu-category-note__items\">${category.note.items.join(', ')}</p>
+    `;
+  } else {
+    noteEl.hidden = true;
+    noteEl.innerHTML = '';
+  }
+  itemsEl.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  category.items.forEach((item) => {
+    fragment.appendChild(buildCard(item));
+  });
+  itemsEl.appendChild(fragment);
+}
+
+function buildCard(item) {
+  const clone = cardTemplate.content.cloneNode(true);
+  const img = clone.querySelector('img');
+  const title = clone.querySelector('h3');
+  const summary = clone.querySelector('.menu-card__summary');
+  const priceEl = clone.querySelector('.menu-card__price');
+  const sectionsWrapper = clone.querySelector('.menu-card__sections');
+
+  img.src = item.image ? staticBase + item.image : fallbackImage;
+  img.alt = item.name;
+  title.textContent = item.name;
+  summary.textContent = item.summary || '';
+  if (item.price) {
+    priceEl.hidden = false;
+    priceEl.textContent = `Price: ${item.price}`;
+  } else {
+    priceEl.hidden = true;
+  }
+  sectionsWrapper.innerHTML = '';
+  (item.sections || []).forEach((section) => {
+    if (!section.items || !section.items.length) return;
+    const sectionEl = document.createElement('section');
+    sectionEl.className = 'menu-card__section';
+    const heading = document.createElement('p');
+    heading.className = 'menu-card__section-title';
+    heading.textContent = section.label;
+    const list = document.createElement('ul');
+    list.className = 'menu-card__list';
+    section.items.forEach((entry) => {
+      const li = document.createElement('li');
+      li.textContent = entry;
+      list.appendChild(li);
+    });
+    sectionEl.appendChild(heading);
+    sectionEl.appendChild(list);
+    sectionsWrapper.appendChild(sectionEl);
+  });
+  return clone;
+}
+</script>
+{% endblock %}
