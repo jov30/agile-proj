@@ -1,0 +1,81 @@
+[
+  {
+    "asset": "static/images/brand/benthanh.jpg",
+    "title": "Ben Thanh Market illustration",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/benthanh.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/street-food-life.jpg",
+    "title": "Street Food Life (Unsplash)",
+    "source": "wikimedia-commons",
+    "page": "https://commons.wikimedia.org/wiki/File:Street_Food_Life_(Unsplash).jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/6/62/Street_Food_Life_%28Unsplash%29.jpg",
+    "license": "CC0 1.0"
+  },
+  {
+    "asset": "static/images/inspiration/noodle-bowl-unsplash.jpg",
+    "title": "Noodle Bowl for Lunch (Unsplash)",
+    "source": "wikimedia-commons",
+    "page": "https://commons.wikimedia.org/wiki/File:Noodle_Bowl_for_Lunch_(Unsplash).jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Noodle_Bowl_for_Lunch_%28Unsplash%29.jpg",
+    "license": "CC0 1.0"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-1.jpg",
+    "title": "Vietnamese street food tray",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood1.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-4.jpg",
+    "title": "Vietnamese floating market boats",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood4.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-5.jpg",
+    "title": "Vietnamese produce market stall",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood5.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-6.jpg",
+    "title": "Vietnamese charcoal grill",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood6.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-7.jpg",
+    "title": "Vietnamese shrimp rice paper rolls",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood7.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-8.jpg",
+    "title": "Vietnamese banh xeo kitchen and plate",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood8.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-9.jpg",
+    "title": "Vietnamese skewer and fish ball stall",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood9.jpg",
+    "license": "local-use"
+  },
+  {
+    "asset": "static/images/inspiration/streetfood-10.jpg",
+    "title": "Vietnamese market skewer spread",
+    "source": "user-provided",
+    "url": "/Users/nhungpham/Downloads/streetfood.10.jpg",
+    "license": "local-use"
+  }
+]

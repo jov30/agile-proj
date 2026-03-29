@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | MCQ Vietnamese Street Food{% endblock %}
+
+{% block content %}
+<section class="feature-showcase section-panel">
+  <div class="feature-showcase__grid">
+    <div>
+      <p class="eyebrow">{{ eyebrow }}</p>
+      <h1 class="section-title">{{ title }}</h1>
+      <p class="section-copy">{{ message }}</p>
+      <div class="pill-row">
+        {% for pill in pills %}
+          <span class="pill"><strong>{{ pill.strong }}</strong> {{ pill.text }}</span>
+        {% endfor %}
+      </div>
+      <div class="button-row">
+        {% for action in actions %}
+          <a
+            href="{{ action.href }}"
+            class="button {% if action.variant == 'primary' %}button--primary{% else %}button--secondary{% endif %}"
+          >
+            {{ action.label }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="feature-showcase__panel">
+      <div class="feature-showcase__media">
+        <img src="{{ url_for('static', filename=image) }}" alt="{{ image_alt }}" />
+      </div>
+      <div class="feature-showcase__facts">
+        {% for fact in facts %}
+          <div class="feature-showcase__fact">
+            <strong>{{ fact.title }}</strong>
+            <span>{{ fact.body }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}MCQ Vietnamese Street Food{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Bebas+Neue&family=Bricolage+Grotesque:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="app-header__inner">
+        <a href="/" class="brand">
+          <span class="brand-mark">
+            <img
+              src="{{ url_for('static', filename='images/mcq-logo.jpg') }}"
+              alt="MCQ Vietnamese Street Food Logo"
+            />
+          </span>
+          <span class="brand-text">
+            <span class="brand-kicker">Saigon market pickup</span>
+            <span class="brand-title">MCQ Vietnamese Street Food</span>
+            <span class="brand-subtitle">Lantern glow, mural colour, and fresh-hall energy.</span>
+          </span>
+        </a>
+        <nav class="main-nav">
+          <a href="/" class="{% if request.path == '/' %}is-active{% endif %}">Home</a>
+          <a href="/menu" class="{% if request.path.startswith('/menu') %}is-active{% endif %}">Menu</a>
+          <a href="/shared-meals" class="{% if request.path.startswith('/shared-meals') %}is-active{% endif %}">Shared Meals</a>
+          <a href="/orders" class="{% if request.path.startswith('/orders') %}is-active{% endif %}">Orders</a>
+          <a href="/profile" class="{% if request.path.startswith('/profile') %}is-active{% endif %}">Profile</a>
+          <a href="/support" class="{% if request.path.startswith('/support') %}is-active{% endif %}">Support</a>
+        </nav>
+        <a href="/menu" class="header-cta">Order Pickup</a>
+      </div>
+    </header>
+    <main class="app-main">{% block content %}{% endblock %}</main>
+    <footer class="app-footer">
+      <div class="app-footer__inner">
+        <div>
+          <p class="footer-sign">Saigon Alley Energy</p>
+          <h2>MCQ Vietnamese Street Food</h2>
+          <p>
+            A more fashion-forward web presence inspired by your real storefront: warm timber, neon signage,
+            market produce colour, and the iconic Ben Thanh clock tower silhouette.
+          </p>
+        </div>
+        <div class="footer-meta">
+          <span>Ben Thanh inspired accent</span>
+          <span>Modern food hall palette</span>
+          <span><a href="/support">Customer Support</a></span>
+          <span><a href="tel:+61892485623">08 9248 5623</a></span>
+          <span>&copy; {{ current_year|default(2026, true) }} MCQ</span>
+        </div>
+      </div>
+    </footer>
+    <aside class="support-dock is-open" id="support-dock" aria-label="Customer support chat">
+      <button class="support-dock__launcher" id="support-launcher" type="button" aria-expanded="true">
+        Chat Support
+      </button>
+      <div class="support-dock__panel" id="support-panel">
+        <div class="support-dock__header">
+          <div>
+            <p class="support-dock__brand">MCQ Supermarket</p>
+            <h2>Need Help?</h2>
+          </div>
+          <button class="support-dock__close" id="support-close" type="button" aria-label="Toggle chat support">
+            -
+          </button>
+        </div>
+        <div class="support-dock__body">
+          <div class="support-message support-message--assistant">
+            Visit our Customer Support for assistance or call us at <a href="tel:+61892485623">08 9248 5623</a>.
+          </div>
+          <div class="support-message support-message--assistant">
+            I can help with menu browsing, scheduled pickup, payment, receipts, favourites, shared meals, and checkout questions.
+          </div>
+          <div class="support-chat-log" id="support-chat-log"></div>
+          <div class="support-dock__prompts">
+            <button type="button" class="support-prompt" data-answer="pickup">Pickup time</button>
+            <button type="button" class="support-prompt" data-answer="payment">Payment</button>
+            <button type="button" class="support-prompt" data-answer="receipt">Receipt</button>
+            <button type="button" class="support-prompt" data-answer="menu">Menu help</button>
+            <button type="button" class="support-prompt" data-answer="account">Account help</button>
+            <button type="button" class="support-prompt" data-answer="support">Contact support</button>
+          </div>
+          <div class="support-dock__actions">
+            <a href="/support" class="support-dock__action support-dock__action--primary">Customer Support</a>
+            <a href="tel:+61892485623" class="support-dock__action support-dock__action--secondary">Call 08 9248 5623</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <script>
+      (() => {
+        const dock = document.getElementById('support-dock');
+        const launcher = document.getElementById('support-launcher');
+        const closeButton = document.getElementById('support-close');
+        const chatLog = document.getElementById('support-chat-log');
+        const prompts = document.querySelectorAll('.support-prompt');
+        const answers = {
+          pickup:
+            'Scheduled pickup is part of the project core flow. The future checkout will let customers choose a pickup date and time before confirming the order.',
+          payment:
+            'Payment is now exposed as its own planned feature page. It will sit between checkout and pickup confirmation in the customer journey.',
+          receipt:
+            'The receipt page is the post-checkout confirmation point where customers can review the order summary and eventually download proof of purchase.',
+          menu:
+            'You can browse categories now. Later customers will also be able to save favourites, review ingredients, and add items to cart directly from the menu experience.',
+          account:
+            'User-side features from the project include register, login, profile updates, order history, favourites, payment, pickup planning, and shared meals.',
+          support:
+            'For direct help, visit Customer Support or call 08 9248 5623. This floating chatbox is ready to become an online assistance entry point.',
+        };
+
+        function setOpenState(isOpen) {
+          dock.classList.toggle('is-open', isOpen);
+          launcher.setAttribute('aria-expanded', String(isOpen));
+          launcher.textContent = isOpen ? 'Hide Chat' : 'Chat Support';
+          closeButton.textContent = isOpen ? '-' : '+';
+        }
+
+        function appendMessage(text, kind) {
+          const message = document.createElement('div');
+          message.className = `support-message support-message--${kind}`;
+          message.textContent = text;
+          chatLog.appendChild(message);
+          chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        launcher.addEventListener('click', () => {
+          setOpenState(!dock.classList.contains('is-open'));
+        });
+
+        closeButton.addEventListener('click', () => {
+          setOpenState(!dock.classList.contains('is-open'));
+        });
+
+        prompts.forEach((prompt) => {
+          prompt.addEventListener('click', () => {
+            const key = prompt.dataset.answer;
+            appendMessage(prompt.textContent, 'user');
+            window.setTimeout(() => {
+              appendMessage(answers[key] || answers.support, 'assistant');
+            }, 180);
+          });
+        });
+
+        if (window.matchMedia('(max-width: 720px)').matches) {
+          setOpenState(false);
+        }
+      })();
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

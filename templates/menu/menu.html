@@ -1,0 +1,831 @@
+{% extends "base.html" %}
+
+{% block title %}Menu Hall | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .menu-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.95fr);
+    gap: 1.8rem;
+    align-items: center;
+    padding: clamp(1.4rem, 3vw, 2.6rem);
+  }
+
+  .menu-hero__content,
+  .menu-hero__visual,
+  .menu-browser__header {
+    position: relative;
+    z-index: 1;
+  }
+
+  .menu-hero__title {
+    font-size: clamp(2.2rem, 4vw, 4.1rem);
+  }
+
+  .menu-hero__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-top: 1.4rem;
+  }
+
+  .menu-metric {
+    padding: 1rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.06);
+  }
+
+  .menu-metric strong {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.3rem;
+  }
+
+  .menu-metric span {
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .menu-hero__visual {
+    position: relative;
+    min-height: 500px;
+  }
+
+  .menu-hero__market {
+    position: absolute;
+    inset: 0 0 auto auto;
+    width: min(92%, 440px);
+    filter: drop-shadow(0 28px 42px rgba(32, 18, 12, 0.18));
+    border-radius: 28px;
+  }
+
+  .menu-hero__feature {
+    position: absolute;
+    left: 0;
+    right: 3.2rem;
+    bottom: 0;
+    overflow: hidden;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.92), rgba(23, 19, 21, 0.92)),
+      rgba(32, 23, 19, 0.92);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .menu-hero__street-card {
+    position: absolute;
+    top: 2rem;
+    left: 1.2rem;
+    width: 190px;
+    height: 240px;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.24);
+    transform: rotate(-4deg);
+  }
+
+  .menu-hero__street-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .menu-hero__feature img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .menu-hero__feature-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem 1.2rem;
+    color: var(--text-inverse);
+  }
+
+  .menu-hero__feature-copy span {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.16em;
+    color: rgba(255, 216, 115, 0.88);
+  }
+
+  .menu-hero__feature-copy strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.2rem;
+    text-align: right;
+  }
+
+  .menu-utility {
+    padding: clamp(1.2rem, 3vw, 1.7rem);
+  }
+
+  .menu-utility__header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.3rem;
+    align-items: end;
+    margin-bottom: 1rem;
+  }
+
+  .menu-utility__header h2 {
+    margin: 0.3rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.5rem, 2.1vw, 2.2rem);
+  }
+
+  .menu-utility__header p {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .menu-utility__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .menu-utility__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.95rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 800;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.06);
+  }
+
+  .menu-utility__link::after {
+    content: "->";
+    color: var(--brand-red);
+  }
+
+  .menu-utility__link--accent {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-color: transparent;
+  }
+
+  .menu-utility__link--accent::after {
+    color: rgba(255, 247, 239, 0.9);
+  }
+
+  .menu-browser {
+    padding: clamp(1.3rem, 3vw, 2rem);
+  }
+
+  .menu-browser__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    align-items: end;
+    margin-bottom: 1.4rem;
+  }
+
+  .menu-browser__header-copy {
+    max-width: 48ch;
+  }
+
+  .menu-browser__header h2 {
+    margin: 0.3rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.6rem, 2.2vw, 2.4rem);
+  }
+
+  .menu-browser__header p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .menu-browser__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .menu-browser__hint {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+    white-space: nowrap;
+  }
+
+  .menu-browser__control {
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    box-shadow: 0 16px 28px rgba(255, 106, 19, 0.22);
+    cursor: pointer;
+  }
+
+  .menu-categories {
+    display: flex;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .menu-category-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.82rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-main);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.06);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .menu-category-tab:hover {
+    transform: translateY(-2px);
+  }
+
+  .menu-category-tab small {
+    padding: 0.26rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 106, 19, 0.1);
+    color: var(--brand-red);
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  .menu-category-tab.is-active {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    box-shadow: 0 20px 30px rgba(255, 106, 19, 0.22);
+  }
+
+  .menu-category-tab.is-active small {
+    color: #2a160b;
+    background: rgba(255, 255, 255, 0.84);
+  }
+
+  .menu-category-note {
+    margin-bottom: 1.2rem;
+    padding: 1rem 1.15rem;
+    border-radius: 22px;
+    background:
+      linear-gradient(135deg, rgba(255, 180, 54, 0.14), rgba(255, 106, 19, 0.08)),
+      rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(255, 180, 54, 0.18);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.06);
+  }
+
+  .menu-category-note__label {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.02rem;
+  }
+
+  .menu-category-note__items {
+    margin: 0.45rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .menu-items-rail {
+    overflow-x: auto;
+    padding-bottom: 0.55rem;
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(235, 81, 48, 0.5) rgba(112, 85, 66, 0.08);
+  }
+
+  .menu-items-rail::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .menu-items-rail::-webkit-scrollbar-track {
+    background: rgba(112, 85, 66, 0.08);
+    border-radius: 999px;
+  }
+
+  .menu-items-rail::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-radius: 999px;
+  }
+
+  .menu-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(285px, 340px);
+    gap: 1.2rem;
+    width: max-content;
+  }
+
+  .menu-card {
+    display: flex;
+    flex-direction: column;
+    width: min(340px, calc(100vw - 3.6rem));
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 22px 42px rgba(53, 30, 20, 0.09);
+    scroll-snap-align: start;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+
+  .menu-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 26px 48px rgba(53, 30, 20, 0.14);
+  }
+
+  .menu-card__media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .menu-card__media::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 38%;
+    background: linear-gradient(180deg, transparent, rgba(35, 24, 20, 0.42));
+    pointer-events: none;
+  }
+
+  .menu-card__media img {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .menu-card__body {
+    display: grid;
+    gap: 1rem;
+    padding: 1.15rem 1.2rem 1.3rem;
+  }
+
+  .menu-card__topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .menu-card__label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+  }
+
+  .menu-card__price {
+    margin: 0;
+    font-weight: 800;
+    color: var(--brand-red);
+  }
+
+  .menu-card__heading h3 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.3rem;
+  }
+
+  .menu-card__summary {
+    margin: 0.45rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .menu-card__sections {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .menu-card__section {
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .menu-card__section-title {
+    margin: 0 0 0.45rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    color: var(--brand-orange);
+  }
+
+  .menu-card__list {
+    margin: 0;
+    padding-left: 1.15rem;
+    color: var(--text-main);
+    line-height: 1.6;
+  }
+
+  .menu-error {
+    padding: 1.3rem;
+    border-radius: 22px;
+    background: rgba(235, 81, 48, 0.12);
+    color: #7c2218;
+  }
+
+  @media (max-width: 1080px) {
+    .menu-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .menu-hero__metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .menu-utility__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .menu-hero,
+    .menu-utility,
+    .menu-browser {
+      padding: 1.2rem;
+    }
+
+    .menu-hero__visual {
+      min-height: 420px;
+    }
+
+    .menu-hero__market {
+      width: 100%;
+      max-width: none;
+    }
+
+    .menu-hero__street-card {
+      width: 120px;
+      height: 150px;
+      top: 1rem;
+      left: 0.8rem;
+    }
+
+    .menu-hero__feature {
+      right: 0;
+    }
+
+    .menu-hero__feature img {
+      height: 260px;
+    }
+
+    .menu-hero__feature-copy {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .menu-hero__feature-copy strong {
+      text-align: left;
+    }
+
+    .menu-browser__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .menu-browser__controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .menu-utility__header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .menu-utility__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .menu-category-tab {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .menu-grid {
+      grid-auto-columns: minmax(82vw, 300px);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="menu-hero section-panel">
+  <div class="menu-hero__content">
+    <p class="eyebrow">Menu hall</p>
+    <h1 class="section-title menu-hero__title">Browse the full kitchen like you're standing under the sign.</h1>
+    <p class="section-copy">
+      Pho, rice dishes, hot plates, drinks, pastries, and desserts are now presented like browsing different lanes in a
+      contemporary Saigon market hall. The layout is richer, warmer, and more brand-led without losing menu clarity.
+    </p>
+    <div class="menu-hero__metrics">
+      <div class="menu-metric">
+        <strong id="menu-category-total">0</strong>
+        <span>menu lanes</span>
+      </div>
+      <div class="menu-metric">
+        <strong id="menu-item-total">0</strong>
+        <span>dishes and drinks</span>
+      </div>
+      <div class="menu-metric">
+        <strong>Pickup-first</strong>
+        <span>designed to stay practical for quick ordering</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-hero__visual">
+    <div class="menu-hero__street-card">
+      <img
+        src="{{ url_for('static', filename='images/inspiration/streetfood-7.jpg') }}"
+        alt="Vietnamese fresh roll inspiration"
+      />
+    </div>
+    <img
+      class="menu-hero__market"
+      src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}"
+      alt="Ben Thanh Market inspired artwork"
+    />
+    <div class="menu-hero__feature">
+      <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
+      <div class="menu-hero__feature-copy">
+        <span>Featured lane</span>
+        <strong id="menu-active-category">Pho Noodle Soup</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="menu-utility section-panel">
+  <div class="menu-utility__header">
+    <div>
+      <p class="eyebrow">Future user actions</p>
+      <h2>Important customer buttons stay close to the menu</h2>
+    </div>
+    <p>
+      These links reflect the user-side project flow from the README, so the menu page already points toward cart,
+      checkout, payment, pickup planning, receipt, and the community features customers will use most.
+    </p>
+  </div>
+  <div class="menu-utility__grid">
+    <a class="menu-utility__link menu-utility__link--accent" href="/cart">Cart</a>
+    <a class="menu-utility__link" href="/checkout">Checkout</a>
+    <a class="menu-utility__link" href="/payment">Payment</a>
+    <a class="menu-utility__link" href="/pickup-planner">Pickup Planner</a>
+    <a class="menu-utility__link" href="/receipt">Receipt</a>
+    <a class="menu-utility__link" href="/favorites">Favourites</a>
+    <a class="menu-utility__link" href="/shared-meals">Shared Meals</a>
+    <a class="menu-utility__link" href="/support">Support</a>
+  </div>
+</section>
+
+<section class="menu-browser section-panel">
+  <div class="menu-browser__header">
+    <div class="menu-browser__header-copy">
+      <p class="eyebrow">Choose a counter</p>
+      <h2>Category browsing with more personality</h2>
+      <p>
+        Move through the menu like switching between food counters. Each lane updates the hero image and keeps the item
+        cards visually rich, not just informational.
+      </p>
+    </div>
+    <div class="menu-browser__controls" aria-label="Menu item controls">
+      <span class="menu-browser__hint">Swipe the dishes</span>
+      <button
+        class="menu-browser__control"
+        type="button"
+        data-menu-shift="-1"
+        aria-label="Scroll menu items left"
+      >
+        &larr;
+      </button>
+      <button
+        class="menu-browser__control"
+        type="button"
+        data-menu-shift="1"
+        aria-label="Scroll menu items right"
+      >
+        &rarr;
+      </button>
+    </div>
+  </div>
+
+  <div id="menu-categories" class="menu-categories" role="tablist" aria-label="Menu categories"></div>
+  <div id="menu-category-note" class="menu-category-note" hidden></div>
+  <div id="menu-items-rail" class="menu-items-rail" aria-live="polite">
+    <div id="menu-items" class="menu-grid"></div>
+  </div>
+</section>
+
+<template id="menu-card-template">
+  <article class="menu-card">
+    <div class="menu-card__media">
+      <img src="" alt="" loading="lazy" />
+    </div>
+    <div class="menu-card__body">
+      <div class="menu-card__topline">
+        <span class="menu-card__label"></span>
+        <p class="menu-card__price" hidden></p>
+      </div>
+      <div class="menu-card__heading">
+        <h3></h3>
+        <p class="menu-card__summary"></p>
+      </div>
+      <div class="menu-card__sections"></div>
+    </div>
+  </article>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const menuDataUrl = "{{ url_for('static', filename='data/menu.json') }}";
+const staticBase = "{{ url_for('static', filename='') }}";
+const fallbackImage = "{{ url_for('static', filename='images/menu/pho-classic.jpg') }}";
+const categoriesEl = document.getElementById('menu-categories');
+const itemsEl = document.getElementById('menu-items');
+const itemsRailEl = document.getElementById('menu-items-rail');
+const noteEl = document.getElementById('menu-category-note');
+const heroImg = document.getElementById('menu-hero-image');
+const cardTemplate = document.getElementById('menu-card-template');
+const categoryTotalEl = document.getElementById('menu-category-total');
+const itemTotalEl = document.getElementById('menu-item-total');
+const activeCategoryEl = document.getElementById('menu-active-category');
+const menuRailButtons = document.querySelectorAll('[data-menu-shift]');
+
+let menuCategories = [];
+
+fetch(menuDataUrl)
+  .then((resp) => resp.json())
+  .then((data) => {
+    menuCategories = data.categories || [];
+    if (!menuCategories.length) {
+      itemsEl.innerHTML = '<p class="menu-error">Menu data is unavailable right now.</p>';
+      return;
+    }
+    categoryTotalEl.textContent = menuCategories.length;
+    itemTotalEl.textContent = menuCategories.reduce((count, category) => count + (category.items || []).length, 0);
+    renderCategoryTabs();
+    renderCategory(0);
+  })
+  .catch((error) => {
+    console.error('Menu load failed', error);
+    itemsEl.innerHTML = '<p class="menu-error">Unable to load the menu right now. Please try again soon.</p>';
+  });
+
+function renderCategoryTabs() {
+  categoriesEl.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  menuCategories.forEach((category, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'menu-category-tab';
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-selected', index === 0);
+    button.innerHTML = `<span>${category.title}</span><small>${(category.items || []).length}</small>`;
+    button.addEventListener('click', () => renderCategory(index));
+    fragment.appendChild(button);
+  });
+  categoriesEl.appendChild(fragment);
+}
+
+function renderCategory(index) {
+  document.querySelectorAll('.menu-category-tab').forEach((tab, tabIndex) => {
+    const isActive = tabIndex === index;
+    tab.classList.toggle('is-active', isActive);
+    tab.setAttribute('aria-selected', isActive);
+  });
+
+  const category = menuCategories[index];
+  if (!category) return;
+
+  if (itemsRailEl) {
+    itemsRailEl.scrollTo({ left: 0, behavior: 'smooth' });
+  }
+
+  activeCategoryEl.textContent = category.title;
+  if (category.image) {
+    heroImg.src = staticBase + category.image;
+    heroImg.alt = category.title + ' feature';
+  }
+
+  if (category.note && category.note.items && category.note.items.length) {
+    noteEl.hidden = false;
+    noteEl.innerHTML = `
+      <p class="menu-category-note__label">${category.note.label}</p>
+      <p class="menu-category-note__items">${category.note.items.join(', ')}</p>
+    `;
+  } else {
+    noteEl.hidden = true;
+    noteEl.innerHTML = '';
+  }
+
+  itemsEl.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  category.items.forEach((item) => {
+    fragment.appendChild(buildCard(item, category.title));
+  });
+  itemsEl.appendChild(fragment);
+}
+
+function buildCard(item, categoryTitle) {
+  const clone = cardTemplate.content.cloneNode(true);
+  const img = clone.querySelector('img');
+  const label = clone.querySelector('.menu-card__label');
+  const title = clone.querySelector('h3');
+  const summary = clone.querySelector('.menu-card__summary');
+  const priceEl = clone.querySelector('.menu-card__price');
+  const sectionsWrapper = clone.querySelector('.menu-card__sections');
+
+  img.src = item.image ? staticBase + item.image : fallbackImage;
+  img.alt = item.name;
+  label.textContent = categoryTitle;
+  title.textContent = item.name;
+  summary.textContent = item.summary || '';
+
+  if (item.price) {
+    priceEl.hidden = false;
+    priceEl.textContent = item.price;
+  } else {
+    priceEl.hidden = true;
+  }
+
+  sectionsWrapper.innerHTML = '';
+  (item.sections || []).forEach((section) => {
+    if (!section.items || !section.items.length) return;
+    const sectionEl = document.createElement('section');
+    sectionEl.className = 'menu-card__section';
+    const heading = document.createElement('p');
+    heading.className = 'menu-card__section-title';
+    heading.textContent = section.label;
+    const list = document.createElement('ul');
+    list.className = 'menu-card__list';
+    section.items.forEach((entry) => {
+      const li = document.createElement('li');
+      li.textContent = entry;
+      list.appendChild(li);
+    });
+    sectionEl.appendChild(heading);
+    sectionEl.appendChild(list);
+    sectionsWrapper.appendChild(sectionEl);
+  });
+
+  return clone;
+}
+
+menuRailButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (!itemsRailEl) return;
+    const card = itemsRailEl.querySelector('.menu-card');
+    const step = card ? card.getBoundingClientRect().width + 19 : itemsRailEl.clientWidth * 0.82;
+    const direction = Number(button.dataset.menuShift || '1');
+    itemsRailEl.scrollBy({ left: step * direction, behavior: 'smooth' });
+  });
+});
+</script>
+{% endblock %}

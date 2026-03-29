@@ -1,0 +1,1440 @@
+{
+  "generated_from": "data/menu-source.txt",
+  "categories": [
+    {
+      "id": "pho-noodle-soup",
+      "title": "Pho Noodle Soup",
+      "image": "images/menu/pho-classic.jpg",
+      "items": [
+        {
+          "name": "Raw Beef Pho",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Beef broth",
+                "Raw beef slices"
+              ]
+            },
+            {
+              "label": "Herb Toppings",
+              "items": [
+                "Bean sprouts",
+                "Mint",
+                "Sliced chili",
+                "Lime",
+                "Green onion",
+                "Coriander",
+                "Sliced onion"
+              ]
+            },
+            {
+              "label": "Sauces",
+              "items": [
+                "Chili sauce",
+                "Hoisin sauce"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Pho Noodle Soup favourite featuring rice noodles, beef broth, raw beef slices.",
+          "image": "images/menu/items/raw-beef-pho.jpg"
+        },
+        {
+          "name": "Raw Beef and Beef Balls Pho",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Beef broth",
+                "Raw beef slices",
+                "Beef balls"
+              ]
+            },
+            {
+              "label": "Herb Toppings",
+              "items": [
+                "Bean sprouts",
+                "Mint",
+                "Sliced chili",
+                "Lime",
+                "Green onion",
+                "Coriander",
+                "Sliced onion"
+              ]
+            },
+            {
+              "label": "Sauces",
+              "items": [
+                "Chili sauce",
+                "Hoisin sauce"
+              ]
+            }
+          ],
+          "price": "$16",
+          "summary": "Pho Noodle Soup favourite featuring rice noodles, beef broth, raw beef slices.",
+          "image": "images/menu/items/raw-beef-and-beef-balls-pho.jpg"
+        },
+        {
+          "name": "Beef Brisket Pho",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Beef broth",
+                "Beef brisket"
+              ]
+            },
+            {
+              "label": "Herb Toppings",
+              "items": [
+                "Bean sprouts",
+                "Mint",
+                "Sliced chili",
+                "Lime",
+                "Green onion",
+                "Coriander",
+                "Sliced onion"
+              ]
+            },
+            {
+              "label": "Sauces",
+              "items": [
+                "Chili sauce",
+                "Hoisin sauce"
+              ]
+            }
+          ],
+          "price": "$16",
+          "summary": "Pho Noodle Soup favourite featuring rice noodles, beef broth, beef brisket.",
+          "image": "images/menu/items/beef-brisket-pho.jpg"
+        },
+        {
+          "name": "Slow-Cooked Beef Rib Pho",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Beef broth",
+                "Slow-cooked beef rib"
+              ]
+            },
+            {
+              "label": "Herb Toppings",
+              "items": [
+                "Bean sprouts",
+                "Mint",
+                "Sliced chili",
+                "Lime",
+                "Green onion",
+                "Coriander",
+                "Sliced onion"
+              ]
+            },
+            {
+              "label": "Sauces",
+              "items": [
+                "Chili sauce",
+                "Hoisin sauce"
+              ]
+            }
+          ],
+          "price": "$17",
+          "summary": "Pho Noodle Soup favourite featuring rice noodles, beef broth, slow-cooked beef rib.",
+          "image": "images/menu/items/slow-cooked-beef-rib-pho.jpg"
+        },
+        {
+          "name": "MCQ Special Pho",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Beef broth",
+                "Raw beef slices",
+                "Beef brisket",
+                "Beef balls"
+              ]
+            },
+            {
+              "label": "Herb Toppings",
+              "items": [
+                "Bean sprouts",
+                "Mint",
+                "Sliced chili",
+                "Lime",
+                "Green onion",
+                "Coriander",
+                "Sliced onion"
+              ]
+            },
+            {
+              "label": "Sauces",
+              "items": [
+                "Chili sauce",
+                "Hoisin sauce"
+              ]
+            }
+          ],
+          "price": "$17",
+          "summary": "Pho Noodle Soup favourite featuring rice noodles, beef broth, raw beef slices.",
+          "image": "images/menu/items/mcq-special-pho.jpg"
+        },
+        {
+          "name": "Chicken Pho",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Broth",
+                "Sliced chicken meat"
+              ]
+            },
+            {
+              "label": "Herb Toppings",
+              "items": [
+                "Bean sprouts",
+                "Mint",
+                "Sliced chili",
+                "Lime",
+                "Green onion",
+                "Coriander",
+                "Sliced onion"
+              ]
+            },
+            {
+              "label": "Sauces",
+              "items": [
+                "Chili sauce",
+                "Hoisin sauce"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Pho Noodle Soup favourite featuring rice noodles, broth, sliced chicken meat.",
+          "image": "images/menu/items/chicken-pho.jpg"
+        },
+        {
+          "name": "Beef Balls Pho",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Beef broth",
+                "Beef balls"
+              ]
+            },
+            {
+              "label": "Herb Toppings",
+              "items": [
+                "Bean sprouts",
+                "Mint",
+                "Sliced chili",
+                "Lime",
+                "Green onion",
+                "Coriander",
+                "Sliced onion"
+              ]
+            },
+            {
+              "label": "Sauces",
+              "items": [
+                "Chili sauce",
+                "Hoisin sauce"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Pho Noodle Soup favourite featuring rice noodles, beef broth, beef balls.",
+          "image": "images/menu/items/beef-balls-pho.jpg"
+        },
+        {
+          "name": "Bun Bo Hue",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "XL vermicelli noodles",
+                "Beef broth",
+                "Beef shank",
+                "Pork ham",
+                "Pork hock",
+                "Satay",
+                "Bun Bo Hue sauce"
+              ]
+            }
+          ],
+          "price": "$16",
+          "summary": "Pho Noodle Soup favourite featuring xl vermicelli noodles, beef broth, beef shank.",
+          "image": "images/menu/items/bun-bo-hue.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "pho-cups",
+      "title": "Pho Cups",
+      "image": "images/menu/pho-cup.jpg",
+      "items": [
+        {
+          "name": "Beef Pho Cup",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Broth"
+              ]
+            },
+            {
+              "label": "•\tChoice of one type of beef",
+              "items": [
+                "Raw beef",
+                "Beef brisket",
+                "Beef balls"
+              ]
+            },
+            {
+              "label": "•\tOr special combination",
+              "items": [
+                "Raw beef",
+                "Beef brisket",
+                "Beef balls",
+                "Coriander",
+                "Green onion",
+                "Sliced onion"
+              ]
+            }
+          ],
+          "price": "$12",
+          "summary": "Pho Cups favourite featuring rice noodles, broth.",
+          "image": "images/menu/items/beef-pho-cup.jpg"
+        },
+        {
+          "name": "Chicken Pho Cup",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice noodles",
+                "Broth",
+                "Sliced chicken",
+                "Coriander",
+                "Green onion",
+                "Sliced onion"
+              ]
+            }
+          ],
+          "price": "$12",
+          "summary": "Pho Cups favourite featuring rice noodles, broth, sliced chicken.",
+          "image": "images/menu/items/chicken-pho-cup.jpg"
+        },
+        {
+          "name": "Bun Bo Hue Cup",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "XL vermicelli noodles",
+                "Broth",
+                "Beef shank",
+                "Pork ham",
+                "Pork hock",
+                "Coriander",
+                "Green onion",
+                "Sliced onion"
+              ]
+            }
+          ],
+          "price": "$13",
+          "summary": "Pho Cups favourite featuring xl vermicelli noodles, broth, beef shank.",
+          "image": "images/menu/items/bun-bo-hue-cup.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "pho-combo",
+      "title": "Pho Combo",
+      "image": "images/menu/pho-combo.jpg",
+      "items": [
+        {
+          "name": "Pho Combo",
+          "sections": [
+            {
+              "label": "Includes",
+              "items": [
+                "Any pho",
+                "One coffee",
+                "Any juice"
+              ]
+            }
+          ],
+          "price": "$20",
+          "summary": "Pho Combo favourite featuring any pho, one coffee, any juice.",
+          "image": "images/menu/items/pho-combo.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "rice-dishes",
+      "title": "Rice Dishes",
+      "image": "images/menu/rice-dishes.jpg",
+      "items": [
+        {
+          "name": "Grilled Pork Chop with Broken Rice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Broken rice",
+                "Grilled pork chop",
+                "Shredded pork (bì)",
+                "Pork and egg meatloaf (chả trứng)",
+                "Pickles",
+                "Cucumber",
+                "Tomato",
+                "Tangy sweet fish sauce"
+              ]
+            }
+          ],
+          "price": "$17",
+          "summary": "Rice Dishes favourite featuring broken rice, grilled pork chop, shredded pork (bì).",
+          "image": "images/menu/items/grilled-pork-chop-with-broken-rice.jpg"
+        },
+        {
+          "name": "Roast Pork Rice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Steamed rice",
+                "Roast pork",
+                "Pickles",
+                "Cucumber",
+                "Tomato",
+                "Tangy sweet sauce"
+              ]
+            }
+          ],
+          "price": "$16",
+          "summary": "Rice Dishes favourite featuring steamed rice, roast pork, pickles.",
+          "image": "images/menu/items/roast-pork-rice.jpg"
+        },
+        {
+          "name": "Grilled Chicken Rice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Steamed rice",
+                "Grilled chicken",
+                "Pickles",
+                "Cucumber",
+                "Tomato",
+                "Tangy sweet sauce"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Rice Dishes favourite featuring steamed rice, grilled chicken, pickles.",
+          "image": "images/menu/items/grilled-chicken-rice.jpg"
+        },
+        {
+          "name": "Grilled Beef Rice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Steamed rice",
+                "Grilled beef",
+                "Pickles",
+                "Cucumber",
+                "Tomato",
+                "Tangy sweet sauce"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Rice Dishes favourite featuring steamed rice, grilled beef, pickles.",
+          "image": "images/menu/items/grilled-beef-rice.jpg"
+        },
+        {
+          "name": "Stir-Fried Tofu Rice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Steamed rice",
+                "Stir-fried tofu",
+                "Pickles",
+                "Cucumber",
+                "Tomato",
+                "Soy sauce"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Rice Dishes favourite featuring steamed rice, stir-fried tofu, pickles.",
+          "image": "images/menu/items/stir-fried-tofu-rice.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "mcq-sizzling-hot-plates",
+      "title": "MCQ Sizzling Hot Plates",
+      "image": "images/menu/sizzling-plate.jpg",
+      "items": [
+        {
+          "name": "Chicken Sizzling Hot Plate",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Chicken",
+                "Pickles",
+                "Onion",
+                "Rice",
+                "savory meat Sauce",
+                "Sunny side up egg"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "MCQ Sizzling Hot Plates favourite featuring chicken, pickles, onion.",
+          "image": "images/menu/items/chicken-sizzling-hot-plate.jpg"
+        },
+        {
+          "name": "Beef Sizzling Hot Plate",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "grilled Beef",
+                "Pickles",
+                "Onion",
+                "Rice",
+                "Sauce",
+                "Sunny side up egg"
+              ]
+            }
+          ],
+          "price": "$16",
+          "summary": "MCQ Sizzling Hot Plates favourite featuring grilled beef, pickles, onion.",
+          "image": "images/menu/items/beef-sizzling-hot-plate.jpg"
+        },
+        {
+          "name": "Pork Sizzling Hot Plate",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "grilled Pork",
+                "Pickles",
+                "Onion",
+                "Rice",
+                "Sauce",
+                "Sunny side up egg"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "MCQ Sizzling Hot Plates favourite featuring grilled pork, pickles, onion.",
+          "image": "images/menu/items/pork-sizzling-hot-plate.jpg"
+        },
+        {
+          "name": "Tofu Sizzling Hot Plate",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "fried Tofu",
+                "Pickles",
+                "Onion",
+                "Rice",
+                "Sauce",
+                "Sunny side up egg"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "MCQ Sizzling Hot Plates favourite featuring fried tofu, pickles, onion.",
+          "image": "images/menu/items/tofu-sizzling-hot-plate.jpg"
+        },
+        {
+          "name": "MCQ Sizzling Beef with Bread",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Beef steak",
+                "Sunny side up egg",
+                "Pâté",
+                "Vietnamese sausage",
+                "Onion",
+                "Bread"
+              ]
+            }
+          ],
+          "price": "$17",
+          "summary": "MCQ Sizzling Hot Plates favourite featuring beef steak, sunny side up egg, pâté.",
+          "image": "images/menu/items/mcq-sizzling-beef-with-bread.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "dry-noodles",
+      "title": "Dry Noodles",
+      "image": "images/menu/dry-noodles.jpg",
+      "items": [
+        {
+          "name": "Roast Pork Dry Noodles",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Dry noodles",
+                "Roast pork",
+                "Lettuce",
+                "Pickles",
+                "Cucumber",
+                "Mint",
+                "Fish sauce with chili",
+                "Onion oil",
+                "Fried shallots"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Dry Noodles favourite featuring dry noodles, roast pork, lettuce.",
+          "image": "images/menu/items/roast-pork-dry-noodles.jpg"
+        },
+        {
+          "name": "Grilled Lemongrass Chicken Dry Noodles",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Dry noodles",
+                "Grilled lemongrass chicken",
+                "Lettuce",
+                "Pickles",
+                "Cucumber",
+                "Mint",
+                "Fish sauce with chili",
+                "Onion oil",
+                "Fried shallots"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Dry Noodles favourite featuring dry noodles, grilled lemongrass chicken, lettuce.",
+          "image": "images/menu/items/grilled-lemongrass-chicken-dry-noodles.jpg"
+        },
+        {
+          "name": "Grilled Lemongrass Beef Dry Noodles",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Dry noodles",
+                "Grilled lemongrass beef",
+                "Lettuce",
+                "Pickles",
+                "Cucumber",
+                "Mint",
+                "Fish sauce with chili",
+                "Onion oil",
+                "Fried shallots"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Dry Noodles favourite featuring dry noodles, grilled lemongrass beef, lettuce.",
+          "image": "images/menu/items/grilled-lemongrass-beef-dry-noodles.jpg"
+        },
+        {
+          "name": "Grilled Lemongrass Pork Dry Noodles",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Dry noodles",
+                "Grilled lemongrass pork",
+                "Lettuce",
+                "Pickles",
+                "Cucumber",
+                "Mint",
+                "Fish sauce with chili",
+                "Onion oil",
+                "Fried shallots"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Dry Noodles favourite featuring dry noodles, grilled lemongrass pork, lettuce.",
+          "image": "images/menu/items/grilled-lemongrass-pork-dry-noodles.jpg"
+        },
+        {
+          "name": "Stir-Fried Tofu Dry Noodles",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Dry noodles",
+                "Stir-fried tofu",
+                "Lettuce",
+                "Pickles",
+                "Cucumber",
+                "Mint",
+                "Soy sauce",
+                "Onion oil",
+                "Fried shallots"
+              ]
+            }
+          ],
+          "price": "$15",
+          "summary": "Dry Noodles favourite featuring dry noodles, stir-fried tofu, lettuce.",
+          "image": "images/menu/items/stir-fried-tofu-dry-noodles.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "banh-mi",
+      "title": "Bánh Mì",
+      "image": "images/menu/banh-mi.jpg",
+      "items": [
+        {
+          "name": "Roast Pork Bánh Mì",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Crispy roast pork",
+                "Pâté",
+                "Butter",
+                "Soy sauce",
+                "Savory meat sauce",
+                "Cucumber",
+                "Pickled vegetables",
+                "Coriander",
+                "Sliced chili"
+              ]
+            }
+          ],
+          "price": "$11",
+          "summary": "Bánh Mì favourite featuring crispy roast pork, pâté, butter.",
+          "image": "images/menu/items/roast-pork-banh-mi.jpg"
+        },
+        {
+          "name": "Traditional Pork Bánh Mì",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Grilled pork",
+                "Pork head cheese",
+                "Pork ham",
+                "Pâté",
+                "Butter",
+                "Soy sauce",
+                "Savory meat sauce",
+                "Cucumber",
+                "Pickled vegetables",
+                "Coriander",
+                "Sliced chili"
+              ]
+            }
+          ],
+          "price": "$10",
+          "summary": "Bánh Mì favourite featuring grilled pork, pork head cheese, pork ham.",
+          "image": "images/menu/items/traditional-pork-banh-mi.jpg"
+        },
+        {
+          "name": "Grilled Chicken Bánh Mì",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Grilled chicken",
+                "Butter",
+                "Mayonnaise",
+                "Cucumber",
+                "Pickled vegetables",
+                "Coriander",
+                "Sliced chili"
+              ]
+            }
+          ],
+          "price": "$11",
+          "summary": "Bánh Mì favourite featuring grilled chicken, butter, mayonnaise.",
+          "image": "images/menu/items/grilled-chicken-banh-mi.jpg"
+        },
+        {
+          "name": "Grilled Pork Bánh Mì",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Grilled pork",
+                "Butter",
+                "Mayonnaise",
+                "Cucumber",
+                "Pickled vegetables",
+                "Coriander",
+                "Sliced chili"
+              ]
+            }
+          ],
+          "price": "$11",
+          "summary": "Bánh Mì favourite featuring grilled pork, butter, mayonnaise.",
+          "image": "images/menu/items/grilled-pork-banh-mi.jpg"
+        },
+        {
+          "name": "Grilled Beef Bánh Mì",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Grilled beef",
+                "Butter",
+                "Mayonnaise",
+                "Cucumber",
+                "Pickled vegetables",
+                "Coriander",
+                "Sliced chili"
+              ]
+            }
+          ],
+          "price": "$12",
+          "summary": "Bánh Mì favourite featuring grilled beef, butter, mayonnaise.",
+          "image": "images/menu/items/grilled-beef-banh-mi.jpg"
+        },
+        {
+          "name": "Bánh Mì with Coffee",
+          "sections": [
+            {
+              "label": "Includes",
+              "items": [
+                "Any bánh mì",
+                "One coffee"
+              ]
+            }
+          ],
+          "price": "$10",
+          "summary": "Bánh Mì favourite featuring any bánh mì, one coffee.",
+          "image": "images/menu/items/banh-mi-with-coffee.jpg"
+        },
+        {
+          "name": "Bánh Mì with Juice",
+          "sections": [
+            {
+              "label": "Includes",
+              "items": [
+                "Any bánh mì",
+                "One juice"
+              ]
+            }
+          ],
+          "price": "$8",
+          "summary": "Bánh Mì favourite featuring any bánh mì, one juice.",
+          "image": "images/menu/items/banh-mi-with-juice.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "rice-paper-rolls",
+      "title": "Rice Paper Rolls",
+      "image": "images/menu/rice-paper-roll.jpg",
+      "items": [
+        {
+          "name": "Chicken Rice Paper Roll",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice paper",
+                "Vermicelli noodles",
+                "Grilled chicken",
+                "Lettuce"
+              ]
+            },
+            {
+              "label": "Served with",
+              "items": [
+                "Hoisin peanut dipping sauce",
+                "Fish sauce with chili"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Rice Paper Rolls favourite featuring rice paper, vermicelli noodles, grilled chicken.",
+          "image": "images/menu/items/chicken-rice-paper-roll.jpg"
+        },
+        {
+          "name": "Prawn and Pork Rice Paper Roll",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice paper",
+                "Vermicelli noodles",
+                "Prawn",
+                "Pork",
+                "Lettuce"
+              ]
+            },
+            {
+              "label": "Served with",
+              "items": [
+                "Hoisin peanut dipping sauce",
+                "Fish sauce with chili"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Rice Paper Rolls favourite featuring rice paper, vermicelli noodles, prawn.",
+          "image": "images/menu/items/prawn-and-pork-rice-paper-roll.jpg"
+        },
+        {
+          "name": "Grilled Beef Rice Paper Roll",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Rice paper",
+                "Vermicelli noodles",
+                "Grilled beef",
+                "Lettuce"
+              ]
+            },
+            {
+              "label": "Served with",
+              "items": [
+                "Hoisin peanut dipping sauce",
+                "Fish sauce with chili"
+              ]
+            }
+          ],
+          "price": "$8",
+          "summary": "Rice Paper Rolls favourite featuring rice paper, vermicelli noodles, grilled beef.",
+          "image": "images/menu/items/grilled-beef-rice-paper-roll.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "mixed-juices",
+      "title": "Mixed Juices",
+      "image": "images/menu/juices.jpg",
+      "items": [
+        {
+          "name": "Detox Juice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Celery",
+                "Carrot",
+                "Cucumber",
+                "Apple",
+                "Mint"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Mixed Juices favourite featuring celery, carrot, cucumber.",
+          "image": "images/menu/items/detox-juice.jpg"
+        },
+        {
+          "name": "Immunity Juice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Honey",
+                "Ginger",
+                "Carrot",
+                "Orange",
+                "Apple"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Mixed Juices favourite featuring honey, ginger, carrot.",
+          "image": "images/menu/items/immunity-juice.jpg"
+        },
+        {
+          "name": "Sweet Beets Juice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Beetroot",
+                "Apple",
+                "Orange"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Mixed Juices favourite featuring beetroot, apple, orange.",
+          "image": "images/menu/items/sweet-beets-juice.jpg"
+        },
+        {
+          "name": "Green Glow Juice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Kiwi",
+                "Pineapple",
+                "Cucumber",
+                "Apple"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Mixed Juices favourite featuring kiwi, pineapple, cucumber.",
+          "image": "images/menu/items/green-glow-juice.jpg"
+        },
+        {
+          "name": "Tropical Juice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Apple",
+                "Pineapple",
+                "Orange",
+                "Watermelon",
+                "Watermelon juice"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Mixed Juices favourite featuring apple, pineapple, orange.",
+          "image": "images/menu/items/tropical-juice.jpg"
+        },
+        {
+          "name": "Sugarcane Juice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Fresh sugarcane juice"
+              ]
+            }
+          ],
+          "price": "$7 (with ice) / $9 (no ice)",
+          "summary": "Mixed Juices favourite featuring fresh sugarcane juice.",
+          "image": "images/menu/items/sugarcane-juice.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "smoothies",
+      "title": "Smoothies",
+      "image": "images/menu/smoothies.jpg",
+      "items": [
+        {
+          "name": "Avocado Smoothie",
+          "sections": [],
+          "price": "$9",
+          "summary": "Blended fruit smoothies with a creamy base.",
+          "image": "images/menu/items/avocado-smoothie.jpg"
+        },
+        {
+          "name": "Strawberry Smoothie",
+          "sections": [],
+          "price": "$9",
+          "summary": "Blended fruit smoothies with a creamy base.",
+          "image": "images/menu/items/strawberry-smoothie.jpg"
+        },
+        {
+          "name": "Mango Smoothie",
+          "sections": [],
+          "price": "$9",
+          "summary": "Blended fruit smoothies with a creamy base.",
+          "image": "images/menu/items/mango-smoothie.jpg"
+        },
+        {
+          "name": "Mixed Berry Smoothie",
+          "sections": [],
+          "price": "$9",
+          "summary": "Blended fruit smoothies with a creamy base.",
+          "image": "images/menu/items/mixed-berry-smoothie.jpg"
+        },
+        {
+          "name": "Coconut Smoothie",
+          "sections": [],
+          "price": "$9",
+          "summary": "Blended fruit smoothies with a creamy base.",
+          "image": "images/menu/items/coconut-smoothie.jpg"
+        }
+      ],
+      "note": {
+        "label": "Smoothie Base Ingredients",
+        "items": [
+          "Milk",
+          "Fresh fruit",
+          "Ice",
+          "Sugar",
+          "Condensed milk"
+        ]
+      }
+    },
+    {
+      "id": "vietnamese-coffee",
+      "title": "Vietnamese Coffee",
+      "image": "images/menu/coffee.jpg",
+      "items": [
+        {
+          "name": "Black Coffee",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Vietnamese coffee",
+                "Ice"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Vietnamese Coffee favourite featuring vietnamese coffee, ice.",
+          "image": "images/menu/items/black-coffee.jpg"
+        },
+        {
+          "name": "Milk Coffee",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Vietnamese coffee",
+                "Condensed milk",
+                "Milk",
+                "Ice"
+              ]
+            }
+          ],
+          "price": "$8",
+          "summary": "Vietnamese Coffee favourite featuring vietnamese coffee, condensed milk, milk.",
+          "image": "images/menu/items/milk-coffee.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "lemonade-drinks",
+      "title": "Lemonade Drinks",
+      "image": "images/menu/lemonade.jpg",
+      "items": [
+        {
+          "name": "Kiwi Lemonade",
+          "sections": [],
+          "price": "$8",
+          "summary": "House lemonade infusions.",
+          "image": "images/menu/items/kiwi-lemonade.jpg"
+        },
+        {
+          "name": "Strawberry Lemonade",
+          "sections": [],
+          "price": "$8",
+          "summary": "House lemonade infusions.",
+          "image": "images/menu/items/strawberry-lemonade.jpg"
+        },
+        {
+          "name": "Watermelon Lemonade",
+          "sections": [],
+          "price": "$8",
+          "summary": "House lemonade infusions.",
+          "image": "images/menu/items/watermelon-lemonade.jpg"
+        },
+        {
+          "name": "Coconut Lemonade",
+          "sections": [],
+          "price": "$8",
+          "summary": "House lemonade infusions.",
+          "image": "images/menu/items/coconut-lemonade.jpg"
+        },
+        {
+          "name": "Pineapple Lemonade",
+          "sections": [],
+          "price": "$8",
+          "summary": "House lemonade infusions.",
+          "image": "images/menu/items/pineapple-lemonade.jpg"
+        },
+        {
+          "name": "Aloe Vera Lemonade",
+          "sections": [],
+          "price": "$8",
+          "summary": "House lemonade infusions.",
+          "image": "images/menu/items/aloe-vera-lemonade.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "desserts",
+      "title": "Desserts",
+      "image": "images/menu/items/thai-dessert-che-thai.jpg",
+      "items": [
+        {
+          "name": "Thai Dessert (Che Thai)",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Jackfruit",
+                "Longan",
+                "Jelly",
+                "Coconut milk",
+                "Crushed ice"
+              ]
+            }
+          ],
+          "price": "$8",
+          "summary": "Desserts favourite featuring jackfruit, longan, jelly.",
+          "image": "images/menu/items/thai-dessert-che-thai.jpg"
+        },
+        {
+          "name": "Red Bean Dessert",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Red beans",
+                "Coconut milk",
+                "Sweet syrup"
+              ]
+            }
+          ],
+          "price": "$7",
+          "summary": "Desserts favourite featuring red beans, coconut milk, sweet syrup.",
+          "image": "images/menu/items/red-bean-dessert.jpg"
+        },
+        {
+          "name": "Coconut Milk Dessert",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Coconut milk",
+                "Jelly",
+                "Tapioca pearls"
+              ]
+            }
+          ],
+          "price": "$6",
+          "summary": "Desserts favourite featuring coconut milk, jelly, tapioca pearls.",
+          "image": "images/menu/items/coconut-milk-dessert.jpg"
+        }
+      ],
+      "note": null
+    },
+    {
+      "id": "pastries",
+      "title": "Pastries",
+      "image": "images/menu/items/banh-tieu.jpg",
+      "items": [
+        {
+          "name": "Banh Tieu",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Fried sesame dough",
+                "Sesame seeds"
+              ]
+            }
+          ],
+          "price": "$2.5",
+          "summary": "Pastries favourite featuring fried sesame dough, sesame seeds.",
+          "image": "images/menu/items/banh-tieu.jpg"
+        },
+        {
+          "name": "Chao Quay",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Crispy fried dough sticks"
+              ]
+            }
+          ],
+          "price": "$3",
+          "summary": "Pastries favourite featuring crispy fried dough sticks.",
+          "image": "images/menu/items/chao-quay.jpg"
+        },
+        {
+          "name": "Mung Bean Sesame Ball",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Glutinous rice dough",
+                "Mung bean filling",
+                "Sesame seeds"
+              ]
+            }
+          ],
+          "price": "$2.5",
+          "summary": "Pastries favourite featuring glutinous rice dough, mung bean filling, sesame seeds.",
+          "image": "images/menu/items/mung-bean-sesame-ball.jpg"
+        },
+        {
+          "name": "Red Bean Sesame Ball",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Glutinous rice dough",
+                "Red bean filling",
+                "Sesame seeds"
+              ]
+            }
+          ],
+          "price": "$2.5",
+          "summary": "Pastries favourite featuring glutinous rice dough, red bean filling, sesame seeds.",
+          "image": "images/menu/items/red-bean-sesame-ball.jpg"
+        },
+        {
+          "name": "Banh Bao",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Steamed bun",
+                "Savoury pork filling",
+                "Egg"
+              ]
+            }
+          ],
+          "price": "$5",
+          "summary": "Pastries favourite featuring steamed bun, savoury pork filling, egg.",
+          "image": "images/menu/items/banh-bao.jpg"
+        },
+        {
+          "name": "Sticky Rice with Chicken / Savoury Sticky Rice",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Sticky rice",
+                "Chicken",
+                "Shallots",
+                "Seasoning"
+              ]
+            }
+          ],
+          "price": "$8",
+          "summary": "Pastries favourite featuring sticky rice, chicken, shallots.",
+          "image": "images/menu/items/sticky-rice-with-chicken-savoury-sticky-rice.jpg"
+        },
+        {
+          "name": "Banh Tai Yen",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Honeycomb cake batter",
+                "Coconut milk",
+                "Sugar"
+              ]
+            }
+          ],
+          "price": "$2.5",
+          "summary": "Pastries favourite featuring honeycomb cake batter, coconut milk, sugar.",
+          "image": "images/menu/items/banh-tai-yen.jpg"
+        },
+        {
+          "name": "Spring Roll",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Crispy wrapper",
+                "Savoury filling"
+              ]
+            }
+          ],
+          "price": "$2.50 each",
+          "summary": "Pastries favourite featuring crispy wrapper, savoury filling.",
+          "image": "images/menu/items/spring-roll.jpg"
+        },
+        {
+          "name": "Batiso",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Flaky pastry",
+                "Savoury filling"
+              ]
+            }
+          ],
+          "price": "$3 each",
+          "summary": "Pastries favourite featuring flaky pastry, savoury filling.",
+          "image": "images/menu/items/batiso.jpg"
+        },
+        {
+          "name": "Chicken Curry Puff",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Pastry shell",
+                "Chicken curry filling"
+              ]
+            }
+          ],
+          "price": "$3.50 each",
+          "summary": "Pastries favourite featuring pastry shell, chicken curry filling.",
+          "image": "images/menu/items/chicken-curry-puff.jpg"
+        },
+        {
+          "name": "Fried Pork Dumpling",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Dumpling wrapper",
+                "Seasoned pork filling"
+              ]
+            }
+          ],
+          "price": "$2.50 each",
+          "summary": "Pastries favourite featuring dumpling wrapper, seasoned pork filling.",
+          "image": "images/menu/items/fried-pork-dumpling.jpg"
+        },
+        {
+          "name": "Fried Banana",
+          "sections": [
+            {
+              "label": "Ingredients",
+              "items": [
+                "Banana",
+                "Light batter"
+              ]
+            }
+          ],
+          "price": "$3.50 each",
+          "summary": "Pastries favourite featuring banana, light batter.",
+          "image": "images/menu/items/fried-banana.jpg"
+        }
+      ],
+      "note": null
+    }
+  ]
+}
