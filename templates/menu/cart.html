@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Cart | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .cart-page {
+    width: min(var(--page-width), 100%);
+    margin: 0 auto;
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+  .cart-page__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .cart-page__header h1 {
+    margin: 0.2rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.35rem);
+  }
+
+  .cart-lines {
+    display: grid;
+    gap: 0.85rem;
+  }
+  .cart-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 1rem 1.2rem;
+    align-items: center;
+    padding: 1.1rem 1.2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line-soft);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+  }
+  .cart-line__title {
+    margin: 0 0 0.2rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+  .cart-line__meta {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .cart-line__qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .cart-line__qty button {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+  }
+  .cart-line__qty span {
+    min-width: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .cart-line__price {
+    font-weight: 800;
+    color: var(--brand-red);
+    text-align: right;
+  }
+
+  .cart-line__remove {
+    grid-column: 1 / -1;
+    justify-self: start;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--brand-red);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.88rem;
+  }
+
+  .cart-summary {
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.3rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 180, 54, 0.22);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 180, 54, 0.12),
+        rgba(255, 106, 19, 0.06)
+      ),
+      var(--surface-strong);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .cart-summary__total {
+    font-size: 1.35rem;
+    font-weight: 800;
+  }
+  .cart-summary__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .cart-empty {
+    padding: 2rem 1.2rem;
+    text-align: center;
+    border-radius: var(--radius-xl);
+    border: 1px dashed var(--line-soft);
+    color: var(--text-muted);
+  }
+  .cart-empty a {
+    color: var(--brand-red);
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    .cart-line {
+      grid-template-columns: 1fr;
+    }
+    .cart-line__price {
+      text-align: left;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-page section-panel">
+  <div class="cart-page__header">
+    <div>
+      <p class="eyebrow">Your order</p>
+      <h1>Cart</h1>
+    </div>
+    <a class="button button--secondary" href="{{ url_for('public.menu') }}">Browse menu</a>
+  </div>
+
+  <div id="cart-root" class="cart-lines" aria-live="polite"></div>
+
+  <div id="cart-summary" class="cart-summary" hidden></div>
+
+  <div id="cart-empty" class="cart-empty" hidden>
+    <p>Your cart is empty.</p>
+    <p><a href="{{ url_for('public.menu') }}">Explore the menu</a> to add dishes.</p>
+  </div>
+
+  <p id="cart-error" class="menu-error" style="margin-top: 1rem; display: none" role="alert"></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script>
+  (() => {
+    const root = document.getElementById("cart-root");
+    const summaryEl = document.getElementById("cart-summary");
+    const emptyEl = document.getElementById("cart-empty");
+    const errEl = document.getElementById("cart-error");
+
+    function showError(msg) {
+      errEl.style.display = msg ? "block" : "none";
+      errEl.textContent = msg || "";
+    }
+
+    function render(data) {
+      showError("");
+      root.innerHTML = "";
+
+      if (!data.lines || data.lines.length === 0) {
+        summaryEl.hidden = true;
+        emptyEl.hidden = false;
+        return;
+      }
+
+      emptyEl.hidden = true;
+      summaryEl.hidden = false;
+
+      const frag = document.createDocumentFragment();
+      for (const line of data.lines) {
+        const row = document.createElement("div");
+        row.className = "cart-line";
+        row.dataset.itemId = line.item_id;
+        row.innerHTML = `
+          <div>
+            <p class="cart-line__title"></p>
+            <p class="cart-line__meta"></p>
+          </div>
+          <div class="cart-line__qty">
+            <button type="button" aria-label="Decrease quantity" data-delta="-1">&minus;</button>
+            <span class="cart-line__qty-value"></span>
+            <button type="button" aria-label="Increase quantity" data-delta="1">&plus;</button>
+          </div>
+          <div class="cart-line__price"></div>
+          <button type="button" class="cart-line__remove">Remove</button>
+        `;
+        row.querySelector(".cart-line__title").textContent = line.name;
+        row.querySelector(".cart-line__meta").textContent = `${line.category_title} · ${line.price_display} each`;
+        row.querySelector(".cart-line__qty-value").textContent = String(line.quantity);
+        row.querySelector(".cart-line__price").textContent = line.line_display;
+        frag.appendChild(row);
+      }
+      root.appendChild(frag);
+
+      summaryEl.innerHTML = `
+        <p class="cart-summary__total">Total: ${data.total_display}</p>
+        <div class="cart-summary__actions">
+          <a class="button button--primary" href="/checkout">Checkout</a>
+          <a class="button button--secondary" href="/menu">Add more items</a>
+        </div>
+      `;
+
+      root.querySelectorAll(".cart-line").forEach((lineEl) => {
+        const itemId = lineEl.dataset.itemId;
+        const qtyEl = lineEl.querySelector(".cart-line__qty-value");
+
+        lineEl.querySelectorAll(".cart-line__qty button").forEach((b) => {
+          b.addEventListener("click", async () => {
+            const qty = Number(qtyEl.textContent);
+            const delta = Number(b.dataset.delta);
+            const next = qty + delta;
+
+            b.disabled = true;
+            showError("");
+            try {
+              if (next < 1) {
+                await window.McqCart.remove(itemId);
+              } else {
+                await window.McqCart.setQuantity(itemId, next);
+              }
+              const fresh = await window.McqCart.get();
+              render(fresh);
+            } catch (e) {
+              showError(e.message || "Could not update cart.");
+            } finally {
+              b.disabled = false;
+            }
+          });
+        });
+
+        lineEl.querySelector(".cart-line__remove").addEventListener("click", async () => {
+          try {
+            await window.McqCart.remove(itemId);
+            const fresh = await window.McqCart.get();
+            render(fresh);
+          } catch (e) {
+            showError(e.message || "Could not remove item.");
+          }
+        });
+      });
+    }
+
+    async function init() {
+      try {
+        const data = await window.McqCart.get();
+        render(data);
+      } catch (e) {
+        showError(e.message || "Could not load cart.");
+      }
+    }
+
+    init();
+  })();
+</script>
+{% endblock %}
+

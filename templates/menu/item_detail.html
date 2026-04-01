@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.name }} | MCQ Menu{% endblock %}
+
+{% block head %}
+<style>
+  .item-detail {
+    width: min(var(--page-width), 100%);
+    margin: 0 auto;
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+  .item-detail__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: start;
+  }
+  .item-detail__media {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--line-soft);
+    box-shadow: var(--shadow-soft);
+    background: var(--surface-strong);
+  }
+  .item-detail__media img {
+    width: 100%;
+    height: min(420px, 52vh);
+    object-fit: cover;
+    display: block;
+  }
+  .item-detail__panel {
+    padding: 1.5rem 1.6rem;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-soft);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+  }
+  .item-detail__label {
+    display: inline-block;
+    margin-bottom: 0.6rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+  }
+  .item-detail__title {
+    margin: 0 0 0.5rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+  }
+  .item-detail__summary {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .item-detail__price {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--brand-red);
+    margin-bottom: 1.2rem;
+  }
+  .item-detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .item-detail__section {
+    margin-top: 1.1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(112, 85, 66, 0.1);
+  }
+  .item-detail__section h2 {
+    margin: 0 0 0.5rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    color: var(--brand-orange);
+  }
+  .item-detail__section ul {
+    margin: 0;
+    padding-left: 1.15rem;
+    line-height: 1.6;
+  }
+  .item-detail__toast {
+    min-height: 1.5rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--brand-green);
+  }
+  .item-detail__toast.is-error {
+    color: var(--brand-red);
+  }
+  @media (max-width: 880px) {
+    .item-detail__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<article class="item-detail section-panel">
+  <div class="item-detail__grid">
+    <div class="item-detail__media">
+      <img
+        src="{{ url_for('static', filename=item.image or 'images/menu/pho-classic.jpg') }}"
+        alt="{{ item.name }}"
+        width="800"
+        height="520"
+      />
+    </div>
+    <div class="item-detail__panel">
+      <span class="item-detail__label">{{ category.title }}</span>
+      <h1 class="item-detail__title">{{ item.name }}</h1>
+      <p class="item-detail__summary">{{ item.summary or "" }}</p>
+      {% if item.price %}
+        <p class="item-detail__price">{{ item.price }}</p>
+      {% endif %}
+      <div class="item-detail__actions">
+        <button type="button" class="button button--primary" id="detail-add-cart" data-item-id="{{ item.id }}">
+          Add to cart
+        </button>
+        <a class="button button--secondary" href="{{ url_for('public.menu') }}">Back to menu</a>
+        <a class="button button--secondary" href="{{ url_for('orders.cart') }}">View cart</a>
+      </div>
+      <p class="item-detail__toast" id="detail-cart-toast" aria-live="polite"></p>
+      {% for section in item.sections or [] %}
+        {% set ing = section["items"] %}
+        {% if ing and ing|length > 0 %}
+          <div class="item-detail__section">
+            <h2>{{ section.label }}</h2>
+            <ul>
+              {% for line in ing %}
+                <li>{{ line }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</article>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script>
+  (() => {
+    const btn = document.getElementById("detail-add-cart");
+    const toast = document.getElementById("detail-cart-toast");
+    if (!btn || !window.McqCart) return;
+
+    btn.addEventListener("click", async () => {
+      toast.textContent = "";
+      toast.classList.remove("is-error");
+      btn.disabled = true;
+      try {
+        await window.McqCart.add(btn.dataset.itemId, 1);
+        toast.textContent = "Added to cart.";
+      } catch (e) {
+        toast.classList.add("is-error");
+        toast.textContent = e.message || "Could not add to cart.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+</script>
+{% endblock %}

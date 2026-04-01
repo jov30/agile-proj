@@ -357,6 +357,7 @@
     flex-direction: column;
     width: min(340px, calc(100vw - 3.6rem));
     overflow: hidden;
+    cursor: pointer;
     border-radius: 28px;
     border: 1px solid rgba(112, 85, 66, 0.12);
     background:
@@ -440,6 +441,90 @@
   .menu-card__sections {
     display: grid;
     gap: 0.85rem;
+  }
+
+  .menu-card__actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.55rem;
+    margin-top: 0.35rem;
+    align-items: center;
+  }
+
+  .menu-card__actions .button {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .menu-card__qty-slot {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .menu-card__qty-slot .menu-card__add,
+  .menu-card__qty-slot .menu-card__qty {
+    width: 100%;
+  }
+
+  .menu-card__qty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .menu-card__qty[hidden] {
+    display: none;
+  }
+
+  .menu-card__qty-btn {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    cursor: pointer;
+  }
+
+  .menu-card__qty-value {
+    min-width: 1.4rem;
+    text-align: center;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+
+  .menu-card__add.is-busy {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  .menu-browser__search {
+    margin-top: 1.1rem;
+  }
+
+  .menu-search__input {
+    width: min(520px, 100%);
+    padding: 0.85rem 1.05rem;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.16);
+    background: rgba(255, 255, 255, 0.88);
+    font: inherit;
+    font-weight: 600;
+    box-shadow: 0 10px 24px rgba(53, 30, 20, 0.06);
+  }
+
+  .menu-search__input:focus {
+    outline: 2px solid rgba(255, 106, 19, 0.35);
+    outline-offset: 2px;
   }
 
   .menu-card__section {
@@ -655,6 +740,19 @@
     </div>
   </div>
 
+  <div class="menu-browser__search" aria-label="Menu keyword search">
+    <label class="menu-search">
+      <input
+        type="search"
+        id="menu-search"
+        class="menu-search__input"
+        placeholder="Search dishes by name, description, or ingredients…"
+        aria-label="Search dishes"
+        autocomplete="off"
+      />
+    </label>
+  </div>
+
   <div id="menu-categories" class="menu-categories" role="tablist" aria-label="Menu categories"></div>
   <div id="menu-category-note" class="menu-category-note" hidden></div>
   <div id="menu-items-rail" class="menu-items-rail" aria-live="polite">
@@ -677,14 +775,26 @@
         <p class="menu-card__summary"></p>
       </div>
       <div class="menu-card__sections"></div>
+      <div class="menu-card__actions">
+        <a class="button button--secondary menu-card__detail" href="#" aria-label="View item details">Details</a>
+        <div class="menu-card__qty-slot">
+          <button type="button" class="button button--primary menu-card__add">Add</button>
+          <div class="menu-card__qty" hidden>
+            <button type="button" class="menu-card__qty-btn" data-delta="-1" aria-label="Decrease quantity">-</button>
+            <span class="menu-card__qty-value">1</span>
+            <button type="button" class="menu-card__qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+      </div>
     </div>
   </article>
 </template>
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script>
-const menuDataUrl = "{{ url_for('static', filename='data/menu.json') }}";
+const menuDataUrl = "{{ url_for('public.api_menu') }}";
 const staticBase = "{{ url_for('static', filename='') }}";
 const fallbackImage = "{{ url_for('static', filename='images/menu/pho-classic.jpg') }}";
 const categoriesEl = document.getElementById('menu-categories');
@@ -699,15 +809,38 @@ const activeCategoryEl = document.getElementById('menu-active-category');
 const menuRailButtons = document.querySelectorAll('[data-menu-shift]');
 
 let menuCategories = [];
+const searchInput = document.getElementById('menu-search');
+let activeCategoryIndex = 0;
+let searchTimer = null;
+const cartQtyById = new Map();
+
+function cacheCartQuantities(cartPayload) {
+  cartQtyById.clear();
+  (cartPayload?.lines || []).forEach((line) => {
+    if (!line.item_id) return;
+    cartQtyById.set(line.item_id, Number(line.quantity || 0));
+  });
+}
+
+async function refreshCartSnapshot() {
+  if (!window.McqCart) return;
+  try {
+    const cart = await window.McqCart.get();
+    cacheCartQuantities(cart);
+  } catch (error) {
+    console.warn('Cart snapshot unavailable', error);
+  }
+}
 
 fetch(menuDataUrl)
   .then((resp) => resp.json())
-  .then((data) => {
+  .then(async (data) => {
     menuCategories = data.categories || [];
     if (!menuCategories.length) {
       itemsEl.innerHTML = '<p class="menu-error">Menu data is unavailable right now.</p>';
       return;
     }
+    await refreshCartSnapshot();
     categoryTotalEl.textContent = menuCategories.length;
     itemTotalEl.textContent = menuCategories.reduce((count, category) => count + (category.items || []).length, 0);
     renderCategoryTabs();
@@ -717,6 +850,68 @@ fetch(menuDataUrl)
     console.error('Menu load failed', error);
     itemsEl.innerHTML = '<p class="menu-error">Unable to load the menu right now. Please try again soon.</p>';
   });
+
+function ingredientBlob(item) {
+  const parts = [];
+  (item.sections || []).forEach((sec) => {
+    (sec.items || []).forEach((entry) => parts.push(entry));
+  });
+  return parts.join(' ');
+}
+
+function itemMatchesQuery(item, q) {
+  if (!q) return true;
+  const hay = [item.name || '', item.summary || '', ingredientBlob(item)].join(' ').toLowerCase();
+  return hay.includes(q);
+}
+
+function renderSearchResults(q) {
+  // Clear active tab highlight while searching.
+  document.querySelectorAll('.menu-category-tab').forEach((tab) => {
+    tab.classList.remove('is-active');
+    tab.setAttribute('aria-selected', 'false');
+  });
+
+  noteEl.hidden = true;
+  noteEl.innerHTML = '';
+  activeCategoryEl.textContent = `Search: “${q}”`;
+  heroImg && (heroImg.src = staticBase + (menuCategories[activeCategoryIndex]?.image || 'images/menu/pho-classic.jpg'));
+
+  const matches = [];
+  menuCategories.forEach((cat) => {
+    (cat.items || []).forEach((item) => {
+      if (itemMatchesQuery(item, q)) {
+        matches.push({ categoryTitle: cat.title, item });
+      }
+    });
+  });
+
+  itemsEl.innerHTML = '';
+  if (!matches.length) {
+    itemsEl.innerHTML = '<p class="menu-error">No dishes match that search.</p>';
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  matches.forEach(({ categoryTitle, item }) => {
+    fragment.appendChild(buildCard(item, categoryTitle));
+  });
+  itemsEl.appendChild(fragment);
+}
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      const q = searchInput.value.trim().toLowerCase();
+      if (q) {
+        renderSearchResults(q);
+      } else {
+        renderCategory(activeCategoryIndex);
+      }
+    }, 140);
+  });
+}
 
 function renderCategoryTabs() {
   categoriesEl.innerHTML = '';
@@ -728,13 +923,17 @@ function renderCategoryTabs() {
     button.setAttribute('role', 'tab');
     button.setAttribute('aria-selected', index === 0);
     button.innerHTML = `<span>${category.title}</span><small>${(category.items || []).length}</small>`;
-    button.addEventListener('click', () => renderCategory(index));
+    button.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      renderCategory(index);
+    });
     fragment.appendChild(button);
   });
   categoriesEl.appendChild(fragment);
 }
 
 function renderCategory(index) {
+  activeCategoryIndex = index;
   document.querySelectorAll('.menu-category-tab').forEach((tab, tabIndex) => {
     const isActive = tabIndex === index;
     tab.classList.toggle('is-active', isActive);
@@ -781,6 +980,12 @@ function buildCard(item, categoryTitle) {
   const summary = clone.querySelector('.menu-card__summary');
   const priceEl = clone.querySelector('.menu-card__price');
   const sectionsWrapper = clone.querySelector('.menu-card__sections');
+  const detail = clone.querySelector('.menu-card__detail');
+  const addBtn = clone.querySelector('.menu-card__add');
+  const qtyWrap = clone.querySelector('.menu-card__qty');
+  const qtyValue = clone.querySelector('.menu-card__qty-value');
+  const qtyButtons = clone.querySelectorAll('.menu-card__qty-btn');
+  const itemId = item.id;
 
   img.src = item.image ? staticBase + item.image : fallbackImage;
   img.alt = item.name;
@@ -793,6 +998,91 @@ function buildCard(item, categoryTitle) {
     priceEl.textContent = item.price;
   } else {
     priceEl.hidden = true;
+  }
+
+  if (detail) {
+    if (itemId) {
+      detail.href = '/menu/item/' + encodeURIComponent(itemId);
+      detail.removeAttribute('aria-disabled');
+    } else {
+      detail.setAttribute('aria-disabled', 'true');
+      detail.removeAttribute('href');
+    }
+  }
+
+  function setCardQuantity(qty) {
+    const safeQty = Math.max(0, Number(qty || 0));
+    if (qtyValue) qtyValue.textContent = String(safeQty || 1);
+    if (addBtn) addBtn.hidden = safeQty > 0;
+    if (qtyWrap) qtyWrap.hidden = safeQty < 1;
+  }
+
+  async function syncQuantity(nextQty) {
+    if (!itemId || !window.McqCart) return;
+    let payload;
+    if (nextQty < 1) {
+      payload = await window.McqCart.remove(itemId);
+    } else {
+      payload = await window.McqCart.setQuantity(itemId, nextQty);
+    }
+    cacheCartQuantities(payload);
+    setCardQuantity(cartQtyById.get(itemId) || 0);
+  }
+
+  setCardQuantity(cartQtyById.get(itemId) || 0);
+
+  if (addBtn) {
+    addBtn.dataset.itemId = itemId || '';
+    if (itemId && window.McqCart) {
+      addBtn.disabled = false;
+      addBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        addBtn.classList.add('is-busy');
+        addBtn.disabled = true;
+        try {
+          const payload = await window.McqCart.add(itemId, 1);
+          cacheCartQuantities(payload);
+          setCardQuantity(cartQtyById.get(itemId) || 0);
+        } finally {
+          addBtn.classList.remove('is-busy');
+          addBtn.disabled = false;
+        }
+      });
+    } else {
+      addBtn.disabled = true;
+    }
+  }
+
+  qtyButtons.forEach((button) => {
+    button.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!itemId || !window.McqCart) return;
+      const currentQty = cartQtyById.get(itemId) || 0;
+      const delta = Number(button.dataset.delta || '0');
+      const nextQty = currentQty + delta;
+      qtyButtons.forEach((b) => {
+        b.disabled = true;
+      });
+      try {
+        await syncQuantity(nextQty);
+      } finally {
+        qtyButtons.forEach((b) => {
+          b.disabled = false;
+        });
+      }
+    });
+  });
+
+  // Make the whole card clickable for item details.
+  // Clicking "Add" is excluded above, and clicking the "Details" link should just work.
+  const cardEl = clone.querySelector('.menu-card');
+  if (cardEl && detail && itemId) {
+    cardEl.addEventListener('click', (e) => {
+      const target = e.target;
+      if (!detail || !detail.href) return;
+      if (target && target.closest && target.closest('.menu-card__actions')) return;
+      window.location.href = detail.href;
+    });
   }
 
   sectionsWrapper.innerHTML = '';
