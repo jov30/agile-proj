@@ -32,6 +32,7 @@
         <nav class="main-nav">
           <a href="/" class="{% if request.path == '/' %}is-active{% endif %}">Home</a>
           <a href="/menu" class="{% if request.path.startswith('/menu') %}is-active{% endif %}">Menu</a>
+          <a href="/cart" class="{% if request.path.startswith('/cart') %}is-active{% endif %}">Cart</a>
           <a href="/shared-meals" class="{% if request.path.startswith('/shared-meals') %}is-active{% endif %}">Shared Meals</a>
           <a href="/orders" class="{% if request.path.startswith('/orders') %}is-active{% endif %}">Orders</a>
           <a href="/profile" class="{% if request.path.startswith('/profile') %}is-active{% endif %}">Profile</a>

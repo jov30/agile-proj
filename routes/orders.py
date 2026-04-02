@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 from routes.helpers import render_feature_page
 
@@ -8,7 +8,7 @@ orders_bp = Blueprint("orders", __name__)
 
 @orders_bp.get("/cart")
 def cart() -> str:
-    return render_feature_page("cart")
+    return render_template("menu/cart.html")
 
 
 @orders_bp.get("/checkout")
