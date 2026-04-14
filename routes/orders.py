@@ -735,11 +735,18 @@ def checkout() -> str | Response:
             )
             return render_template("menu/checkout.html", **context), 402
 
+        checkout_token = session.get(SESSION_CHECKOUT_TOKEN_KEY)
         order = _build_order_from_cart(form_data, pickup_at, cart)
         order.payment_reference = payment_attempt.reference
         order.payment_status = payment_attempt.status
-        payment_attempt.order = order
-        payment_attempt.checkout_token = None
+        if isinstance(checkout_token, str) and checkout_token:
+            attempts = PaymentAttempt.query.filter_by(checkout_token=checkout_token).all()
+            for attempt in attempts:
+                attempt.order = order
+                attempt.checkout_token = None
+        else:
+            payment_attempt.order = order
+            payment_attempt.checkout_token = None
         _finalize_successful_order(order)
         return redirect(url_for("orders.receipt", order=order.order_number))
 

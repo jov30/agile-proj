@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
 from app import create_app
-from models import Order, db
+from models import Order, PaymentAttempt, db
 
 
 class TestCheckoutAndOrders(unittest.TestCase):
@@ -38,9 +38,15 @@ class TestCheckoutAndOrders(unittest.TestCase):
             session["cart_lines"] = [{"id": item["id"], "qty": quantity}]
         return item
 
-    def _valid_checkout_form(self) -> dict[str, str]:
+    def _valid_checkout_form(
+        self,
+        *,
+        days_ahead: int = 1,
+        card_number: str = "4242 4242 4242 4242",
+        special_instructions: str = "Please keep the soup separate.",
+    ) -> dict[str, str]:
         now = datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"]))
-        pickup = (now + timedelta(days=1)).replace(
+        pickup = (now + timedelta(days=days_ahead)).replace(
             hour=12,
             minute=30,
             second=0,
@@ -54,15 +60,15 @@ class TestCheckoutAndOrders(unittest.TestCase):
             "pickup_time": pickup.strftime("%H:%M"),
             "payment_method": "card",
             "card_name": "Nguyen Tester",
-            "card_number": "4242 4242 4242 4242",
+            "card_number": card_number,
             "card_expiry": "12/30",
             "card_cvv": "123",
-            "special_instructions": "Please keep the soup separate.",
+            "special_instructions": special_instructions,
         }
 
-    def _place_order(self) -> str:
+    def _place_order(self, form_data: dict[str, str] | None = None) -> str:
         self._seed_cart()
-        response = self.client.post("/checkout", data=self._valid_checkout_form(), follow_redirects=False)
+        response = self.client.post("/checkout", data=form_data or self._valid_checkout_form(), follow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
         location = response.headers["Location"]
@@ -140,6 +146,88 @@ class TestCheckoutAndOrders(unittest.TestCase):
         response = self.client.post("/checkout", data=self._valid_checkout_form())
         self.assertEqual(response.status_code, 400)
         self.assertIn("Your cart is empty", response.get_data(as_text=True))
+
+    def test_payment_failure_then_retry_success_persists_attempt_log(self):
+        self._seed_cart()
+        declined = self._valid_checkout_form(card_number="4000 0000 0000 0002")
+
+        failed = self.client.post("/checkout", data=declined)
+        self.assertEqual(failed.status_code, 402)
+        self.assertIn("configured to decline", failed.get_data(as_text=True))
+
+        with self.app.app_context():
+            attempts = PaymentAttempt.query.all()
+            self.assertEqual(len(attempts), 1)
+            self.assertEqual(attempts[0].status, "Failed")
+
+        succeeded = self.client.post("/checkout", data=self._valid_checkout_form(), follow_redirects=False)
+        self.assertEqual(succeeded.status_code, 302)
+        order_number = parse_qs(urlparse(succeeded.headers["Location"]).query)["order"][0]
+
+        with self.app.app_context():
+            order = Order.query.filter_by(order_number=order_number).first()
+            self.assertIsNotNone(order)
+            self.assertEqual(len(order.payment_attempts), 2)
+            statuses = {attempt.status for attempt in order.payment_attempts}
+            self.assertEqual(statuses, {"Failed", "Succeeded"})
+
+        detail = self.client.get(f"/api/orders/{order_number}").get_json()
+        self.assertEqual(detail["payment_attempt_count"], 2)
+
+    def test_order_filters_detail_view_and_status_patch(self):
+        first_order = self._place_order(self._valid_checkout_form(days_ahead=1))
+        second_order = self._place_order(self._valid_checkout_form(days_ahead=2, special_instructions="No coriander, please."))
+
+        update = self.client.patch(
+            f"/api/orders/{first_order}/status",
+            json={"status": "Preparing", "kitchen_notes": "Broth is on the stove."},
+        )
+        self.assertEqual(update.status_code, 200)
+        self.assertEqual(update.get_json()["order_status"], "Preparing")
+
+        filtered_page = self.client.get("/orders?status=Preparing")
+        self.assertEqual(filtered_page.status_code, 200)
+        html = filtered_page.get_data(as_text=True)
+        self.assertIn(first_order, html)
+        self.assertNotIn(second_order, html)
+
+        filtered_api = self.client.get("/api/orders?status=Preparing")
+        self.assertEqual(filtered_api.status_code, 200)
+        payload = filtered_api.get_json()
+        self.assertEqual(payload["count"], 1)
+        self.assertEqual(payload["orders"][0]["order_number"], first_order)
+
+        detail_page = self.client.get(f"/orders/{first_order}")
+        self.assertEqual(detail_page.status_code, 200)
+        detail_html = detail_page.get_data(as_text=True)
+        self.assertIn("Transaction log", detail_html)
+        self.assertIn(first_order, detail_html)
+
+    def test_receipt_qr_and_reorder_prefill_work(self):
+        order_number = self._place_order(self._valid_checkout_form(special_instructions="Sauce on the side."))
+
+        qr = self.client.get(f"/orders/{order_number}/qr.png")
+        self.assertEqual(qr.status_code, 200)
+        self.assertEqual(qr.mimetype, "image/png")
+        self.assertTrue(qr.data.startswith(b"\x89PNG"))
+
+        reorder = self.client.post(f"/orders/{order_number}/reorder", follow_redirects=False)
+        self.assertEqual(reorder.status_code, 302)
+        checkout = self.client.get("/checkout")
+        self.assertEqual(checkout.status_code, 200)
+        html = checkout.get_data(as_text=True)
+        self.assertIn("Sauce on the side.", html)
+        self.assertIn("Nguyen Tester", html)
+
+    def test_pickup_slot_capacity_blocks_overbooked_time(self):
+        self.app.config["PICKUP_SLOT_CAPACITY"] = 1
+        order_form = self._valid_checkout_form(days_ahead=1)
+        self._place_order(order_form)
+
+        self._seed_cart()
+        blocked = self.client.post("/checkout", data=order_form)
+        self.assertEqual(blocked.status_code, 400)
+        self.assertIn("pickup slot is unavailable", blocked.get_data(as_text=True).lower())
 
 
 if __name__ == "__main__":
