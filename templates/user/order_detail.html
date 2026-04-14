@@ -211,12 +211,13 @@
         <p class="eyebrow">Order detail</p>
         <h1 class="section-title">{{ order.order_number }}</h1>
         <p class="section-copy">
-          This view breaks down the full pickup record, payment attempt history, status progression,
+          This view breaks down the full fulfillment record, payment attempt history, status progression,
           and saved instructions for one confirmed order.
         </p>
         <div class="pill-row">
           <span class="pill"><strong>{{ order.order_status }}</strong> current kitchen stage for this order.</span>
           <span class="pill"><strong>{{ order.payment_reference }}</strong> stored payment reference attached to the order.</span>
+          <span class="pill"><strong>{{ order.fulfillment_label }}</strong> fulfillment mode recorded at checkout.</span>
           <span class="pill"><strong>{{ order.total_display }}</strong> total paid including pickup fee.</span>
         </div>
         <div class="order-detail__actions">
@@ -228,16 +229,22 @@
         </div>
       </div>
       <aside class="order-detail__ticket">
-        <p class="eyebrow">Pickup verification</p>
-        <h2>{{ order.pickup_day }} at {{ order.pickup_time }}</h2>
+        <p class="eyebrow">{% if order.is_instant %}Queue verification{% else %}Pickup verification{% endif %}</p>
+        <h2>
+          {% if order.is_instant %}
+            {{ order.queue_display }} · ready around {{ order.pickup_time }}
+          {% else %}
+            {{ order.pickup_day }} at {{ order.pickup_time }}
+          {% endif %}
+        </h2>
         <div class="order-detail__ticket-grid">
           <div class="order-detail__ticket-item">
             <span>Confirmation code</span>
             <strong>{{ order.confirmation_code }}</strong>
           </div>
           <div class="order-detail__ticket-item">
-            <span>Pickup contact</span>
-            <strong>{{ order.customer_name }}</strong>
+            <span>{% if order.is_instant %}Counter{% else %}Pickup contact{% endif %}</span>
+            <strong>{% if order.is_instant %}{{ order.counter_label }}{% else %}{{ order.customer_name }}{% endif %}</strong>
           </div>
           <div class="order-detail__ticket-item">
             <span>QR verification</span>
@@ -295,7 +302,7 @@
             <p>{{ order.customer_email }} · {{ order.customer_phone }}</p>
           </div>
           <div class="order-detail__meta-item">
-            <span>Kitchen notes</span>
+            <span>{% if order.is_instant %}Queue notes{% else %}Kitchen notes{% endif %}</span>
             <strong>{{ order.kitchen_notes }}</strong>
             <p>{{ order.special_instructions or "No extra customer instructions were saved." }}</p>
           </div>

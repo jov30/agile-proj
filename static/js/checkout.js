@@ -5,9 +5,12 @@
   const draftKey = "mcq_checkout_draft_v1";
   const windowsNode = document.getElementById("pickup-windows-data");
   const pickupWindows = windowsNode ? JSON.parse(windowsNode.textContent || "[]") : [];
+  const instantQueueNode = document.getElementById("instant-queue-data");
+  const instantQueue = instantQueueNode ? JSON.parse(instantQueueNode.textContent || "{}") : {};
   const form = document.getElementById("checkout-form");
   const dateSelect = document.getElementById("pickup_date");
   const timeSelect = document.getElementById("pickup_time");
+  const fulfillmentInputs = document.querySelectorAll('input[name="fulfillment_type"]');
   const paymentInputs = document.querySelectorAll('input[name="payment_method"]');
   const cardFields = document.getElementById("card-fields");
   const cardInputs = cardFields ? cardFields.querySelectorAll("input") : [];
@@ -15,11 +18,18 @@
   const cardExpiry = document.getElementById("card_expiry");
   const cardCvv = document.getElementById("card_cvv");
   const phoneInput = document.getElementById("customer_phone");
+  const scheduledFields = document.getElementById("scheduled-fields");
+  const scheduledPanel = document.getElementById("scheduled-pickup-panel");
+  const instantPanel = document.getElementById("instant-queue-panel");
+  const instantQueueCopy = document.getElementById("instant-queue-copy");
+  const instructionsField = document.getElementById("special_instructions");
+  const instantNotesField = document.getElementById("special_instructions_instant");
   const pickupPreviewTitle = document.getElementById("pickup-preview-title");
   const pickupPreviewCopy = document.getElementById("pickup-preview-copy");
   const paymentPreviewTitle = document.getElementById("payment-preview-title");
   const paymentPreviewCopy = document.getElementById("payment-preview-copy");
   const submitButton = document.getElementById("checkout-submit");
+  const submitIdle = document.getElementById("checkout-submit-idle");
   const inlineStatus = document.getElementById("checkout-inline-status");
   const fields = form ? Array.from(form.querySelectorAll("input, select, textarea")) : [];
 
@@ -52,6 +62,14 @@
 
   function selectedPaymentInput() {
     return Array.from(paymentInputs).find((input) => input.checked) || null;
+  }
+
+  function selectedFulfillmentInput() {
+    return Array.from(fulfillmentInputs).find((input) => input.checked) || null;
+  }
+
+  function instantSelected() {
+    return selectedFulfillmentInput()?.value === "instant";
   }
 
   function selectedWindow() {
@@ -91,11 +109,38 @@
   }
 
   function updatePickupPreview() {
-    if (!dateSelect || !timeSelect || !pickupPreviewTitle || !pickupPreviewCopy) return;
+    if (!pickupPreviewTitle || !pickupPreviewCopy) return;
+
+    if (instantSelected()) {
+      const queueNumber = Number(instantQueue.next_queue_number || 0);
+      const queueLabel = queueNumber > 0 ? `#${String(queueNumber).padStart(3, "0")}` : "Pending queue";
+      pickupPreviewTitle.textContent = `Instant queue ${queueLabel}`;
+      pickupPreviewCopy.textContent = instantQueue.status_message || "Queue position and ETA are assigned after payment confirmation.";
+      if (instantQueueCopy) {
+        if (instantQueue.can_accept) {
+          instantQueueCopy.textContent = `Queue ${queueLabel} at ${instantQueue.counter_label} with an estimated ${instantQueue.quoted_wait_minutes} minute wait (ready around ${instantQueue.estimated_ready_label}).`;
+        } else {
+          instantQueueCopy.textContent = instantQueue.status_message || "Instant queue is currently unavailable.";
+        }
+      }
+      return;
+    }
+
+    if (!dateSelect || !timeSelect) return;
     const window = selectedWindow();
     const selectedOption = timeSelect.options[timeSelect.selectedIndex];
     pickupPreviewTitle.textContent = window ? window.label : "Choose a pickup day";
     pickupPreviewCopy.textContent = `Selected pickup time: ${selectedOption ? selectedOption.textContent : "Choose a time"}`;
+  }
+
+  function updateSubmitLabel() {
+    if (!submitIdle || !submitButton) return;
+    const total = submitButton.dataset.grandTotal || "";
+    if (instantSelected()) {
+      submitIdle.textContent = `Pay ${total} & Join Instant Queue`;
+    } else {
+      submitIdle.textContent = `Pay ${total} & Confirm Scheduled Pickup`;
+    }
   }
 
   function updatePaymentPreview() {
@@ -119,6 +164,35 @@
     cardInputs.forEach((field) => {
       field.disabled = !requiresCard;
     });
+  }
+
+  function syncSpecialInstructions() {
+    if (!instructionsField || !instantNotesField) return;
+    instructionsField.value = instantNotesField.value;
+  }
+
+  function syncFulfillmentUI() {
+    const useInstant = instantSelected();
+    if (scheduledFields) {
+      scheduledFields.hidden = useInstant;
+    }
+    if (scheduledPanel) {
+      scheduledPanel.hidden = useInstant;
+    }
+    if (instantPanel) {
+      instantPanel.hidden = !useInstant;
+    }
+    if (dateSelect) {
+      dateSelect.disabled = useInstant;
+    }
+    if (timeSelect) {
+      timeSelect.disabled = useInstant;
+    }
+    if (instructionsField && instantNotesField && useInstant) {
+      instantNotesField.value = instructionsField.value;
+    }
+    updatePickupPreview();
+    updateSubmitLabel();
   }
 
   function readDraft() {
@@ -155,6 +229,13 @@
         field.value = value;
       }
     });
+
+    if (!selectedFulfillmentInput() && fulfillmentInputs.length) {
+      const firstEnabled = Array.from(fulfillmentInputs).find((input) => !input.disabled);
+      if (firstEnabled) {
+        firstEnabled.checked = true;
+      }
+    }
   }
 
   async function handleCartAction(itemId, action, quantity) {
@@ -190,6 +271,13 @@
     });
   });
 
+  fulfillmentInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      syncFulfillmentUI();
+      writeDraft();
+    });
+  });
+
   if (dateSelect) {
     dateSelect.addEventListener("change", () => {
       renderTimeOptions();
@@ -201,6 +289,18 @@
   if (timeSelect) {
     timeSelect.addEventListener("change", () => {
       updatePickupPreview();
+      writeDraft();
+    });
+  }
+
+  if (instantNotesField && instructionsField) {
+    instantNotesField.addEventListener("input", () => {
+      syncSpecialInstructions();
+      writeDraft();
+    });
+    instructionsField.addEventListener("input", () => {
+      if (!instantSelected()) return;
+      instantNotesField.value = instructionsField.value;
       writeDraft();
     });
   }
@@ -246,6 +346,7 @@
         event.preventDefault();
         return;
       }
+      syncSpecialInstructions();
       writeDraft();
       submitButton.disabled = true;
       submitButton.classList.add("is-busy");
@@ -277,8 +378,10 @@
   restoreDraft();
   renderTimeOptions();
   updateCardFields();
+  syncFulfillmentUI();
   updatePickupPreview();
   updatePaymentPreview();
+  updateSubmitLabel();
   writeDraft();
   window.setTimeout(scrollToActiveSection, 120);
 })();

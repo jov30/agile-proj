@@ -331,7 +331,7 @@
           <p class="eyebrow">Customer order history</p>
           <h1 class="section-title">Filter, inspect, and repeat previous pickup orders.</h1>
           <p class="section-copy">
-            Order history now supports filtering by status and pickup date, a dedicated detail view,
+            Order history now supports both instant queue and scheduled pickup records, with filters, detail view,
             and reorder prefill that carries contact details and notes back into checkout.
           </p>
           <div class="pill-row">
@@ -353,7 +353,7 @@
           </article>
           {% if latest_order %}
             <article class="orders-highlight" style="grid-column: 1 / -1">
-              <strong>{{ latest_order.pickup_day }} at {{ latest_order.pickup_time }}</strong>
+              <strong>{{ latest_order.fulfillment_label }} · {{ latest_order.pickup_day }} at {{ latest_order.pickup_time }}</strong>
               <p>
                 Latest visible order is {{ latest_order.order_number }} with status {{ latest_order.order_status }}
                 and payment reference {{ latest_order.payment_reference }}.
@@ -410,11 +410,19 @@
                 <div>
                   <p class="eyebrow">Order record</p>
                   <h2>{{ order.order_number }}</h2>
-                  <p>Placed {{ order.created_at }} · Pickup {{ order.pickup_at }}</p>
+                  <p>
+                    Placed {{ order.created_at }} ·
+                    {% if order.is_instant %}
+                      Queue {{ order.queue_display }} at {{ order.counter_label }} (ETA {{ order.pickup_time }})
+                    {% else %}
+                      Pickup {{ order.pickup_at }}
+                    {% endif %}
+                  </p>
                 </div>
                 <div class="order-card__badges">
                   <span class="order-badge">{{ order.order_status }}</span>
                   <span class="order-badge order-badge--teal">{{ order.payment_status }}</span>
+                  <span class="order-badge order-badge--teal">{{ order.fulfillment_label }}</span>
                   <span class="order-badge">{{ order.total_display }}</span>
                 </div>
               </header>
@@ -433,8 +441,14 @@
                 </div>
                 <aside class="order-side">
                   <div class="order-side__card">
-                    <span>Pickup slot</span>
-                    <strong>{{ order.pickup_at }}</strong>
+                    <span>{% if order.is_instant %}Queue status{% else %}Pickup slot{% endif %}</span>
+                    <strong>
+                      {% if order.is_instant %}
+                        {{ order.queue_display }} · {{ order.counter_label }}
+                      {% else %}
+                        {{ order.pickup_at }}
+                      {% endif %}
+                    </strong>
                     <p>{{ order.kitchen_notes }}</p>
                   </div>
                   <div class="order-side__card">

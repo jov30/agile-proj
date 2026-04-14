@@ -415,15 +415,25 @@
       <div class="receipt-hero__grid">
         <div>
           <p class="eyebrow">Order confirmed</p>
-          <h1 class="section-title">Pickup booked for {{ order.pickup_day }}.</h1>
+          <h1 class="section-title">
+            {% if order.is_instant %}
+              Queue ticket {{ order.queue_display }} confirmed for {{ order.counter_label }}.
+            {% else %}
+              Pickup booked for {{ order.pickup_day }}.
+            {% endif %}
+          </h1>
           <p class="section-copy">
             The payment simulation has been approved, the order record is stored in the database,
-            and the receipt below is ready for download or review at any time.
+            and the receipt below is ready for download or review at any time across both fulfillment modes.
           </p>
           <div class="pill-row">
             <span class="pill"><strong>{{ order.order_number }}</strong> unique order reference for staff verification.</span>
             <span class="pill"><strong>{{ order.payment_reference }}</strong> simulated payment confirmation saved to the order.</span>
-            <span class="pill"><strong>{{ order.total_display }}</strong> total charged including the pickup service fee.</span>
+            <span class="pill"><strong>{{ order.fulfillment_label }}</strong> fulfillment mode captured with the order.</span>
+            <span class="pill"><strong>{{ order.total_display }}</strong> total charged including service fee.</span>
+            {% if order.is_instant and order.queue_display %}
+              <span class="pill"><strong>{{ order.queue_display }}</strong> queue number to present at {{ order.counter_label }}.</span>
+            {% endif %}
           </div>
           <div class="receipt-actions">
             <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--primary">Download PDF receipt</a>
@@ -436,21 +446,27 @@
           </div>
         </div>
         <aside class="receipt-ticket">
-          <p class="receipt-ticket__label">Pickup ticket</p>
-          <h2>{{ order.pickup_time }}</h2>
-          <p>Arrive a few minutes early with your order number ready. Staff can verify using the confirmation code below.</p>
+          <p class="receipt-ticket__label">{% if order.is_instant %}Queue ticket{% else %}Pickup ticket{% endif %}</p>
+          <h2>{% if order.is_instant %}{{ order.queue_display }}{% else %}{{ order.pickup_time }}{% endif %}</h2>
+          <p>
+            {% if order.is_instant %}
+              Join {{ order.counter_label }} and present this queue number. Estimated ready time is {{ order.pickup_time }}.
+            {% else %}
+              Arrive a few minutes early with your order number ready. Staff can verify using the confirmation code below.
+            {% endif %}
+          </p>
           <div class="receipt-ticket__meta">
             <div>
               <span>Confirmation code</span>
               <strong>{{ order.confirmation_code }}</strong>
             </div>
             <div>
-              <span>Pickup contact</span>
-              <strong>{{ order.customer_name }}</strong>
+              <span>Fulfillment</span>
+              <strong>{{ order.fulfillment_label }}</strong>
             </div>
             <div>
-              <span>Payment status</span>
-              <strong>{{ order.payment_status }}</strong>
+              <span>{% if order.is_instant %}Counter{% else %}Pickup contact{% endif %}</span>
+              <strong>{% if order.is_instant %}{{ order.counter_label }}{% else %}{{ order.customer_name }}{% endif %}</strong>
             </div>
           </div>
           <div class="receipt-ticket__qr">
@@ -516,8 +532,14 @@
                 <p>Order created and saved to the database at this time.</p>
               </div>
               <div class="receipt-meta__item">
-                <span>Pickup slot</span>
-                <strong>{{ order.pickup_at }}</strong>
+                <span>{% if order.is_instant %}Queue and ETA{% else %}Pickup slot{% endif %}</span>
+                <strong>
+                  {% if order.is_instant %}
+                    {{ order.queue_display }} · ready around {{ order.pickup_time }}
+                  {% else %}
+                    {{ order.pickup_at }}
+                  {% endif %}
+                </strong>
                 <p>{{ order.kitchen_notes }}</p>
               </div>
               <div class="receipt-meta__item">
@@ -558,9 +580,9 @@
           <div class="receipt-card__content">
             <div class="receipt-card__header">
               <div>
-                <p class="eyebrow">Pickup timeline</p>
+                <p class="eyebrow">Order timeline</p>
                 <h2>Order progression</h2>
-                <p>The customer flow now runs from checkout into confirmation and history without placeholders.</p>
+                <p>The flow runs from checkout to payment and fulfillment confirmation without placeholders.</p>
               </div>
             </div>
             <div class="receipt-timeline">

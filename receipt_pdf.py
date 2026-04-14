@@ -106,6 +106,8 @@ def _build_pdf(objects: list[bytes]) -> bytes:
 def build_receipt_pdf(order: dict) -> bytes:
     content: list[str] = []
     y = TOP_Y
+    is_instant = bool(order.get("is_instant"))
+    mode_subtitle = "Instant queue invoice receipt" if is_instant else "Scheduled pickup invoice receipt"
 
     content.extend(_filled_rect(LEFT_MARGIN, 722, 516, 42, (0.957, 0.420, 0.110)))
     content.extend(
@@ -123,19 +125,27 @@ def build_receipt_pdf(order: dict) -> bytes:
             y=728,
             font="F1",
             size=11,
-            lines=["Scheduled pickup invoice receipt"],
+            lines=[mode_subtitle],
         )
     )
     y = 698
 
+    fulfillment_line = (
+        f"Queue: {order.get('queue_display')} at {order.get('counter_label')}"
+        if is_instant
+        else f"Pickup time: {order['pickup_at']}"
+    )
     overview_lines = [
         f"Order number: {order['order_number']}",
         f"Confirmation code: {order['confirmation_code']}",
         f"Placed: {order['created_at']}",
-        f"Pickup time: {order['pickup_at']}",
+        fulfillment_line,
+        f"Fulfillment: {order.get('fulfillment_label', 'Scheduled pickup')}",
         f"Status: {order['order_status']}",
         f"Payment: {order['payment_status']} via {order['payment_method']}",
     ]
+    if is_instant and order.get("quoted_wait_display"):
+        overview_lines.append(f"Quoted wait: {order['quoted_wait_display']}")
     content.extend(_stroked_rect(LEFT_MARGIN, 600, 516, 88, (0.812, 0.682, 0.510)))
     content.extend(_text_block(x=LEFT_MARGIN + 14, y=y, font="F2", size=13, lines=["Order overview"]))
     y -= 18
@@ -191,7 +201,7 @@ def build_receipt_pdf(order: dict) -> bytes:
 
     totals = [
         f"Subtotal: {order['subtotal_display']}",
-        f"Pickup service fee: {order['service_fee_display']}",
+        f"Service fee: {order['service_fee_display']}",
         f"Total paid: {order['total_display']}",
     ]
     content.extend(_stroked_rect(LEFT_MARGIN, 196, 516, 56, (0.812, 0.682, 0.510)))
@@ -216,7 +226,11 @@ def build_receipt_pdf(order: dict) -> bytes:
 
     footer_lines = [
         "Thank you for ordering with MCQ.",
-        "Please arrive a few minutes before the scheduled pickup time and have your order number ready.",
+        (
+            f"Collect from {order.get('counter_label')} with queue {order.get('queue_display')} and order number ready."
+            if is_instant
+            else "Please arrive a few minutes before the scheduled pickup time and have your order number ready."
+        ),
     ]
     content.extend(_text_block(x=LEFT_MARGIN, y=y, font="F1", size=10, lines=footer_lines, leading=14))
 
