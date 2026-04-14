@@ -11,6 +11,7 @@ from flask import Blueprint, Response, current_app, jsonify, redirect, render_te
 
 from menu_catalog import format_aud
 from models import (
+    FULFILLMENT_TYPES,
     ORDER_STATUS_SEQUENCE,
     PAYMENT_ATTEMPT_STATUS_SEQUENCE,
     Order,
@@ -27,6 +28,11 @@ SESSION_LAST_ORDER_KEY = "last_order_number"
 SESSION_ORDER_HISTORY_KEY = "order_history_numbers"
 SESSION_CHECKOUT_TOKEN_KEY = "checkout_payment_token"
 SESSION_CHECKOUT_PREFILL_KEY = "checkout_prefill"
+
+FULFILLMENT_LABELS = {
+    "instant": "Instant counter pickup",
+    "scheduled": "Scheduled pickup",
+}
 
 PAYMENT_METHODS = {
     "card": {
@@ -91,6 +97,7 @@ def _pickup_slot_counts() -> dict[str, int]:
     counts: dict[str, int] = {}
     active_orders = (
         Order.query.filter(Order.pickup_at >= start_naive, Order.pickup_at < end_naive)
+        .filter(Order.fulfillment_type == FULFILLMENT_TYPES[1])
         .filter(Order.order_status != ORDER_STATUS_SEQUENCE[-1])
         .all()
     )
@@ -176,13 +183,110 @@ def _pickup_windows() -> list[dict]:
     return windows
 
 
+def _instant_ordering_enabled() -> bool:
+    return bool(current_app.config.get("ENABLE_INSTANT_ORDERING", False))
+
+
+def _service_hours_for(day_value) -> tuple[datetime, datetime]:
+    opening = datetime.combine(
+        day_value,
+        time(
+            hour=current_app.config["PICKUP_OPEN_HOUR"],
+            minute=current_app.config["PICKUP_OPEN_MINUTE"],
+        ),
+        tzinfo=_timezone(),
+    )
+    closing = datetime.combine(
+        day_value,
+        time(
+            hour=current_app.config["PICKUP_CLOSE_HOUR"],
+            minute=current_app.config["PICKUP_CLOSE_MINUTE"],
+        ),
+        tzinfo=_timezone(),
+    )
+    return opening, closing
+
+
+def _instant_queue_snapshot(cart: dict | None = None) -> dict:
+    now = _now_local()
+    opening, closing = _service_hours_for(now.date())
+    day_start_naive = datetime.combine(now.date(), time.min)
+    day_end_naive = datetime.combine(now.date() + timedelta(days=1), time.min)
+
+    active_orders = (
+        Order.query.filter(
+            Order.fulfillment_type == FULFILLMENT_TYPES[0],
+            Order.order_status != ORDER_STATUS_SEQUENCE[-1],
+            Order.pickup_at >= day_start_naive,
+            Order.pickup_at < day_end_naive,
+        )
+        .order_by(Order.created_at.asc())
+        .all()
+    )
+    active_count = len(active_orders)
+    max_active = max(1, int(current_app.config["INSTANT_ORDERING_MAX_ACTIVE_ORDERS"]))
+    remaining_capacity = max(0, max_active - active_count)
+    item_units = sum(line.get("quantity", 0) for line in (cart or {}).get("lines", []))
+
+    base_wait = max(1, int(current_app.config["INSTANT_ORDERING_BASE_PREP_MINUTES"]))
+    per_active_wait = max(0, int(current_app.config["INSTANT_ORDERING_PER_ACTIVE_ORDER_MINUTES"]))
+    per_item_wait = max(0, int(current_app.config["INSTANT_ORDERING_PER_ITEM_MINUTES"]))
+    quoted_wait = base_wait + (active_count * per_active_wait) + (max(0, item_units - 1) * per_item_wait)
+    estimated_ready = now + timedelta(minutes=quoted_wait)
+
+    latest_queue = (
+        Order.query.filter(
+            Order.fulfillment_type == FULFILLMENT_TYPES[0],
+            Order.queue_number.isnot(None),
+            Order.pickup_at >= day_start_naive,
+            Order.pickup_at < day_end_naive,
+        )
+        .order_by(Order.queue_number.desc())
+        .first()
+    )
+    next_queue_number = (latest_queue.queue_number if latest_queue and latest_queue.queue_number else 0) + 1
+
+    is_open = opening <= now <= closing
+    kitchen_can_finish = estimated_ready <= closing
+    enabled = _instant_ordering_enabled()
+    can_accept = enabled and is_open and kitchen_can_finish and remaining_capacity > 0
+
+    if not enabled:
+        status_message = "Instant ordering is currently disabled."
+    elif not is_open:
+        status_message = "Instant ordering opens during trading hours only."
+    elif remaining_capacity < 1:
+        status_message = "Instant queue is full right now. Choose a scheduled pickup slot."
+    elif not kitchen_can_finish:
+        status_message = "Kitchen is close to closing. Choose a scheduled pickup slot."
+    else:
+        status_message = f"Queue #{next_queue_number} is estimated ready in about {quoted_wait} minutes."
+
+    return {
+        "enabled": enabled,
+        "counter_label": current_app.config["INSTANT_ORDERING_COUNTER_LABEL"],
+        "active_count": active_count,
+        "max_active_orders": max_active,
+        "remaining_capacity": remaining_capacity,
+        "next_queue_number": next_queue_number,
+        "quoted_wait_minutes": quoted_wait,
+        "estimated_ready_at": estimated_ready,
+        "estimated_ready_label": estimated_ready.strftime("%I:%M %p").lstrip("0"),
+        "is_open": is_open,
+        "can_accept": can_accept,
+        "status_message": status_message,
+    }
+
+
 def _default_checkout_form() -> dict[str, str]:
     windows = _pickup_windows()
     first_available = _first_available_pickup(windows)
+    default_fulfillment = FULFILLMENT_TYPES[0] if _instant_ordering_enabled() else FULFILLMENT_TYPES[1]
     form = {
         "customer_name": "",
         "customer_email": "",
         "customer_phone": "",
+        "fulfillment_type": default_fulfillment,
         "pickup_date": first_available["date"] if first_available else "",
         "pickup_time": first_available["time"] if first_available else "",
         "payment_method": "card",
@@ -193,9 +297,17 @@ def _default_checkout_form() -> dict[str, str]:
         "special_instructions": "",
     }
     prefill = _checkout_prefill()
-    for key in ("customer_name", "customer_email", "customer_phone", "payment_method", "special_instructions"):
+    for key in (
+        "customer_name",
+        "customer_email",
+        "customer_phone",
+        "payment_method",
+        "special_instructions",
+    ):
         if prefill.get(key):
             form[key] = prefill[key]
+    if prefill.get("fulfillment_type") in FULFILLMENT_TYPES:
+        form["fulfillment_type"] = prefill["fulfillment_type"]
 
     slot_lookup = {
         (window["date"], slot["value"]): slot
@@ -218,18 +330,44 @@ def _payment_options() -> list[dict]:
     ]
 
 
-def _status_timeline(order_status: str) -> list[dict]:
+def _fulfillment_options() -> list[dict]:
+    options = [
+        {
+            "key": FULFILLMENT_TYPES[0],
+            "label": FULFILLMENT_LABELS[FULFILLMENT_TYPES[0]],
+            "description": "Pay now, get a live queue number, then collect at the counter when ready.",
+            "is_enabled": _instant_ordering_enabled(),
+        },
+        {
+            "key": FULFILLMENT_TYPES[1],
+            "label": FULFILLMENT_LABELS[FULFILLMENT_TYPES[1]],
+            "description": "Book a pickup date and time slot ahead of time.",
+            "is_enabled": True,
+        },
+    ]
+    return options
+
+
+def _status_timeline(order_status: str, fulfillment_type: str) -> list[dict]:
     try:
         active_index = ORDER_STATUS_SEQUENCE.index(order_status)
     except ValueError:
         active_index = 0
 
-    labels = {
-        "Confirmed": "Order has been accepted and queued for kitchen prep.",
-        "Preparing": "Kitchen is actively preparing the dishes for pickup.",
-        "Ready for Pickup": "Order is packed and ready for customer collection.",
-        "Completed": "Pickup has been collected and the order is closed.",
-    }
+    if fulfillment_type == FULFILLMENT_TYPES[0]:
+        labels = {
+            "Confirmed": "Order has been accepted and added to the instant pickup queue.",
+            "Preparing": "Kitchen is currently preparing your order.",
+            "Ready for Pickup": "Order is ready at the pickup counter.",
+            "Completed": "Order has been collected from the counter.",
+        }
+    else:
+        labels = {
+            "Confirmed": "Order has been accepted and queued for kitchen prep.",
+            "Preparing": "Kitchen is actively preparing the dishes for pickup.",
+            "Ready for Pickup": "Order is packed and ready for customer collection.",
+            "Completed": "Pickup has been collected and the order is closed.",
+        }
     return [
         {
             "label": label,
@@ -326,11 +464,14 @@ def _get_checkout_context(
     entry_step: str = "checkout",
 ) -> dict:
     cart = _build_cart_payload(_menu())
+    resolved_form = form_data or _default_checkout_form()
+    if resolved_form.get("fulfillment_type") not in FULFILLMENT_TYPES:
+        resolved_form["fulfillment_type"] = FULFILLMENT_TYPES[0] if _instant_ordering_enabled() else FULFILLMENT_TYPES[1]
     subtotal = cart["total_cents"]
     service_fee = current_app.config["ORDER_SERVICE_FEE_CENTS"] if cart["lines"] else 0
     total = subtotal + service_fee
     windows = _pickup_windows()
-    selected_date = (form_data or {}).get("pickup_date")
+    selected_date = resolved_form.get("pickup_date")
     selected_slots = []
     for window in windows:
         if window["date"] == selected_date:
@@ -339,13 +480,14 @@ def _get_checkout_context(
     if not selected_slots and windows:
         selected_slots = windows[0]["slots"]
     next_available_pickup = _first_available_pickup(windows)
+    instant_queue = _instant_queue_snapshot(cart)
     payment_feedback = _latest_checkout_attempt() if cart["lines"] else None
 
     return {
         "entry_step": entry_step,
         "errors": errors or [],
         "field_errors": field_errors or {},
-        "form_data": form_data or _default_checkout_form(),
+        "form_data": resolved_form,
         "cart": cart,
         "service_fee_cents": service_fee,
         "service_fee_display": format_aud(service_fee),
@@ -353,10 +495,12 @@ def _get_checkout_context(
         "grand_total_display": format_aud(total),
         "pickup_windows": windows,
         "selected_slots": selected_slots,
+        "fulfillment_options": _fulfillment_options(),
         "payment_options": _payment_options(),
         "pickup_lead_minutes": current_app.config["PICKUP_MIN_LEAD_MINUTES"],
         "pickup_slot_capacity": current_app.config["PICKUP_SLOT_CAPACITY"],
         "next_available_pickup": next_available_pickup,
+        "instant_queue": instant_queue,
         "payment_feedback": _serialize_payment_attempt(payment_feedback) if payment_feedback else None,
         "restaurant_phone": current_app.config["RESTAURANT_PHONE"],
     }
@@ -367,6 +511,7 @@ def _normalize_form() -> dict[str, str]:
         "customer_name",
         "customer_email",
         "customer_phone",
+        "fulfillment_type",
         "pickup_date",
         "pickup_time",
         "payment_method",
@@ -391,7 +536,7 @@ def _push_error(
         field_errors[field_name] = message
 
 
-def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str], dict[str, str], datetime | None]:
+def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str], dict[str, str], dict | None]:
     errors: list[str] = []
     field_errors: dict[str, str] = {}
     if not cart["lines"]:
@@ -425,6 +570,37 @@ def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str]
                 _push_error(errors, field_errors, "card_expiry", "The simulated card expiry cannot be in the past.")
         if not CVV_RE.match(re.sub(r"\D", "", form_data["card_cvv"])):
             _push_error(errors, field_errors, "card_cvv", "Enter a valid 3 or 4 digit security code.")
+
+    fulfillment_type = form_data.get("fulfillment_type") or FULFILLMENT_TYPES[1]
+    form_data["fulfillment_type"] = fulfillment_type
+    if fulfillment_type not in FULFILLMENT_TYPES:
+        _push_error(errors, field_errors, "fulfillment_type", "Choose how you want to receive this order.")
+        return errors, field_errors, None
+
+    if fulfillment_type == FULFILLMENT_TYPES[0]:
+        instant_queue = _instant_queue_snapshot(cart)
+        if not instant_queue["enabled"]:
+            _push_error(
+                errors,
+                field_errors,
+                "fulfillment_type",
+                "Instant ordering is currently unavailable. Use scheduled pickup instead.",
+            )
+            return errors, field_errors, None
+        if not instant_queue["can_accept"]:
+            _push_error(errors, field_errors, "fulfillment_type", instant_queue["status_message"])
+            return errors, field_errors, None
+        return (
+            errors,
+            field_errors,
+            {
+                "fulfillment_type": FULFILLMENT_TYPES[0],
+                "pickup_at": instant_queue["estimated_ready_at"],
+                "queue_number": instant_queue["next_queue_number"],
+                "quoted_wait_minutes": instant_queue["quoted_wait_minutes"],
+                "counter_label": instant_queue["counter_label"],
+            },
+        )
 
     pickup_at = _combine_pickup(form_data["pickup_date"], form_data["pickup_time"])
     windows = _pickup_windows()
@@ -470,15 +646,45 @@ def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str]
             if next_available:
                 message += f" Next available pickup is {next_available['date_label']} at {next_available['time_label']}."
             _push_error(errors, field_errors, "pickup_time", message)
-    return errors, field_errors, pickup_at
+    if errors or pickup_at is None:
+        return errors, field_errors, None
+    return (
+        errors,
+        field_errors,
+        {
+            "fulfillment_type": FULFILLMENT_TYPES[1],
+            "pickup_at": pickup_at,
+            "queue_number": None,
+            "quoted_wait_minutes": None,
+            "counter_label": None,
+        },
+    )
 
 
-def _build_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart: dict) -> Order:
+def _build_order_from_cart(form_data: dict[str, str], fulfillment_plan: dict, cart: dict) -> Order:
     subtotal = cart["total_cents"]
     service_fee = current_app.config["ORDER_SERVICE_FEE_CENTS"]
     total = subtotal + service_fee
     payment_key = form_data["payment_method"]
     card_number = re.sub(r"\D", "", form_data["card_number"])
+
+    fulfillment_type = fulfillment_plan["fulfillment_type"]
+    pickup_at = fulfillment_plan["pickup_at"]
+    queue_number = fulfillment_plan["queue_number"]
+    quoted_wait = fulfillment_plan["quoted_wait_minutes"]
+    counter_label = fulfillment_plan["counter_label"]
+    if fulfillment_type == FULFILLMENT_TYPES[0]:
+        latest_queue = _instant_queue_snapshot(cart)
+        queue_number = latest_queue["next_queue_number"]
+        quoted_wait = latest_queue["quoted_wait_minutes"]
+        pickup_at = latest_queue["estimated_ready_at"]
+        counter_label = latest_queue["counter_label"]
+        kitchen_notes = (
+            f"Instant queue #{queue_number} at {counter_label}. "
+            f"Target ready around {latest_queue['estimated_ready_label']}."
+        )
+    else:
+        kitchen_notes = "Scheduled pickup order queued for the kitchen."
 
     order = Order(
         order_number=f"MCQ-{_now_local().strftime('%Y%m%d')}-{secrets.token_hex(2).upper()}",
@@ -486,13 +692,17 @@ def _build_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart:
         customer_name=form_data["customer_name"],
         customer_email=form_data["customer_email"],
         customer_phone=form_data["customer_phone"],
+        fulfillment_type=fulfillment_type,
         pickup_at=pickup_at.astimezone(_timezone()).replace(tzinfo=None),
+        queue_number=queue_number,
+        quoted_wait_minutes=quoted_wait,
+        counter_label=counter_label,
         payment_method=PAYMENT_METHODS[payment_key]["label"],
         payment_status=PAYMENT_ATTEMPT_STATUS_SEQUENCE[1],
         payment_reference=f"SIM-{secrets.token_hex(4).upper()}",
         card_last4=card_number[-4:] if card_number else None,
         order_status=ORDER_STATUS_SEQUENCE[0],
-        kitchen_notes="Pickup order queued for the kitchen.",
+        kitchen_notes=kitchen_notes,
         special_instructions=form_data["special_instructions"] or None,
         subtotal_cents=subtotal,
         service_fee_cents=service_fee,
@@ -590,6 +800,17 @@ def _serialize_order(order: Order) -> dict:
     created_local = order.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
     updated_local = order.updated_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
     pickup_local = order.pickup_at.replace(tzinfo=_timezone())
+    fulfillment_type = order.fulfillment_type if order.fulfillment_type in FULFILLMENT_TYPES else FULFILLMENT_TYPES[1]
+    is_instant = fulfillment_type == FULFILLMENT_TYPES[0]
+    queue_display = f"#{order.queue_number:03d}" if order.queue_number else ("#PENDING" if is_instant else None)
+    quoted_wait = order.quoted_wait_minutes if order.quoted_wait_minutes is not None else None
+    if is_instant:
+        fulfillment_summary = (
+            f"Queue {queue_display} at {order.counter_label or current_app.config['INSTANT_ORDERING_COUNTER_LABEL']} "
+            f"· ready around {pickup_local.strftime('%I:%M %p').lstrip('0')}"
+        )
+    else:
+        fulfillment_summary = f"Scheduled pickup on {pickup_local.strftime('%A, %d %b')} at {pickup_local.strftime('%I:%M %p').lstrip('0')}"
     attempts = sorted(order.payment_attempts, key=lambda attempt: attempt.created_at, reverse=True)
     return {
         "order_number": order.order_number,
@@ -600,6 +821,15 @@ def _serialize_order(order: Order) -> dict:
         "created_at": created_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
         "created_relative_date": created_local.strftime("%d %b %Y"),
         "updated_at": updated_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+        "fulfillment_type": fulfillment_type,
+        "fulfillment_label": FULFILLMENT_LABELS[fulfillment_type],
+        "is_instant": is_instant,
+        "counter_label": order.counter_label or current_app.config["INSTANT_ORDERING_COUNTER_LABEL"],
+        "queue_number": order.queue_number,
+        "queue_display": queue_display,
+        "quoted_wait_minutes": quoted_wait,
+        "quoted_wait_display": f"{quoted_wait} minutes" if quoted_wait is not None else None,
+        "fulfillment_summary": fulfillment_summary,
         "pickup_at": pickup_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
         "pickup_date_iso": pickup_local.strftime("%Y-%m-%d"),
         "pickup_day": pickup_local.strftime("%A, %d %b"),
@@ -618,7 +848,7 @@ def _serialize_order(order: Order) -> dict:
         "service_fee_display": format_aud(order.service_fee_cents),
         "total_display": format_aud(order.total_cents),
         "available_statuses": list(ORDER_STATUS_SEQUENCE),
-        "status_timeline": _status_timeline(order.order_status),
+        "status_timeline": _status_timeline(order.order_status, fulfillment_type),
         "payment_attempt_count": len(attempts),
         "latest_payment_attempt": _serialize_payment_attempt(attempts[0]) if attempts else None,
         "payment_attempts": [_serialize_payment_attempt(attempt) for attempt in attempts],
@@ -682,6 +912,7 @@ def _session_orders() -> list[Order]:
 
 def _reorder_prefill(order: Order) -> dict[str, str]:
     windows = _pickup_windows()
+    fulfillment_type = order.fulfillment_type if order.fulfillment_type in FULFILLMENT_TYPES else FULFILLMENT_TYPES[1]
     original_date = order.pickup_at.strftime("%Y-%m-%d")
     original_time = order.pickup_at.strftime("%H:%M")
     slot_lookup = {
@@ -698,15 +929,18 @@ def _reorder_prefill(order: Order) -> dict[str, str]:
         pickup_date = fallback["date"] if fallback else ""
         pickup_time = fallback["time"] if fallback else ""
 
-    return {
+    prefill = {
         "customer_name": order.customer_name,
         "customer_email": order.customer_email,
         "customer_phone": order.customer_phone,
-        "pickup_date": pickup_date,
-        "pickup_time": pickup_time,
+        "fulfillment_type": fulfillment_type,
         "payment_method": "card",
         "special_instructions": order.special_instructions or "",
     }
+    if fulfillment_type == FULFILLMENT_TYPES[1]:
+        prefill["pickup_date"] = pickup_date
+        prefill["pickup_time"] = pickup_time
+    return prefill
 
 
 @orders_bp.route("/checkout", methods=["GET", "POST"])
@@ -714,8 +948,8 @@ def checkout() -> str | Response:
     if request.method == "POST":
         form_data = _normalize_form()
         cart = _build_cart_payload(_menu())
-        errors, field_errors, pickup_at = _validate_checkout(form_data, cart)
-        if errors or pickup_at is None:
+        errors, field_errors, fulfillment_plan = _validate_checkout(form_data, cart)
+        if errors or fulfillment_plan is None:
             context = _get_checkout_context(
                 form_data=form_data,
                 errors=errors,
@@ -736,7 +970,7 @@ def checkout() -> str | Response:
             return render_template("menu/checkout.html", **context), 402
 
         checkout_token = session.get(SESSION_CHECKOUT_TOKEN_KEY)
-        order = _build_order_from_cart(form_data, pickup_at, cart)
+        order = _build_order_from_cart(form_data, fulfillment_plan, cart)
         order.payment_reference = payment_attempt.reference
         order.payment_status = payment_attempt.status
         if isinstance(checkout_token, str) and checkout_token:
@@ -874,6 +1108,9 @@ def receipt_pdf(order_number: str):
 @orders_bp.get("/orders/<order_number>/qr.png")
 def receipt_qr(order_number: str):
     order = Order.query.filter_by(order_number=order_number).first_or_404()
+    fulfillment_type = order.fulfillment_type if order.fulfillment_type in FULFILLMENT_TYPES else FULFILLMENT_TYPES[1]
+    queue_text = f"\nqueue_number={order.queue_number}" if order.queue_number else ""
+    counter_text = f"\ncounter_label={order.counter_label}" if order.counter_label else ""
     qr = qrcode.QRCode(
         version=3,
         border=1,
@@ -881,7 +1118,8 @@ def receipt_qr(order_number: str):
         error_correction=qrcode.constants.ERROR_CORRECT_M,
     )
     qr.add_data(
-        f"MCQ ORDER\norder_number={order.order_number}\nconfirmation_code={order.confirmation_code}\npickup_at={order.pickup_at.isoformat()}"
+        f"MCQ ORDER\norder_number={order.order_number}\nconfirmation_code={order.confirmation_code}\n"
+        f"fulfillment_type={fulfillment_type}\npickup_at={order.pickup_at.isoformat()}{queue_text}{counter_text}"
     )
     qr.make(fit=True)
     image = qr.make_image(fill_color="black", back_color="white")

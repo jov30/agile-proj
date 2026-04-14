@@ -15,6 +15,10 @@ ORDER_STATUS_SEQUENCE = (
     "Ready for Pickup",
     "Completed",
 )
+FULFILLMENT_TYPES = (
+    "instant",
+    "scheduled",
+)
 PAYMENT_ATTEMPT_STATUS_SEQUENCE = (
     "Processing",
     "Succeeded",
@@ -35,7 +39,16 @@ class Order(db.Model):
     customer_name = db.Column(db.String(120), nullable=False)
     customer_email = db.Column(db.String(255), nullable=False, index=True)
     customer_phone = db.Column(db.String(40), nullable=False)
+    fulfillment_type = db.Column(
+        db.String(20),
+        nullable=False,
+        default=FULFILLMENT_TYPES[1],
+        index=True,
+    )
     pickup_at = db.Column(db.DateTime, nullable=False, index=True)
+    queue_number = db.Column(db.Integer, nullable=True, index=True)
+    quoted_wait_minutes = db.Column(db.Integer, nullable=True)
+    counter_label = db.Column(db.String(120), nullable=True)
     payment_method = db.Column(db.String(40), nullable=False)
     payment_status = db.Column(
         db.String(40),
@@ -144,6 +157,17 @@ def _sync_legacy_schema() -> None:
         if "updated_at" not in order_columns:
             conn.execute(text("ALTER TABLE orders ADD COLUMN updated_at DATETIME"))
             conn.execute(text("UPDATE orders SET updated_at = created_at WHERE updated_at IS NULL"))
+        if "fulfillment_type" not in order_columns:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN fulfillment_type VARCHAR(20)"))
+        if "queue_number" not in order_columns:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN queue_number INTEGER"))
+        if "quoted_wait_minutes" not in order_columns:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN quoted_wait_minutes INTEGER"))
+        if "counter_label" not in order_columns:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN counter_label VARCHAR(120)"))
+        conn.execute(text("UPDATE orders SET fulfillment_type = 'scheduled' WHERE fulfillment_type IS NULL"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_orders_fulfillment_type ON orders (fulfillment_type)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_orders_queue_number ON orders (queue_number)"))
 
 
 def init_db(app: Flask) -> None:

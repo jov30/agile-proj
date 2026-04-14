@@ -7,6 +7,13 @@ from pathlib import Path
 _BASE_DIR = Path(__file__).resolve().parent
 
 
+def _bool_env(name: str, default: bool) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Config:
     """Application configuration."""
 
@@ -27,5 +34,13 @@ class Config:
     PICKUP_MIN_LEAD_MINUTES = int(os.environ.get("PICKUP_MIN_LEAD_MINUTES", "45"))
     PICKUP_MAX_DAYS_AHEAD = int(os.environ.get("PICKUP_MAX_DAYS_AHEAD", "7"))
     PICKUP_SLOT_CAPACITY = int(os.environ.get("PICKUP_SLOT_CAPACITY", "4"))
+    ENABLE_INSTANT_ORDERING = _bool_env("ENABLE_INSTANT_ORDERING", True)
+    INSTANT_ORDERING_COUNTER_LABEL = os.environ.get("INSTANT_ORDERING_COUNTER_LABEL", "Front Pickup Counter")
+    INSTANT_ORDERING_BASE_PREP_MINUTES = int(os.environ.get("INSTANT_ORDERING_BASE_PREP_MINUTES", "12"))
+    INSTANT_ORDERING_PER_ACTIVE_ORDER_MINUTES = int(
+        os.environ.get("INSTANT_ORDERING_PER_ACTIVE_ORDER_MINUTES", "4")
+    )
+    INSTANT_ORDERING_PER_ITEM_MINUTES = int(os.environ.get("INSTANT_ORDERING_PER_ITEM_MINUTES", "2"))
+    INSTANT_ORDERING_MAX_ACTIVE_ORDERS = int(os.environ.get("INSTANT_ORDERING_MAX_ACTIVE_ORDERS", "8"))
     ORDER_SERVICE_FEE_CENTS = int(os.environ.get("ORDER_SERVICE_FEE_CENTS", "150"))
     RESTAURANT_PHONE = os.environ.get("RESTAURANT_PHONE", "08 9248 5623")
