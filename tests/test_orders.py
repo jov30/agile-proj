@@ -91,7 +91,7 @@ class TestCheckoutAndOrders(unittest.TestCase):
         with self.app.app_context():
             order = Order.query.one()
             self.assertEqual(order.order_status, "Confirmed")
-            self.assertEqual(order.payment_status, "Paid (simulated)")
+            self.assertEqual(order.payment_status, "Succeeded")
             self.assertEqual(len(order.line_items), 1)
 
         with self.client.session_transaction() as session:

@@ -8,7 +8,14 @@ from zoneinfo import ZoneInfo
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import format_aud
-from models import Order, OrderLineItem, db
+from models import (
+    ORDER_STATUS_SEQUENCE,
+    PAYMENT_ATTEMPT_STATUS_SEQUENCE,
+    Order,
+    OrderLineItem,
+    PaymentAttempt,
+    db,
+)
 from receipt_pdf import build_receipt_pdf
 from routes.cart_api import SESSION_LINES_KEY, _build_cart_payload, _menu, _save_lines
 
@@ -129,6 +136,45 @@ def _payment_options() -> list[dict]:
         {"key": key, **value}
         for key, value in PAYMENT_METHODS.items()
     ]
+
+
+def _status_timeline(order_status: str) -> list[dict]:
+    try:
+        active_index = ORDER_STATUS_SEQUENCE.index(order_status)
+    except ValueError:
+        active_index = 0
+
+    labels = {
+        "Confirmed": "Order has been accepted and queued for kitchen prep.",
+        "Preparing": "Kitchen is actively preparing the dishes for pickup.",
+        "Ready for Pickup": "Order is packed and ready for customer collection.",
+        "Completed": "Pickup has been collected and the order is closed.",
+    }
+    return [
+        {
+            "label": label,
+            "description": labels[label],
+            "is_active": index <= active_index,
+            "is_current": index == active_index,
+        }
+        for index, label in enumerate(ORDER_STATUS_SEQUENCE)
+    ]
+
+
+def _serialize_payment_attempt(attempt: PaymentAttempt) -> dict:
+    local_created = attempt.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
+    return {
+        "reference": attempt.reference,
+        "status": attempt.status,
+        "payment_method": attempt.payment_method,
+        "amount_cents": attempt.amount_cents,
+        "amount_display": format_aud(attempt.amount_cents),
+        "attempt_number": attempt.attempt_number,
+        "card_last4": attempt.card_last4,
+        "failure_code": attempt.failure_code,
+        "failure_message": attempt.failure_message,
+        "created_at": local_created.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+    }
 
 
 def _history_numbers() -> list[str]:
@@ -278,10 +324,10 @@ def _create_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart
         customer_phone=form_data["customer_phone"],
         pickup_at=pickup_at.astimezone(_timezone()).replace(tzinfo=None),
         payment_method=PAYMENT_METHODS[payment_key]["label"],
-        payment_status="Paid (simulated)",
+        payment_status=PAYMENT_ATTEMPT_STATUS_SEQUENCE[1],
         payment_reference=f"SIM-{secrets.token_hex(4).upper()}",
         card_last4=card_number[-4:] if card_number else None,
-        order_status="Confirmed",
+        order_status=ORDER_STATUS_SEQUENCE[0],
         kitchen_notes="Pickup order queued for the kitchen.",
         special_instructions=form_data["special_instructions"] or None,
         subtotal_cents=subtotal,
@@ -311,7 +357,9 @@ def _create_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart
 
 def _serialize_order(order: Order) -> dict:
     created_local = order.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
+    updated_local = order.updated_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
     pickup_local = order.pickup_at.replace(tzinfo=_timezone())
+    attempts = sorted(order.payment_attempts, key=lambda attempt: attempt.created_at, reverse=True)
     return {
         "order_number": order.order_number,
         "confirmation_code": order.confirmation_code,
@@ -320,6 +368,7 @@ def _serialize_order(order: Order) -> dict:
         "customer_phone": order.customer_phone,
         "created_at": created_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
         "created_relative_date": created_local.strftime("%d %b %Y"),
+        "updated_at": updated_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
         "pickup_at": pickup_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
         "pickup_day": pickup_local.strftime("%A, %d %b"),
         "pickup_time": pickup_local.strftime("%I:%M %p").lstrip("0"),
@@ -336,6 +385,11 @@ def _serialize_order(order: Order) -> dict:
         "subtotal_display": format_aud(order.subtotal_cents),
         "service_fee_display": format_aud(order.service_fee_cents),
         "total_display": format_aud(order.total_cents),
+        "available_statuses": list(ORDER_STATUS_SEQUENCE),
+        "status_timeline": _status_timeline(order.order_status),
+        "payment_attempt_count": len(attempts),
+        "latest_payment_attempt": _serialize_payment_attempt(attempts[0]) if attempts else None,
+        "payment_attempts": [_serialize_payment_attempt(attempt) for attempt in attempts],
         "lines": [
             {
                 "item_id": line.item_id,
@@ -421,6 +475,33 @@ def api_orders():
 @orders_bp.get("/api/orders/<order_number>")
 def api_order_detail(order_number: str):
     order = Order.query.filter_by(order_number=order_number).first_or_404()
+    return jsonify(_serialize_order(order))
+
+
+@orders_bp.patch("/api/orders/<order_number>/status")
+def api_update_order_status(order_number: str):
+    order = Order.query.filter_by(order_number=order_number).first_or_404()
+    body = request.get_json(silent=True) or {}
+    next_status = body.get("status")
+    kitchen_notes = body.get("kitchen_notes")
+
+    if next_status not in ORDER_STATUS_SEQUENCE:
+        return (
+            jsonify(
+                {
+                    "error": "status must be one of the supported order states",
+                    "allowed_statuses": list(ORDER_STATUS_SEQUENCE),
+                }
+            ),
+            400,
+        )
+    if kitchen_notes is not None and not isinstance(kitchen_notes, str):
+        return jsonify({"error": "kitchen_notes must be a string when provided"}), 400
+
+    order.order_status = next_status
+    if kitchen_notes is not None:
+        order.kitchen_notes = kitchen_notes.strip() or None
+    db.session.commit()
     return jsonify(_serialize_order(order))
 
 
