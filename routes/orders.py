@@ -26,6 +26,7 @@ orders_bp = Blueprint("orders", __name__)
 SESSION_LAST_ORDER_KEY = "last_order_number"
 SESSION_ORDER_HISTORY_KEY = "order_history_numbers"
 SESSION_CHECKOUT_TOKEN_KEY = "checkout_payment_token"
+SESSION_CHECKOUT_PREFILL_KEY = "checkout_prefill"
 
 PAYMENT_METHODS = {
     "card": {
@@ -178,14 +179,12 @@ def _pickup_windows() -> list[dict]:
 def _default_checkout_form() -> dict[str, str]:
     windows = _pickup_windows()
     first_available = _first_available_pickup(windows)
-    first_date = first_available["date"] if first_available else ""
-    first_slot = first_available["time"] if first_available else ""
-    return {
+    form = {
         "customer_name": "",
         "customer_email": "",
         "customer_phone": "",
-        "pickup_date": first_date,
-        "pickup_time": first_slot,
+        "pickup_date": first_available["date"] if first_available else "",
+        "pickup_time": first_available["time"] if first_available else "",
         "payment_method": "card",
         "card_name": "",
         "card_number": "",
@@ -193,6 +192,23 @@ def _default_checkout_form() -> dict[str, str]:
         "card_cvv": "",
         "special_instructions": "",
     }
+    prefill = _checkout_prefill()
+    for key in ("customer_name", "customer_email", "customer_phone", "payment_method", "special_instructions"):
+        if prefill.get(key):
+            form[key] = prefill[key]
+
+    slot_lookup = {
+        (window["date"], slot["value"]): slot
+        for window in windows
+        for slot in window["slots"]
+    }
+    prefill_date = prefill.get("pickup_date")
+    prefill_time = prefill.get("pickup_time")
+    slot = slot_lookup.get((prefill_date, prefill_time))
+    if slot and slot["is_available"]:
+        form["pickup_date"] = prefill_date or form["pickup_date"]
+        form["pickup_time"] = prefill_time or form["pickup_time"]
+    return form
 
 
 def _payment_options() -> list[dict]:
@@ -279,6 +295,27 @@ def _latest_checkout_attempt() -> PaymentAttempt | None:
         .order_by(PaymentAttempt.created_at.desc())
         .first()
     )
+
+
+def _checkout_prefill() -> dict[str, str]:
+    payload = session.get(SESSION_CHECKOUT_PREFILL_KEY)
+    if not isinstance(payload, dict):
+        return {}
+    return {
+        key: value
+        for key, value in payload.items()
+        if isinstance(key, str) and isinstance(value, str)
+    }
+
+
+def _save_checkout_prefill(prefill: dict[str, str]) -> None:
+    session[SESSION_CHECKOUT_PREFILL_KEY] = prefill
+    session.modified = True
+
+
+def _clear_checkout_prefill() -> None:
+    session.pop(SESSION_CHECKOUT_PREFILL_KEY, None)
+    session.modified = True
 
 
 def _get_checkout_context(
@@ -484,6 +521,7 @@ def _finalize_successful_order(order: Order) -> None:
     session[SESSION_LINES_KEY] = []
     _remember_order(order.order_number)
     _clear_checkout_token()
+    _clear_checkout_prefill()
 
 
 def _payment_failure_for(form_data: dict[str, str], card_last4: str | None) -> tuple[str, str] | None:
@@ -563,6 +601,7 @@ def _serialize_order(order: Order) -> dict:
         "created_relative_date": created_local.strftime("%d %b %Y"),
         "updated_at": updated_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
         "pickup_at": pickup_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+        "pickup_date_iso": pickup_local.strftime("%Y-%m-%d"),
         "pickup_day": pickup_local.strftime("%A, %d %b"),
         "pickup_time": pickup_local.strftime("%I:%M %p").lstrip("0"),
         "payment_method": order.payment_method,
@@ -597,6 +636,41 @@ def _serialize_order(order: Order) -> dict:
     }
 
 
+def _parse_date_filter(value: str | None):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def _filter_serialized_orders(orders: list[dict]) -> tuple[list[dict], dict[str, str]]:
+    status = request.args.get("status", "").strip()
+    date_from = request.args.get("date_from", "").strip()
+    date_to = request.args.get("date_to", "").strip()
+    from_value = _parse_date_filter(date_from)
+    to_value = _parse_date_filter(date_to)
+
+    filtered = orders
+    if status in ORDER_STATUS_SEQUENCE:
+        filtered = [order for order in filtered if order["order_status"] == status]
+    if from_value:
+        filtered = [
+            order
+            for order in filtered
+            if datetime.strptime(order["pickup_date_iso"], "%Y-%m-%d").date() >= from_value
+        ]
+    if to_value:
+        filtered = [
+            order
+            for order in filtered
+            if datetime.strptime(order["pickup_date_iso"], "%Y-%m-%d").date() <= to_value
+        ]
+
+    return filtered, {"status": status, "date_from": date_from, "date_to": date_to}
+
+
 def _session_orders() -> list[Order]:
     order_numbers = _history_numbers()
     if not order_numbers:
@@ -604,6 +678,35 @@ def _session_orders() -> list[Order]:
     orders = Order.query.filter(Order.order_number.in_(order_numbers)).order_by(Order.created_at.desc()).all()
     order_lookup = {order.order_number: order for order in orders}
     return [order_lookup[number] for number in order_numbers if number in order_lookup]
+
+
+def _reorder_prefill(order: Order) -> dict[str, str]:
+    windows = _pickup_windows()
+    original_date = order.pickup_at.strftime("%Y-%m-%d")
+    original_time = order.pickup_at.strftime("%H:%M")
+    slot_lookup = {
+        (window["date"], slot["value"]): slot
+        for window in windows
+        for slot in window["slots"]
+    }
+    slot = slot_lookup.get((original_date, original_time))
+    if slot and slot["is_available"]:
+        pickup_date = original_date
+        pickup_time = original_time
+    else:
+        fallback = _first_available_pickup(windows)
+        pickup_date = fallback["date"] if fallback else ""
+        pickup_time = fallback["time"] if fallback else ""
+
+    return {
+        "customer_name": order.customer_name,
+        "customer_email": order.customer_email,
+        "customer_phone": order.customer_phone,
+        "pickup_date": pickup_date,
+        "pickup_time": pickup_time,
+        "payment_method": "card",
+        "special_instructions": order.special_instructions or "",
+    }
 
 
 @orders_bp.route("/checkout", methods=["GET", "POST"])
@@ -677,20 +780,31 @@ def receipt() -> str:
 @orders_bp.get("/orders")
 def orders() -> str:
     session_orders = [_serialize_order(order) for order in _session_orders()]
-    total_spend = sum(order["total_cents"] for order in session_orders)
+    filtered_orders, filters = _filter_serialized_orders(session_orders)
+    total_spend = sum(order["total_cents"] for order in filtered_orders)
     return render_template(
         "user/orders.html",
-        orders=session_orders,
-        order_count=len(session_orders),
+        orders=filtered_orders,
+        order_count=len(filtered_orders),
+        total_order_count=len(session_orders),
         total_spend_display=format_aud(total_spend),
-        latest_order=session_orders[0] if session_orders else None,
+        latest_order=filtered_orders[0] if filtered_orders else (session_orders[0] if session_orders else None),
+        filters=filters,
+        available_statuses=list(ORDER_STATUS_SEQUENCE),
     )
 
 
 @orders_bp.get("/api/orders")
 def api_orders():
     orders = [_serialize_order(order) for order in _session_orders()]
-    return jsonify({"orders": orders, "count": len(orders)})
+    filtered_orders, filters = _filter_serialized_orders(orders)
+    return jsonify({"orders": filtered_orders, "count": len(filtered_orders), "filters": filters})
+
+
+@orders_bp.get("/orders/<order_number>")
+def order_detail(order_number: str):
+    order = Order.query.filter_by(order_number=order_number).first_or_404()
+    return render_template("user/order_detail.html", order=_serialize_order(order))
 
 
 @orders_bp.get("/api/orders/<order_number>")
@@ -731,6 +845,8 @@ def reorder(order_number: str):
     order = Order.query.filter_by(order_number=order_number).first_or_404()
     lines = [{"id": line.item_id, "qty": line.quantity} for line in order.line_items]
     _save_lines(lines)
+    _clear_checkout_token()
+    _save_checkout_prefill(_reorder_prefill(order))
     return redirect(url_for("orders.checkout"))
 
 

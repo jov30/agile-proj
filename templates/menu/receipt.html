@@ -428,6 +428,7 @@
           <div class="receipt-actions">
             <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--primary">Download PDF receipt</a>
             <button type="button" class="button button--secondary" onclick="window.print()">Print receipt</button>
+            <a href="{{ url_for('orders.order_detail', order_number=order.order_number) }}" class="button button--secondary">Open order detail</a>
             <a href="{{ url_for('orders.orders') }}" class="button button--secondary">View order history</a>
             <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
               <button type="submit" class="button button--secondary button--inline">Order again</button>
