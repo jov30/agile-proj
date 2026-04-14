@@ -344,6 +344,28 @@
           {% endfor %}
         </div>
       </div>
+
+      <div class="order-detail__card">
+        <p class="eyebrow">Ready notifications</p>
+        <h2>Mock delivery log</h2>
+        <div class="order-detail__attempts">
+          {% if not order.notifications %}
+            <div class="order-detail__attempt-item">
+              <span>No notification sent yet</span>
+              <strong>Order is not in ready state</strong>
+              <p>Once status changes to Ready for Pickup, mock email and SMS logs appear here.</p>
+            </div>
+          {% else %}
+            {% for note in order.notifications %}
+              <div class="order-detail__attempt-item">
+                <span>{{ note.delivery_status }} · {{ note.channel|upper }} · {{ note.created_at }}</span>
+                <strong>{{ note.event_type.replace('_', ' ')|title }}</strong>
+                <p>{{ note.message }}</p>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
     </aside>
   </section>
 </div>

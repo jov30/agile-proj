@@ -37,6 +37,7 @@
   .orders-stat,
   .orders-filter,
   .orders-highlight,
+  .orders-ready-banner,
   .order-card {
     position: relative;
     overflow: hidden;
@@ -51,6 +52,7 @@
   .orders-stat,
   .orders-filter,
   .orders-highlight,
+  .orders-ready-banner,
   .order-card {
     padding: 1.15rem 1.2rem;
   }
@@ -125,6 +127,17 @@
     z-index: 1;
     display: grid;
     gap: 1rem;
+  }
+
+  .orders-ready-banners {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .orders-ready-banner p {
+    margin: 0.34rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
   }
 
   .order-card__header {
@@ -363,6 +376,29 @@
         </div>
       </div>
     </section>
+
+    {% if ready_banners %}
+      <section class="orders-list section-panel">
+        <div class="orders-ready-banners">
+          {% for banner in ready_banners %}
+            <article class="orders-ready-banner">
+              <p class="eyebrow">Ready notification</p>
+              <strong>
+                {{ banner.order_number }} is ready for pickup
+                {% if banner.queue_display %}
+                  ({{ banner.queue_display }})
+                {% endif %}
+              </strong>
+              <p>
+                {{ banner.message }}
+                <br />
+                Notified at {{ banner.notified_at }}.
+              </p>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
 
     <section class="orders-list section-panel">
       <form method="get" class="orders-filter">

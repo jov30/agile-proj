@@ -146,6 +146,8 @@ def build_receipt_pdf(order: dict) -> bytes:
     ]
     if is_instant and order.get("quoted_wait_display"):
         overview_lines.append(f"Quoted wait: {order['quoted_wait_display']}")
+    if order.get("ready_notification_count"):
+        overview_lines.append(f"Ready notifications: {order['ready_notification_count']} mock sends")
     content.extend(_stroked_rect(LEFT_MARGIN, 600, 516, 88, (0.812, 0.682, 0.510)))
     content.extend(_text_block(x=LEFT_MARGIN + 14, y=y, font="F2", size=13, lines=["Order overview"]))
     y -= 18

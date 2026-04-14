@@ -434,6 +434,9 @@
             {% if order.is_instant and order.queue_display %}
               <span class="pill"><strong>{{ order.queue_display }}</strong> queue number to present at {{ order.counter_label }}.</span>
             {% endif %}
+            {% if order.ready_notification_count %}
+              <span class="pill"><strong>{{ order.ready_notification_count }}</strong> ready notifications sent (mock email/SMS).</span>
+            {% endif %}
           </div>
           <div class="receipt-actions">
             <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--primary">Download PDF receipt</a>
@@ -568,6 +571,13 @@
                       · {{ order.latest_payment_attempt.failure_message }}
                     {% endif %}
                   </p>
+                </div>
+              {% endif %}
+              {% if order.latest_ready_notification %}
+                <div class="receipt-meta__item">
+                  <span>Ready notification</span>
+                  <strong>{{ order.latest_ready_notification.delivery_status }} via {{ order.latest_ready_notification.channel|upper }}</strong>
+                  <p>{{ order.latest_ready_notification.message }}</p>
                 </div>
               {% endif %}
             </div>

@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
 from app import create_app
-from models import Order, PaymentAttempt, db
+from models import DailyQueueCounter, Order, OrderNotification, PaymentAttempt, db
 
 
 class TestCheckoutAndOrders(unittest.TestCase):
@@ -265,6 +265,8 @@ class TestCheckoutAndOrders(unittest.TestCase):
             self.assertIsNotNone(second_order)
             self.assertEqual(first_order.queue_number, 1)
             self.assertEqual(second_order.queue_number, 2)
+            queue_counter = DailyQueueCounter.query.one()
+            self.assertEqual(queue_counter.last_number, 2)
 
     def test_instant_queue_capacity_blocks_new_order(self):
         self.app.config["INSTANT_ORDERING_MAX_ACTIVE_ORDERS"] = 1
@@ -274,6 +276,44 @@ class TestCheckoutAndOrders(unittest.TestCase):
         blocked = self.client.post("/checkout", data=self._valid_checkout_form(fulfillment_type="instant"))
         self.assertEqual(blocked.status_code, 400)
         self.assertIn("instant queue is full", blocked.get_data(as_text=True).lower())
+
+    def test_ready_status_triggers_mock_notifications_and_history_banner(self):
+        order_number = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+        response = self.client.patch(
+            f"/api/orders/{order_number}/status",
+            json={"status": "Ready for Pickup"},
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()
+        self.assertEqual(payload["ready_notification_count"], 2)
+        self.assertIsNotNone(payload["latest_ready_notification"])
+
+        with self.app.app_context():
+            notes = (
+                OrderNotification.query.join(Order, Order.id == OrderNotification.order_id)
+                .filter(Order.order_number == order_number, OrderNotification.event_type == "ready_for_pickup")
+                .all()
+            )
+            self.assertEqual(len(notes), 2)
+            channels = {note.channel for note in notes}
+            self.assertEqual(channels, {"email", "sms"})
+
+        history = self.client.get("/orders")
+        self.assertEqual(history.status_code, 200)
+        html = history.get_data(as_text=True)
+        self.assertIn("Ready notification", html)
+        self.assertIn(order_number, html)
+
+    def test_admin_queue_page_lists_active_orders(self):
+        instant_order = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+        scheduled_order = self._place_order(self._valid_checkout_form(fulfillment_type="scheduled"))
+
+        page = self.client.get("/admin/orders/queue")
+        self.assertEqual(page.status_code, 200)
+        html = page.get_data(as_text=True)
+        self.assertIn("Live pickup queue management", html)
+        self.assertIn(instant_order, html)
+        self.assertIn(scheduled_order, html)
 
 
 if __name__ == "__main__":
