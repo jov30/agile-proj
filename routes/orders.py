@@ -62,6 +62,10 @@ def _now_local() -> datetime:
     return datetime.now(_timezone())
 
 
+def _to_local_naive(value: datetime) -> datetime:
+    return value.astimezone(_timezone()).replace(tzinfo=None)
+
+
 def _combine_pickup(date_text: str, time_text: str) -> datetime | None:
     if not date_text or not time_text:
         return None
@@ -73,10 +77,43 @@ def _combine_pickup(date_text: str, time_text: str) -> datetime | None:
     return datetime.combine(pickup_date, pickup_time, tzinfo=_timezone())
 
 
+def _pickup_slot_counts() -> dict[str, int]:
+    now = _now_local()
+    start_naive = datetime.combine(now.date(), time.min)
+    end_naive = datetime.combine(
+        now.date() + timedelta(days=current_app.config["PICKUP_MAX_DAYS_AHEAD"] + 1),
+        time.min,
+    )
+    counts: dict[str, int] = {}
+    active_orders = (
+        Order.query.filter(Order.pickup_at >= start_naive, Order.pickup_at < end_naive)
+        .filter(Order.order_status != ORDER_STATUS_SEQUENCE[-1])
+        .all()
+    )
+    for order in active_orders:
+        slot_key = order.pickup_at.strftime("%Y-%m-%d %H:%M")
+        counts[slot_key] = counts.get(slot_key, 0) + 1
+    return counts
+
+
+def _first_available_pickup(windows: list[dict]) -> dict | None:
+    for window in windows:
+        for slot in window["slots"]:
+            if slot["is_available"]:
+                return {
+                    "date": window["date"],
+                    "date_label": window["label"],
+                    "time": slot["value"],
+                    "time_label": slot["label"],
+                }
+    return None
+
+
 def _pickup_windows() -> list[dict]:
     now = _now_local()
     lead = timedelta(minutes=current_app.config["PICKUP_MIN_LEAD_MINUTES"])
     slot_minutes = current_app.config["PICKUP_SLOT_MINUTES"]
+    capacity = current_app.config["PICKUP_SLOT_CAPACITY"]
     opening = time(
         hour=current_app.config["PICKUP_OPEN_HOUR"],
         minute=current_app.config["PICKUP_OPEN_MINUTE"],
@@ -85,6 +122,7 @@ def _pickup_windows() -> list[dict]:
         hour=current_app.config["PICKUP_CLOSE_HOUR"],
         minute=current_app.config["PICKUP_CLOSE_MINUTE"],
     )
+    slot_counts = _pickup_slot_counts()
     windows: list[dict] = []
 
     for day_offset in range(current_app.config["PICKUP_MAX_DAYS_AHEAD"] + 1):
@@ -93,13 +131,34 @@ def _pickup_windows() -> list[dict]:
         closing_slot = datetime.combine(date_value, closing, tzinfo=_timezone())
         slots = []
         while current_slot <= closing_slot:
-            if current_slot >= now + lead:
-                slots.append(
-                    {
-                        "value": current_slot.strftime("%H:%M"),
-                        "label": current_slot.strftime("%I:%M %p").lstrip("0"),
-                    }
-                )
+            slot_key = f"{date_value.isoformat()} {current_slot.strftime('%H:%M')}"
+            reserved_count = slot_counts.get(slot_key, 0)
+            remaining_capacity = max(0, capacity - reserved_count)
+            is_available = True
+            reason = ""
+            if current_slot < now + lead:
+                is_available = False
+                reason = "Too soon for kitchen lead time"
+            elif remaining_capacity < 1:
+                is_available = False
+                reason = "Pickup slot is full"
+            elif remaining_capacity == 1:
+                reason = "1 spot left"
+            else:
+                reason = f"{remaining_capacity} spots left"
+
+            slots.append(
+                {
+                    "value": current_slot.strftime("%H:%M"),
+                    "label": current_slot.strftime("%I:%M %p").lstrip("0"),
+                    "slot_key": slot_key,
+                    "is_available": is_available,
+                    "availability_reason": reason,
+                    "remaining_capacity": remaining_capacity,
+                    "reserved_count": reserved_count,
+                    "capacity": capacity,
+                }
+            )
             current_slot += timedelta(minutes=slot_minutes)
         if slots:
             windows.append(
@@ -107,6 +166,7 @@ def _pickup_windows() -> list[dict]:
                     "date": date_value.isoformat(),
                     "label": date_value.strftime("%A, %d %b"),
                     "slots": slots,
+                    "available_count": sum(1 for slot in slots if slot["is_available"]),
                 }
             )
     return windows
@@ -114,8 +174,9 @@ def _pickup_windows() -> list[dict]:
 
 def _default_checkout_form() -> dict[str, str]:
     windows = _pickup_windows()
-    first_date = windows[0]["date"] if windows else ""
-    first_slot = windows[0]["slots"][0]["value"] if windows and windows[0]["slots"] else ""
+    first_available = _first_available_pickup(windows)
+    first_date = first_available["date"] if first_available else ""
+    first_slot = first_available["time"] if first_available else ""
     return {
         "customer_name": "",
         "customer_email": "",
@@ -196,6 +257,7 @@ def _get_checkout_context(
     *,
     form_data: dict[str, str] | None = None,
     errors: list[str] | None = None,
+    field_errors: dict[str, str] | None = None,
     entry_step: str = "checkout",
 ) -> dict:
     cart = _build_cart_payload(_menu())
@@ -211,10 +273,12 @@ def _get_checkout_context(
             break
     if not selected_slots and windows:
         selected_slots = windows[0]["slots"]
+    next_available_pickup = _first_available_pickup(windows)
 
     return {
         "entry_step": entry_step,
         "errors": errors or [],
+        "field_errors": field_errors or {},
         "form_data": form_data or _default_checkout_form(),
         "cart": cart,
         "service_fee_cents": service_fee,
@@ -225,6 +289,8 @@ def _get_checkout_context(
         "selected_slots": selected_slots,
         "payment_options": _payment_options(),
         "pickup_lead_minutes": current_app.config["PICKUP_MIN_LEAD_MINUTES"],
+        "pickup_slot_capacity": current_app.config["PICKUP_SLOT_CAPACITY"],
+        "next_available_pickup": next_available_pickup,
         "restaurant_phone": current_app.config["RESTAURANT_PHONE"],
     }
 
@@ -246,43 +312,62 @@ def _normalize_form() -> dict[str, str]:
     return {field: request.form.get(field, "").strip() for field in fields}
 
 
-def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str], datetime | None]:
+def _push_error(
+    errors: list[str],
+    field_errors: dict[str, str],
+    field_name: str | None,
+    message: str,
+) -> None:
+    if message not in errors:
+        errors.append(message)
+    if field_name and field_name not in field_errors:
+        field_errors[field_name] = message
+
+
+def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str], dict[str, str], datetime | None]:
     errors: list[str] = []
+    field_errors: dict[str, str] = {}
     if not cart["lines"]:
-        errors.append("Your cart is empty. Add at least one item before checking out.")
+        _push_error(errors, field_errors, "cart", "Your cart is empty. Add at least one item before checking out.")
 
     if len(form_data["customer_name"]) < 2:
-        errors.append("Please enter the pickup contact name.")
+        _push_error(errors, field_errors, "customer_name", "Please enter the pickup contact name.")
     if not EMAIL_RE.match(form_data["customer_email"]):
-        errors.append("Please enter a valid email address.")
+        _push_error(errors, field_errors, "customer_email", "Please enter a valid email address.")
     if len(PHONE_RE.findall(form_data["customer_phone"])) < 8:
-        errors.append("Please enter a valid phone number.")
+        _push_error(errors, field_errors, "customer_phone", "Please enter a valid phone number.")
 
     payment = PAYMENT_METHODS.get(form_data["payment_method"])
     if payment is None:
-        errors.append("Choose a valid payment method.")
+        _push_error(errors, field_errors, "payment_method", "Choose a valid payment method.")
 
     if payment and payment["requires_card"]:
         card_number = re.sub(r"\D", "", form_data["card_number"])
         if len(form_data["card_name"]) < 2:
-            errors.append("Cardholder name is required for card payments.")
+            _push_error(errors, field_errors, "card_name", "Cardholder name is required for card payments.")
         if not CARD_RE.match(card_number):
-            errors.append("Enter a valid card number for the simulated payment.")
+            _push_error(errors, field_errors, "card_number", "Enter a valid card number for the simulated payment.")
         expiry_match = EXPIRY_RE.match(form_data["card_expiry"])
         if not expiry_match:
-            errors.append("Enter a card expiry in MM/YY format.")
+            _push_error(errors, field_errors, "card_expiry", "Enter a card expiry in MM/YY format.")
         else:
             month = int(expiry_match.group(1))
             year = 2000 + int(expiry_match.group(2))
             now = _now_local()
             if (year, month) < (now.year, now.month):
-                errors.append("The simulated card expiry cannot be in the past.")
+                _push_error(errors, field_errors, "card_expiry", "The simulated card expiry cannot be in the past.")
         if not CVV_RE.match(re.sub(r"\D", "", form_data["card_cvv"])):
-            errors.append("Enter a valid 3 or 4 digit security code.")
+            _push_error(errors, field_errors, "card_cvv", "Enter a valid 3 or 4 digit security code.")
 
     pickup_at = _combine_pickup(form_data["pickup_date"], form_data["pickup_time"])
+    windows = _pickup_windows()
+    slot_lookup = {
+        (window["date"], slot["value"]): slot
+        for window in windows
+        for slot in window["slots"]
+    }
     if pickup_at is None:
-        errors.append("Choose a valid pickup date and time.")
+        _push_error(errors, field_errors, "pickup_time", "Choose a valid pickup date and time.")
     else:
         now = _now_local()
         lead = timedelta(minutes=current_app.config["PICKUP_MIN_LEAD_MINUTES"])
@@ -298,15 +383,27 @@ def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str]
             second=0,
             microsecond=0,
         )
+        slot = slot_lookup.get((form_data["pickup_date"], form_data["pickup_time"]))
         if pickup_at < now + lead:
-            errors.append(
-                f"Pickup time must be at least {current_app.config['PICKUP_MIN_LEAD_MINUTES']} minutes from now."
+            _push_error(
+                errors,
+                field_errors,
+                "pickup_time",
+                f"Pickup time must be at least {current_app.config['PICKUP_MIN_LEAD_MINUTES']} minutes from now.",
             )
         if pickup_at < opening or pickup_at > closing:
-            errors.append("Pickup time must be within MCQ trading hours.")
+            _push_error(errors, field_errors, "pickup_time", "Pickup time must be within MCQ trading hours.")
         if pickup_at.date() > (now.date() + timedelta(days=current_app.config["PICKUP_MAX_DAYS_AHEAD"])):
-            errors.append("Pickup time is too far in advance for this schedule.")
-    return errors, pickup_at
+            _push_error(errors, field_errors, "pickup_date", "Pickup time is too far in advance for this schedule.")
+        if slot is None:
+            _push_error(errors, field_errors, "pickup_time", "Choose one of the available pickup slots.")
+        elif not slot["is_available"]:
+            next_available = _first_available_pickup(windows)
+            message = f"That pickup slot is unavailable: {slot['availability_reason']}."
+            if next_available:
+                message += f" Next available pickup is {next_available['date_label']} at {next_available['time_label']}."
+            _push_error(errors, field_errors, "pickup_time", message)
+    return errors, field_errors, pickup_at
 
 
 def _create_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart: dict) -> Order:
@@ -418,9 +515,14 @@ def checkout() -> str | Response:
     if request.method == "POST":
         form_data = _normalize_form()
         cart = _build_cart_payload(_menu())
-        errors, pickup_at = _validate_checkout(form_data, cart)
+        errors, field_errors, pickup_at = _validate_checkout(form_data, cart)
         if errors or pickup_at is None:
-            context = _get_checkout_context(form_data=form_data, errors=errors, entry_step="checkout")
+            context = _get_checkout_context(
+                form_data=form_data,
+                errors=errors,
+                field_errors=field_errors,
+                entry_step="checkout",
+            )
             return render_template("menu/checkout.html", **context), 400
         order = _create_order_from_cart(form_data, pickup_at, cart)
         return redirect(url_for("orders.receipt", order=order.order_number))

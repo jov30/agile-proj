@@ -261,6 +261,21 @@
     line-height: 1.5;
   }
 
+  .field-error {
+    margin: -0.1rem 0 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #b33040;
+  }
+
+  .field.is-invalid input,
+  .field.is-invalid select,
+  .field.is-invalid textarea {
+    border-color: rgba(179, 48, 64, 0.34);
+    box-shadow: 0 0 0 4px rgba(179, 48, 64, 0.08);
+    background: rgba(255, 248, 249, 0.98);
+  }
+
   .checkout-alert {
     padding: 1rem 1.1rem;
     border-radius: 24px;
@@ -376,6 +391,12 @@
     line-height: 1.6;
   }
 
+  .checkout-pickup-banner em {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--brand-red);
+  }
+
   .checkout-aside {
     display: grid;
     gap: 1rem;
@@ -420,6 +441,67 @@
     text-align: right;
   }
 
+  .checkout-line__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.55rem;
+  }
+
+  .checkout-line__qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .checkout-line__qty button,
+  .checkout-line__remove {
+    border: 0;
+    border-radius: 12px;
+    font: inherit;
+    cursor: pointer;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+
+  .checkout-line__qty button {
+    width: 34px;
+    height: 34px;
+    font-weight: 800;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+  }
+
+  .checkout-line__qty span {
+    min-width: 1.5rem;
+    text-align: center;
+    font-weight: 800;
+  }
+
+  .checkout-line__remove {
+    padding: 0.52rem 0.7rem;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+    border: 1px solid rgba(0, 111, 116, 0.14);
+  }
+
+  .checkout-line__qty button:hover,
+  .checkout-line__remove:hover {
+    transform: translateY(-1px);
+  }
+
+  .checkout-inline-status {
+    margin-top: 0.8rem;
+    min-height: 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .checkout-inline-status.is-error {
+    color: #b33040;
+    font-weight: 700;
+  }
+
   .checkout-totals {
     display: grid;
     gap: 0.7rem;
@@ -452,6 +534,23 @@
     cursor: pointer;
     font: inherit;
     padding-block: 1rem;
+  }
+
+  .checkout-submit[disabled] {
+    cursor: wait;
+    opacity: 0.82;
+  }
+
+  .checkout-submit__busy {
+    display: none;
+  }
+
+  .checkout-submit.is-busy .checkout-submit__idle {
+    display: none;
+  }
+
+  .checkout-submit.is-busy .checkout-submit__busy {
+    display: inline;
   }
 
   .checkout-mini-grid {
@@ -589,6 +688,12 @@
           <span class="pill"><strong>Simulated payment</strong> secure demo confirmation with no live gateway.</span>
           <span class="pill"><strong>Kitchen-ready data</strong> order lines, totals, pickup slot, and notes are stored in SQLite.</span>
           <span class="pill"><strong>Post-checkout proof</strong> receipt page and PDF export are available immediately.</span>
+          {% if next_available_pickup %}
+            <span class="pill">
+              <strong>Nearest slot</strong>
+              {{ next_available_pickup.date_label }} at {{ next_available_pickup.time_label }}
+            </span>
+          {% endif %}
         </div>
       </div>
       <div class="checkout-hero__panel">
@@ -611,8 +716,8 @@
             <span>Minimum lead time before the pickup window becomes available.</span>
           </div>
           <div class="checkout-stat">
-            <strong>PDF receipt</strong>
-            <span>Generated on demand once the order has been confirmed.</span>
+            <strong>{{ pickup_slot_capacity }} / slot</strong>
+            <span>Maximum active pickup orders allowed in each time block.</span>
           </div>
         </div>
       </div>
@@ -669,11 +774,12 @@
               </div>
 
               <div class="field-grid">
-                <div class="field">
+                <div class="field {% if field_errors.customer_name %}is-invalid{% endif %}">
                   <label for="customer_name">Full name</label>
                   <input id="customer_name" name="customer_name" type="text" value="{{ form_data.customer_name }}" autocomplete="name" />
+                  {% if field_errors.customer_name %}<p class="field-error">{{ field_errors.customer_name }}</p>{% endif %}
                 </div>
-                <div class="field">
+                <div class="field {% if field_errors.customer_phone %}is-invalid{% endif %}">
                   <label for="customer_phone">Phone number</label>
                   <input
                     id="customer_phone"
@@ -683,10 +789,12 @@
                     autocomplete="tel"
                     placeholder="04xx xxx xxx"
                   />
+                  {% if field_errors.customer_phone %}<p class="field-error">{{ field_errors.customer_phone }}</p>{% endif %}
                 </div>
-                <div class="field field-grid--single" style="grid-column: 1 / -1">
+                <div class="field field-grid--single {% if field_errors.customer_email %}is-invalid{% endif %}" style="grid-column: 1 / -1">
                   <label for="customer_email">Email</label>
                   <input id="customer_email" name="customer_email" type="email" value="{{ form_data.customer_email }}" autocomplete="email" />
+                  {% if field_errors.customer_email %}<p class="field-error">{{ field_errors.customer_email }}</p>{% endif %}
                 </div>
               </div>
             </div>
@@ -722,14 +830,16 @@
                   </label>
                 {% endfor %}
               </div>
+              {% if field_errors.payment_method %}<p class="field-error" style="margin-top: 0.7rem">{{ field_errors.payment_method }}</p>{% endif %}
 
               <div class="checkout-card-fields" id="card-fields">
                 <div class="field-grid">
-                  <div class="field field-grid--single" style="grid-column: 1 / -1">
+                  <div class="field field-grid--single {% if field_errors.card_name %}is-invalid{% endif %}" style="grid-column: 1 / -1">
                     <label for="card_name">Cardholder name</label>
                     <input id="card_name" name="card_name" type="text" value="{{ form_data.card_name }}" autocomplete="cc-name" />
+                    {% if field_errors.card_name %}<p class="field-error">{{ field_errors.card_name }}</p>{% endif %}
                   </div>
-                  <div class="field field-grid--single" style="grid-column: 1 / -1">
+                  <div class="field field-grid--single {% if field_errors.card_number %}is-invalid{% endif %}" style="grid-column: 1 / -1">
                     <label for="card_number">Card number</label>
                     <input
                       id="card_number"
@@ -740,8 +850,9 @@
                       autocomplete="cc-number"
                       placeholder="4242 4242 4242 4242"
                     />
+                    {% if field_errors.card_number %}<p class="field-error">{{ field_errors.card_number }}</p>{% endif %}
                   </div>
-                  <div class="field">
+                  <div class="field {% if field_errors.card_expiry %}is-invalid{% endif %}">
                     <label for="card_expiry">Expiry</label>
                     <input
                       id="card_expiry"
@@ -752,8 +863,9 @@
                       autocomplete="cc-exp"
                       placeholder="MM/YY"
                     />
+                    {% if field_errors.card_expiry %}<p class="field-error">{{ field_errors.card_expiry }}</p>{% endif %}
                   </div>
-                  <div class="field">
+                  <div class="field {% if field_errors.card_cvv %}is-invalid{% endif %}">
                     <label for="card_cvv">Security code</label>
                     <input
                       id="card_cvv"
@@ -764,6 +876,7 @@
                       autocomplete="cc-csc"
                       placeholder="123"
                     />
+                    {% if field_errors.card_cvv %}<p class="field-error">{{ field_errors.card_cvv }}</p>{% endif %}
                   </div>
                 </div>
               </div>
@@ -787,31 +900,44 @@
                   Slots open in 30-minute blocks. The earliest available time always respects the
                   {{ pickup_lead_minutes }} minute kitchen lead time, and the contact number below can be used
                   if you need to update the order after it has been placed: {{ restaurant_phone }}.
+                  {% if next_available_pickup %}
+                    <br />
+                    <em>Next available slot:</em> {{ next_available_pickup.date_label }} at {{ next_available_pickup.time_label }}.
+                  {% endif %}
                 </p>
               </div>
 
               <div class="field-grid">
-                <div class="field">
+                <div class="field {% if field_errors.pickup_date %}is-invalid{% endif %}">
                   <label for="pickup_date">Pickup date</label>
                   <select id="pickup_date" name="pickup_date">
                     {% for window in pickup_windows %}
                       <option value="{{ window.date }}" {% if form_data.pickup_date == window.date %}selected{% endif %}>
-                        {{ window.label }}
+                        {{ window.label }}{% if window.available_count %} · {{ window.available_count }} slots open{% else %} · no slots open{% endif %}
                       </option>
                     {% endfor %}
                   </select>
+                  {% if field_errors.pickup_date %}<p class="field-error">{{ field_errors.pickup_date }}</p>{% endif %}
                 </div>
-                <div class="field">
+                <div class="field {% if field_errors.pickup_time %}is-invalid{% endif %}">
                   <label for="pickup_time">Pickup time</label>
                   <select id="pickup_time" name="pickup_time">
                     {% for slot in selected_slots %}
-                      <option value="{{ slot.value }}" {% if form_data.pickup_time == slot.value %}selected{% endif %}>
-                        {{ slot.label }}
+                      <option
+                        value="{{ slot.value }}"
+                        data-slot-label="{{ slot.label }}"
+                        data-slot-available="{{ 'true' if slot.is_available else 'false' }}"
+                        data-slot-reason="{{ slot.availability_reason }}"
+                        {% if form_data.pickup_time == slot.value %}selected{% endif %}
+                        {% if not slot.is_available %}disabled{% endif %}
+                      >
+                        {{ slot.label }} · {{ slot.availability_reason }}
                       </option>
                     {% endfor %}
                   </select>
+                  {% if field_errors.pickup_time %}<p class="field-error">{{ field_errors.pickup_time }}</p>{% endif %}
                 </div>
-                <div class="field field-grid--single" style="grid-column: 1 / -1">
+                <div class="field field-grid--single {% if field_errors.special_instructions %}is-invalid{% endif %}" style="grid-column: 1 / -1">
                   <label for="special_instructions">Kitchen notes</label>
                   <textarea
                     id="special_instructions"
@@ -839,15 +965,24 @@
 
             <div class="checkout-summary__list">
               {% for line in cart.lines %}
-                <div class="checkout-line">
+                <div class="checkout-line" data-checkout-item="{{ line.item_id }}" data-quantity="{{ line.quantity }}">
                   <div>
                     <p class="checkout-line__title">{{ line.name }}</p>
                     <p class="checkout-line__meta">{{ line.quantity }} x {{ line.price_display }} · {{ line.category_title }}</p>
+                    <div class="checkout-line__controls">
+                      <div class="checkout-line__qty">
+                        <button type="button" data-cart-action="decrease" aria-label="Decrease quantity">&minus;</button>
+                        <span>{{ line.quantity }}</span>
+                        <button type="button" data-cart-action="increase" aria-label="Increase quantity">&plus;</button>
+                      </div>
+                      <button type="button" class="checkout-line__remove" data-cart-action="remove">Remove</button>
+                    </div>
                   </div>
                   <div class="checkout-line__price">{{ line.line_display }}</div>
                 </div>
               {% endfor %}
             </div>
+            <p class="checkout-inline-status" id="checkout-inline-status" aria-live="polite"></p>
 
             <div class="checkout-totals">
               <div class="checkout-total">
@@ -865,10 +1000,11 @@
             </div>
 
             <div class="checkout-aside__actions">
-              <button class="button button--primary checkout-submit" type="submit" form="checkout-form">
-                Pay {{ grand_total_display }} & Confirm Pickup
+              <button class="button button--primary checkout-submit" type="submit" form="checkout-form" id="checkout-submit">
+                <span class="checkout-submit__idle">Pay {{ grand_total_display }} & Confirm Pickup</span>
+                <span class="checkout-submit__busy">Processing payment...</span>
               </button>
-              <a href="{{ url_for('orders.cart') }}" class="button button--secondary">Edit cart</a>
+              <a href="{{ url_for('orders.cart') }}" class="button button--secondary">Full cart view</a>
             </div>
           </div>
         </section>
@@ -908,6 +1044,7 @@
 
 {% block scripts %}
   {% if cart.lines %}
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
     <script id="pickup-windows-data" type="application/json">{{ pickup_windows | tojson }}</script>
     <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
   {% endif %}

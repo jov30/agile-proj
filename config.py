@@ -26,5 +26,6 @@ class Config:
     PICKUP_SLOT_MINUTES = int(os.environ.get("PICKUP_SLOT_MINUTES", "30"))
     PICKUP_MIN_LEAD_MINUTES = int(os.environ.get("PICKUP_MIN_LEAD_MINUTES", "45"))
     PICKUP_MAX_DAYS_AHEAD = int(os.environ.get("PICKUP_MAX_DAYS_AHEAD", "7"))
+    PICKUP_SLOT_CAPACITY = int(os.environ.get("PICKUP_SLOT_CAPACITY", "4"))
     ORDER_SERVICE_FEE_CENTS = int(os.environ.get("ORDER_SERVICE_FEE_CENTS", "150"))
     RESTAURANT_PHONE = os.environ.get("RESTAURANT_PHONE", "08 9248 5623")
