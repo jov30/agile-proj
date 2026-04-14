@@ -45,6 +45,14 @@ class TestSupportChat(unittest.TestCase):
         self.assertEqual(payload["fallback_reason"], "missing_api_key")
         self.assertIn("Instant queue", payload["reply"])
 
+    def test_chatbox_is_closed_by_default_without_api_key(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn('id="support-dock"', html)
+        self.assertNotIn('support-dock is-open', html)
+        self.assertIn("Fallback Assistant", html)
+
     @patch("routes.user.requests.post")
     def test_support_chat_uses_openai_when_configured(self, mock_post):
         self.app.config["OPENAI_API_KEY"] = "test-key"
