@@ -23,6 +23,12 @@
     gap: 1.35rem;
   }
 
+  .order-detail__hero-aside {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+
   .order-detail__ticket,
   .order-detail__card {
     position: relative;
@@ -174,6 +180,67 @@
     margin-top: 1rem;
   }
 
+  .order-detail__media {
+    position: relative;
+    overflow: hidden;
+    min-height: 224px;
+    padding: 1.15rem;
+    border-radius: 28px;
+    display: grid;
+    align-items: end;
+    color: var(--text-inverse);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.14), rgba(23, 19, 21, 0.78)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-market-night.jpg') }}");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .order-detail__media::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 42%;
+    height: 48%;
+    opacity: 0.25;
+    background:
+      linear-gradient(180deg, rgba(250, 244, 236, 0), rgba(250, 244, 236, 0)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-skyline.webp') }}");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: bottom right;
+    pointer-events: none;
+  }
+
+  .order-detail__media > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .order-detail__media span {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    color: rgba(255, 216, 115, 0.9);
+  }
+
+  .order-detail__media strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+  }
+
+  .order-detail__media p {
+    margin: 0.45rem 0 0;
+    line-height: 1.58;
+    color: rgba(255, 247, 239, 0.84);
+  }
+
   .order-detail__live-banner {
     padding: 0.95rem 1rem;
     border-radius: 22px;
@@ -264,30 +331,39 @@
           </form>
         </div>
       </div>
-      <aside class="order-detail__ticket">
-        <p class="eyebrow">{% if order.is_instant %}Queue verification{% else %}Pickup verification{% endif %}</p>
-        <h2>
-          {% if order.is_instant %}
-            {{ order.queue_display }} · {% if order.is_eta_delayed %}updated ETA {{ order.current_eta_time }}{% else %}ready around {{ order.pickup_time }}{% endif %}
-          {% else %}
-            {{ order.pickup_day }} at {{ order.pickup_time }}
-          {% endif %}
-        </h2>
-        <div class="order-detail__ticket-grid">
-          <div class="order-detail__ticket-item">
-            <span>Confirmation code</span>
-            <strong>{{ order.confirmation_code }}</strong>
+      <div class="order-detail__hero-aside">
+        <aside class="order-detail__ticket">
+          <p class="eyebrow">{% if order.is_instant %}Queue verification{% else %}Pickup verification{% endif %}</p>
+          <h2>
+            {% if order.is_instant %}
+              {{ order.queue_display }} · {% if order.is_eta_delayed %}updated ETA {{ order.current_eta_time }}{% else %}ready around {{ order.pickup_time }}{% endif %}
+            {% else %}
+              {{ order.pickup_day }} at {{ order.pickup_time }}
+            {% endif %}
+          </h2>
+          <div class="order-detail__ticket-grid">
+            <div class="order-detail__ticket-item">
+              <span>Confirmation code</span>
+              <strong>{{ order.confirmation_code }}</strong>
+            </div>
+            <div class="order-detail__ticket-item">
+              <span>{% if order.is_instant %}Counter{% else %}Pickup contact{% endif %}</span>
+              <strong>{% if order.is_instant %}{{ order.counter_label }}{% else %}{{ order.customer_name }}{% endif %}</strong>
+            </div>
+            <div class="order-detail__ticket-item">
+              <span>QR verification</span>
+              <img class="order-detail__qr" src="{{ url_for('orders.receipt_qr', order_number=order.order_number) }}" alt="QR for {{ order.order_number }}" />
+            </div>
           </div>
-          <div class="order-detail__ticket-item">
-            <span>{% if order.is_instant %}Counter{% else %}Pickup contact{% endif %}</span>
-            <strong>{% if order.is_instant %}{{ order.counter_label }}{% else %}{{ order.customer_name }}{% endif %}</strong>
+        </aside>
+        <article class="order-detail__media">
+          <div>
+            <span>Pickup story</span>
+            <strong>Order detail now keeps the same branded visual language as landing, cart, and checkout.</strong>
+            <p>Customers can verify the order, track live ETA movement, and still feel like they are inside the same restaurant experience instead of a plain tracking utility.</p>
           </div>
-          <div class="order-detail__ticket-item">
-            <span>QR verification</span>
-            <img class="order-detail__qr" src="{{ url_for('orders.receipt_qr', order_number=order.order_number) }}" alt="QR for {{ order.order_number }}" />
-          </div>
-        </div>
-      </aside>
+        </article>
+      </div>
     </div>
   </section>
 

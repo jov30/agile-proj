@@ -37,6 +37,7 @@
   .orders-stat,
   .orders-filter,
   .orders-highlight,
+  .orders-visual,
   .orders-ready-banner,
   .order-card {
     position: relative;
@@ -52,9 +53,66 @@
   .orders-stat,
   .orders-filter,
   .orders-highlight,
+  .orders-visual,
   .orders-ready-banner,
   .order-card {
     padding: 1.15rem 1.2rem;
+  }
+
+  .orders-visual {
+    grid-column: 1 / -1;
+    min-height: 234px;
+    display: grid;
+    align-items: end;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.18), rgba(23, 19, 21, 0.7)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-street-food-scene-detail.jpg') }}");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .orders-visual::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 auto;
+    width: 46%;
+    height: 56%;
+    opacity: 0.28;
+    background:
+      linear-gradient(180deg, rgba(250, 244, 236, 0), rgba(250, 244, 236, 0)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-skyline.webp') }}");
+    background-size: contain;
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    pointer-events: none;
+  }
+
+  .orders-visual > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .orders-visual span {
+    display: block;
+    margin-bottom: 0.32rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.96rem;
+    letter-spacing: 0.15em;
+    color: rgba(255, 216, 115, 0.92);
+  }
+
+  .orders-visual strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.35rem, 2vw, 2rem);
+  }
+
+  .orders-visual p {
+    max-width: 34ch;
+    margin: 0.5rem 0 0;
+    line-height: 1.6;
+    color: rgba(255, 247, 239, 0.84);
   }
 
   .orders-stat strong,
@@ -243,6 +301,7 @@
     margin: 0.35rem 0 0;
     color: var(--text-muted);
     line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
   .order-side__card ul {
@@ -253,6 +312,10 @@
 
   .order-side__card li + li {
     margin-top: 0.35rem;
+  }
+
+  .order-side__card li {
+    overflow-wrap: anywhere;
   }
 
   .order-card__timeline {
@@ -366,6 +429,13 @@
           </div>
         </div>
         <div class="orders-hero__stats">
+          <article class="orders-visual">
+            <div>
+              <span>Live pickup archive</span>
+              <strong>Every confirmed order, receipt, and website notification stays in one branded stream.</strong>
+              <p>Customers can filter history, reopen the receipt, and follow queue or scheduled pickup progress without landing on a blank utility page.</p>
+            </div>
+          </article>
           <article class="orders-stat">
             <strong>{{ order_count }}</strong>
             <span>Filtered results shown below.</span>

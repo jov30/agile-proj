@@ -80,6 +80,75 @@
     gap: 0.95rem;
   }
 
+  .checkout-hero__visuals {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(180px, 0.9fr);
+    gap: 0.85rem;
+  }
+
+  .checkout-hero__visual {
+    position: relative;
+    overflow: hidden;
+    min-height: 188px;
+    padding: 1.15rem;
+    border-radius: 28px;
+    display: grid;
+    align-items: end;
+    color: var(--text-inverse);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .checkout-hero__visual::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(36, 24, 20, 0.08), rgba(36, 24, 20, 0.78)),
+      radial-gradient(circle at 18% 18%, rgba(255, 216, 115, 0.24), transparent 14rem);
+  }
+
+  .checkout-hero__visual > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .checkout-hero__visual--hero {
+    background-image:
+      linear-gradient(180deg, rgba(36, 24, 20, 0.18), rgba(36, 24, 20, 0.18)),
+      url("{{ url_for('static', filename='images/inspiration/hero-new-world-gourmet.avif') }}");
+  }
+
+  .checkout-hero__visual--city {
+    background-image:
+      linear-gradient(180deg, rgba(36, 24, 20, 0.16), rgba(36, 24, 20, 0.54)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-skyline.webp') }}");
+  }
+
+  .checkout-hero__visual span {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.16em;
+    color: rgba(255, 216, 115, 0.9);
+  }
+
+  .checkout-hero__visual strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.15rem, 2vw, 1.7rem);
+  }
+
+  .checkout-hero__visual p {
+    margin: 0.42rem 0 0;
+    line-height: 1.55;
+    color: rgba(255, 247, 239, 0.84);
+  }
+
   .checkout-hero__card {
     padding: 1.15rem 1.2rem;
     border-radius: 28px;
@@ -715,7 +784,8 @@
     .field-grid,
     .payment-methods,
     .fulfillment-methods,
-    .checkout-hero__stats {
+    .checkout-hero__stats,
+    .checkout-hero__visuals {
       grid-template-columns: 1fr;
     }
   }
@@ -760,6 +830,22 @@
         </div>
       </div>
       <div class="checkout-hero__panel">
+        <div class="checkout-hero__visuals">
+          <article class="checkout-hero__visual checkout-hero__visual--hero">
+            <div>
+              <span>Kitchen atmosphere</span>
+              <strong>From bowl to handoff, the checkout flow now feels like part of the same brand story.</strong>
+              <p>Customers move from cart into payment and pickup confirmation without falling into a plain form-only page.</p>
+            </div>
+          </article>
+          <article class="checkout-hero__visual checkout-hero__visual--city">
+            <div>
+              <span>Pickup rhythm</span>
+              <strong>Queue and schedule stay visible</strong>
+              <p>Instant and scheduled flows are both previewed before the order is placed.</p>
+            </div>
+          </article>
+        </div>
         <article class="checkout-hero__card">
           <p class="checkout-hero__kicker">Pickup flow status</p>
           <h2>{{ cart.lines|length }} items ready for confirmation</h2>
