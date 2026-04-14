@@ -308,6 +308,16 @@
     line-height: 1.6;
   }
 
+  .receipt-note ul {
+    margin: 0.7rem 0 0;
+    padding-left: 1rem;
+    color: var(--text-muted);
+  }
+
+  .receipt-note li + li {
+    margin-top: 0.35rem;
+  }
+
   .receipt-print-only {
     display: none;
   }
@@ -424,7 +434,7 @@
           </h1>
           <p class="section-copy">
             The payment simulation has been approved, the order record is stored in the database,
-            and the receipt below is ready for download or review at any time across both fulfillment modes.
+            and the receipt below is ready for download or review at any time across both fulfillment modes with live notification history.
           </p>
           <div class="pill-row">
             <span class="pill"><strong>{{ order.order_number }}</strong> unique order reference for staff verification.</span>
@@ -433,6 +443,12 @@
             <span class="pill"><strong>{{ order.total_display }}</strong> total charged including service fee.</span>
             {% if order.is_instant and order.queue_display %}
               <span class="pill"><strong>{{ order.queue_display }}</strong> queue number to present at {{ order.counter_label }}.</span>
+            {% endif %}
+            {% if order.is_instant %}
+              <span class="pill">
+                <strong>{% if order.is_eta_delayed %}{{ order.current_eta_time }}{% else %}{{ order.pickup_time }}{% endif %}</strong>
+                {% if order.is_eta_delayed %}updated live ETA due to kitchen delay.{% else %}current instant ETA on file.{% endif %}
+              </span>
             {% endif %}
             {% if order.ready_notification_count %}
               <span class="pill"><strong>{{ order.ready_notification_count }}</strong> ready notifications sent (mock email/SMS).</span>
@@ -453,7 +469,12 @@
           <h2>{% if order.is_instant %}{{ order.queue_display }}{% else %}{{ order.pickup_time }}{% endif %}</h2>
           <p>
             {% if order.is_instant %}
-              Join {{ order.counter_label }} and present this queue number. Estimated ready time is {{ order.pickup_time }}.
+              Join {{ order.counter_label }} and present this queue number.
+              {% if order.is_eta_delayed %}
+                Updated live ETA is {{ order.current_eta_time }}.
+              {% else %}
+                Estimated ready time is {{ order.pickup_time }}.
+              {% endif %}
             {% else %}
               Arrive a few minutes early with your order number ready. Staff can verify using the confirmation code below.
             {% endif %}
@@ -538,12 +559,18 @@
                 <span>{% if order.is_instant %}Queue and ETA{% else %}Pickup slot{% endif %}</span>
                 <strong>
                   {% if order.is_instant %}
-                    {{ order.queue_display }} · ready around {{ order.pickup_time }}
+                    {{ order.queue_display }} · {% if order.is_eta_delayed %}updated ETA {{ order.current_eta_time }}{% else %}ready around {{ order.pickup_time }}{% endif %}
                   {% else %}
                     {{ order.pickup_at }}
                   {% endif %}
                 </strong>
-                <p>{{ order.kitchen_notes }}</p>
+                <p>
+                  {{ order.kitchen_notes }}
+                  {% if order.is_instant and order.eta_status_message %}
+                    <br />
+                    {{ order.eta_status_message }}
+                  {% endif %}
+                </p>
               </div>
               <div class="receipt-meta__item">
                 <span>Contact</span>
@@ -614,6 +641,18 @@
             <div class="receipt-note">
               <strong>Special instructions</strong>
               <p>{{ order.special_instructions or "No extra kitchen or pickup instructions were included for this order." }}</p>
+            </div>
+            <div class="receipt-note">
+              <strong>Notification timeline</strong>
+              {% if order.notifications %}
+                <ul>
+                  {% for note in order.notifications %}
+                    <li>{{ note.created_at }} · {{ note.channel_label }} · {{ note.event_label }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p>No website, email, or SMS notification has been recorded for this order yet.</p>
+              {% endif %}
             </div>
             <div class="receipt-note">
               <strong>Need to place the same order again?</strong>

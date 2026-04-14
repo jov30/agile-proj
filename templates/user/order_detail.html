@@ -174,6 +174,23 @@
     margin-top: 1rem;
   }
 
+  .order-detail__live-banner {
+    padding: 0.95rem 1rem;
+    border-radius: 22px;
+    border: 1px solid rgba(0, 111, 116, 0.18);
+    background: rgba(0, 111, 116, 0.08);
+    color: var(--text-main);
+  }
+
+  .order-detail__live-banner[hidden] {
+    display: none;
+  }
+
+  .order-detail__live-banner.is-delayed {
+    border-color: rgba(179, 48, 64, 0.22);
+    background: rgba(179, 48, 64, 0.08);
+  }
+
   .inline-form {
     display: inline;
   }
@@ -204,21 +221,40 @@
 {% endblock %}
 
 {% block content %}
-<div class="order-detail">
+<div
+  class="order-detail"
+  data-order-detail-root
+  data-order-api="{{ url_for('orders.api_order_detail', order_number=order.order_number) }}"
+  data-order-status="{{ order.order_status }}"
+  data-order-updated-at="{{ order.updated_at_iso }}"
+  data-order-notification-count="{{ order.notification_count }}"
+  data-order-current-eta="{{ order.current_eta_time or '' }}"
+>
+  <div class="order-detail__live-banner {% if order.is_eta_delayed %}is-delayed{% endif %}" data-live-banner {% if not order.is_eta_delayed %}hidden{% endif %}>
+    {% if order.is_instant and order.is_eta_delayed %}
+      Live queue alert: updated ETA is {{ order.current_eta_time }}, around {{ order.eta_delay_minutes }} minutes later than the original quote.
+    {% endif %}
+  </div>
   <section class="order-detail__hero section-panel">
     <div class="order-detail__hero-grid">
       <div>
         <p class="eyebrow">Order detail</p>
         <h1 class="section-title">{{ order.order_number }}</h1>
         <p class="section-copy">
-          This view breaks down the full fulfillment record, payment attempt history, status progression,
-          and saved instructions for one confirmed order.
+          This view breaks down the full fulfillment record, payment attempt history, live status progression,
+          website notifications, and saved instructions for one confirmed order.
         </p>
         <div class="pill-row">
           <span class="pill"><strong>{{ order.order_status }}</strong> current kitchen stage for this order.</span>
           <span class="pill"><strong>{{ order.payment_reference }}</strong> stored payment reference attached to the order.</span>
           <span class="pill"><strong>{{ order.fulfillment_label }}</strong> fulfillment mode recorded at checkout.</span>
           <span class="pill"><strong>{{ order.total_display }}</strong> total paid including pickup fee.</span>
+          {% if order.is_instant %}
+            <span class="pill">
+              <strong>{% if order.is_eta_delayed %}{{ order.current_eta_time }}{% else %}{{ order.pickup_time }}{% endif %}</strong>
+              {% if order.is_eta_delayed %}live ETA after kitchen delay.{% else %}original ready target.{% endif %}
+            </span>
+          {% endif %}
         </div>
         <div class="order-detail__actions">
           <a href="{{ url_for('orders.receipt', order=order.order_number) }}" class="button button--primary">Open receipt</a>
@@ -232,7 +268,7 @@
         <p class="eyebrow">{% if order.is_instant %}Queue verification{% else %}Pickup verification{% endif %}</p>
         <h2>
           {% if order.is_instant %}
-            {{ order.queue_display }} · ready around {{ order.pickup_time }}
+            {{ order.queue_display }} · {% if order.is_eta_delayed %}updated ETA {{ order.current_eta_time }}{% else %}ready around {{ order.pickup_time }}{% endif %}
           {% else %}
             {{ order.pickup_day }} at {{ order.pickup_time }}
           {% endif %}
@@ -306,6 +342,18 @@
             <strong>{{ order.kitchen_notes }}</strong>
             <p>{{ order.special_instructions or "No extra customer instructions were saved." }}</p>
           </div>
+          {% if order.is_instant %}
+            <div class="order-detail__meta-item">
+              <span>Live ETA monitor</span>
+              <strong>{% if order.is_eta_delayed %}{{ order.current_eta_time }}{% else %}{{ order.pickup_time }}{% endif %}</strong>
+              <p>
+                {{ order.eta_status_message }}
+                {% if order.queue_backlog_count %}
+                  {{ order.queue_backlog_count }} queue ticket(s) are still ahead of this order.
+                {% endif %}
+              </p>
+            </div>
+          {% endif %}
         </div>
       </div>
 
@@ -346,20 +394,20 @@
       </div>
 
       <div class="order-detail__card">
-        <p class="eyebrow">Ready notifications</p>
-        <h2>Mock delivery log</h2>
+        <p class="eyebrow">Notification timeline</p>
+        <h2>Website, email, and SMS updates</h2>
         <div class="order-detail__attempts">
           {% if not order.notifications %}
             <div class="order-detail__attempt-item">
               <span>No notification sent yet</span>
               <strong>Order is not in ready state</strong>
-              <p>Once status changes to Ready for Pickup, mock email and SMS logs appear here.</p>
+              <p>Once status changes to Ready for Pickup, the site alert strip plus mock email and SMS logs appear here.</p>
             </div>
           {% else %}
             {% for note in order.notifications %}
               <div class="order-detail__attempt-item">
-                <span>{{ note.delivery_status }} · {{ note.channel|upper }} · {{ note.created_at }}</span>
-                <strong>{{ note.event_type.replace('_', ' ')|title }}</strong>
+                <span>{{ note.delivery_status }} · {{ note.channel_label }} · {{ note.created_at }}</span>
+                <strong>{{ note.event_label }}</strong>
                 <p>{{ note.message }}</p>
               </div>
             {% endfor %}
@@ -369,4 +417,60 @@
     </aside>
   </section>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const root = document.querySelector('[data-order-detail-root]');
+    if (!root) return;
+
+    const banner = root.querySelector('[data-live-banner]');
+    const apiUrl = root.dataset.orderApi;
+    let currentStatus = root.dataset.orderStatus || '';
+    let currentUpdatedAt = root.dataset.orderUpdatedAt || '';
+    let currentNotificationCount = root.dataset.orderNotificationCount || '0';
+    let currentEta = root.dataset.orderCurrentEta || '';
+
+    async function pollOrderDetail() {
+      if (document.visibilityState === 'hidden') return;
+      try {
+        const response = await fetch(apiUrl, { headers: { Accept: 'application/json' } });
+        if (!response.ok) return;
+        const payload = await response.json();
+        const statusChanged = payload.order_status !== currentStatus;
+        const updatedChanged = payload.updated_at_iso !== currentUpdatedAt;
+        const notificationChanged = String(payload.notification_count) !== currentNotificationCount;
+        const etaChanged = (payload.current_eta_time || '') !== currentEta;
+        if (!statusChanged && !updatedChanged && !notificationChanged && !etaChanged) {
+          return;
+        }
+
+        const parts = [`Live update: ${payload.order_status}.`];
+        if (payload.is_instant && payload.current_eta_time) {
+          parts.push(`Current ETA ${payload.current_eta_time}.`);
+        }
+        if (payload.latest_ready_notification) {
+          parts.push(`Latest notification via ${payload.latest_ready_notification.channel_label}.`);
+        }
+        banner.textContent = `${parts.join(' ')} Refreshing order detail...`;
+        banner.hidden = false;
+        banner.classList.toggle('is-delayed', Boolean(payload.is_eta_delayed));
+
+        currentStatus = payload.order_status;
+        currentUpdatedAt = payload.updated_at_iso;
+        currentNotificationCount = String(payload.notification_count);
+        currentEta = payload.current_eta_time || '';
+
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 900);
+      } catch (error) {
+        // Keep the last rendered data on screen if polling fails.
+      }
+    }
+
+    window.setInterval(pollOrderDetail, 15000);
+  })();
+</script>
 {% endblock %}

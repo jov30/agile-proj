@@ -245,6 +245,16 @@
     line-height: 1.55;
   }
 
+  .order-side__card ul {
+    margin: 0.55rem 0 0;
+    padding-left: 1rem;
+    color: var(--text-muted);
+  }
+
+  .order-side__card li + li {
+    margin-top: 0.35rem;
+  }
+
   .order-card__timeline {
     margin-top: 1rem;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -345,7 +355,7 @@
           <h1 class="section-title">Filter, inspect, and repeat previous pickup orders.</h1>
           <p class="section-copy">
             Order history now supports both instant queue and scheduled pickup records, with filters, detail view,
-            and reorder prefill that carries contact details and notes back into checkout.
+            reorder prefill, dynamic instant ETA updates, and website notification history across each order record.
           </p>
           <div class="pill-row">
             <span class="pill"><strong>{{ order_count }}</strong> orders match the current filters.</span>
@@ -485,7 +495,17 @@
                         {{ order.pickup_at }}
                       {% endif %}
                     </strong>
-                    <p>{{ order.kitchen_notes }}</p>
+                    <p>
+                      {{ order.kitchen_notes }}
+                      {% if order.is_instant and order.current_eta_time %}
+                        <br />
+                        {% if order.is_eta_delayed %}
+                          Live ETA moved to {{ order.current_eta_time }} ({{ order.eta_delay_minutes }} min delay).
+                        {% else %}
+                          Live ETA is still on track for {{ order.current_eta_time }}.
+                        {% endif %}
+                      {% endif %}
+                    </p>
                   </div>
                   <div class="order-side__card">
                     <span>Payment log</span>
@@ -501,6 +521,25 @@
                     <span>Customer notes</span>
                     <strong>{{ order.customer_name }}</strong>
                     <p>{{ order.special_instructions or "No special notes were saved for this order." }}</p>
+                  </div>
+                  <div class="order-side__card">
+                    <span>Notification timeline</span>
+                    <strong>
+                      {% if order.notification_count %}
+                        {{ order.notification_count }} website/email/SMS update(s)
+                      {% else %}
+                        No pickup notification yet
+                      {% endif %}
+                    </strong>
+                    {% if order.notifications %}
+                      <ul>
+                        {% for note in order.notifications %}
+                          <li>{{ note.created_at }} · {{ note.channel_label }} · {{ note.event_label }}</li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <p>The site alert and mock delivery log will appear here once the order reaches Ready for Pickup.</p>
+                    {% endif %}
                   </div>
                 </aside>
               </div>
