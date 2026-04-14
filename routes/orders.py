@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import io
 import re
 import secrets
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
+import qrcode
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import format_aud
@@ -744,3 +746,23 @@ def receipt_pdf(order_number: str):
             "Content-Disposition": f'attachment; filename="{order.order_number.lower()}-receipt.pdf"',
         },
     )
+
+
+@orders_bp.get("/orders/<order_number>/qr.png")
+def receipt_qr(order_number: str):
+    order = Order.query.filter_by(order_number=order_number).first_or_404()
+    qr = qrcode.QRCode(
+        version=3,
+        border=1,
+        box_size=8,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+    )
+    qr.add_data(
+        f"MCQ ORDER\norder_number={order.order_number}\nconfirmation_code={order.confirmation_code}\npickup_at={order.pickup_at.isoformat()}"
+    )
+    qr.make(fit=True)
+    image = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+    return Response(buffer.getvalue(), mimetype="image/png")

@@ -84,6 +84,30 @@
     font-size: 1.08rem;
   }
 
+  .receipt-ticket__qr {
+    display: grid;
+    justify-items: center;
+    gap: 0.55rem;
+    padding: 1rem;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .receipt-ticket__qr img {
+    width: 168px;
+    height: 168px;
+    display: block;
+    border-radius: 18px;
+    background: #fff;
+    padding: 0.45rem;
+  }
+
+  .receipt-ticket__qr p {
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
   .receipt-actions {
     display: flex;
     flex-wrap: wrap;
@@ -284,6 +308,10 @@
     line-height: 1.6;
   }
 
+  .receipt-print-only {
+    display: none;
+  }
+
   .receipt-empty {
     text-align: center;
   }
@@ -325,6 +353,46 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media print {
+    body {
+      background: #fff;
+    }
+
+    .app-header,
+    .app-footer,
+    .support-dock,
+    .receipt-actions,
+    .receipt-empty__actions {
+      display: none !important;
+    }
+
+    .app-main {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .section-panel,
+    .receipt-card,
+    .receipt-ticket {
+      box-shadow: none;
+      border-color: rgba(0, 0, 0, 0.12);
+      background: #fff;
+      color: #000;
+    }
+
+    .receipt-ticket p,
+    .receipt-ticket__label,
+    .receipt-ticket__meta span,
+    .receipt-policy__item p {
+      color: #000;
+    }
+
+    .receipt-print-only {
+      display: block;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -359,6 +427,7 @@
           </div>
           <div class="receipt-actions">
             <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--primary">Download PDF receipt</a>
+            <button type="button" class="button button--secondary" onclick="window.print()">Print receipt</button>
             <a href="{{ url_for('orders.orders') }}" class="button button--secondary">View order history</a>
             <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
               <button type="submit" class="button button--secondary button--inline">Order again</button>
@@ -382,6 +451,10 @@
               <span>Payment status</span>
               <strong>{{ order.payment_status }}</strong>
             </div>
+          </div>
+          <div class="receipt-ticket__qr">
+            <img src="{{ url_for('orders.receipt_qr', order_number=order.order_number) }}" alt="QR code for order {{ order.order_number }}" />
+            <p>Scan for order verification: {{ order.order_number }}</p>
           </div>
         </aside>
       </div>
@@ -461,6 +534,19 @@
                   {% endif %}
                 </p>
               </div>
+              {% if order.latest_payment_attempt %}
+                <div class="receipt-meta__item">
+                  <span>Payment log</span>
+                  <strong>{{ order.latest_payment_attempt.reference }}</strong>
+                  <p>
+                    Attempt {{ order.latest_payment_attempt.attempt_number }} of {{ order.payment_attempt_count }}
+                    · {{ order.latest_payment_attempt.status }}
+                    {% if order.latest_payment_attempt.failure_message %}
+                      · {{ order.latest_payment_attempt.failure_message }}
+                    {% endif %}
+                  </p>
+                </div>
+              {% endif %}
             </div>
           </div>
         </article>
@@ -477,27 +563,15 @@
               </div>
             </div>
             <div class="receipt-timeline">
-              <div class="receipt-timeline__step is-active">
-                <strong>1</strong>
-                <div>
-                  <strong>Checkout submitted</strong>
-                  <p>Customer details, payment method, pickup slot, and line items were validated and saved.</p>
+              {% for step in order.status_timeline %}
+                <div class="receipt-timeline__step {% if step.is_active %}is-active{% endif %}">
+                  <strong>{{ loop.index }}</strong>
+                  <div>
+                    <strong>{{ step.label }}</strong>
+                    <p>{{ step.description }}</p>
+                  </div>
                 </div>
-              </div>
-              <div class="receipt-timeline__step is-active">
-                <strong>2</strong>
-                <div>
-                  <strong>Receipt generated</strong>
-                  <p>The order confirmation page is live and the PDF file can be downloaded any time.</p>
-                </div>
-              </div>
-              <div class="receipt-timeline__step">
-                <strong>3</strong>
-                <div>
-                  <strong>Pickup ready</strong>
-                  <p>Kitchen staff can prepare the order ahead of the selected collection time.</p>
-                </div>
-              </div>
+              {% endfor %}
             </div>
           </div>
         </article>
@@ -512,10 +586,22 @@
               <strong>Need to place the same order again?</strong>
               <p>Use the “Order again” action above to rebuild the cart with the same items and quantities.</p>
             </div>
+            <div class="receipt-print-only receipt-note">
+              <strong>Printed copy</strong>
+              <p>Printed on {{ order.updated_at }} for customer pickup reference.</p>
+            </div>
           </div>
         </article>
       </aside>
     </section>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+  {% if order %}
+    <script>
+      window.sessionStorage.removeItem("mcq_checkout_draft_v1");
+    </script>
+  {% endif %}
 {% endblock %}
