@@ -64,6 +64,7 @@ def create_app(test_config: dict | None = None) -> Flask:
             "current_user": user,
             "is_admin": is_admin_user(user),
             "site_notifications": site_notifications,
+            "support_ai_enabled": bool(app.config.get("OPENAI_API_KEY")),
         }
 
     register_blueprints(app)

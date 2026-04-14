@@ -127,6 +127,9 @@
             <p class="support-dock__brand">MCQ Supermarket</p>
             <h2>Need Help?</h2>
           </div>
+          <span class="support-dock__status {% if not support_ai_enabled %}is-offline{% endif %}" id="support-status">
+            {% if support_ai_enabled %}AI Assistant Online{% else %}Fallback Assistant{% endif %}
+          </span>
           <button class="support-dock__close" id="support-close" type="button" aria-label="Toggle chat support">
             -
           </button>
@@ -147,6 +150,25 @@
             <button type="button" class="support-prompt" data-answer="account">Account help</button>
             <button type="button" class="support-prompt" data-answer="support">Contact support</button>
           </div>
+          <form class="support-chat-form" id="support-chat-form">
+            <div class="support-chat-form__row">
+              <textarea
+                id="support-chat-input"
+                name="message"
+                rows="3"
+                maxlength="500"
+                placeholder="Ask about instant queue wait time, pickup slots, receipts, tracking, or checkout..."
+              ></textarea>
+              <button type="submit" class="support-dock__action support-dock__action--primary">Send</button>
+            </div>
+            <div class="support-chat-form__note" id="support-chat-note">
+              {% if support_ai_enabled %}
+                Live AI replies are enabled for this website session.
+              {% else %}
+                No OpenAI key is configured on this machine yet, so the chatbox is using a built-in website assistant.
+              {% endif %}
+            </div>
+          </form>
           <div class="support-dock__actions">
             <a href="/orders" class="support-dock__action support-dock__action--primary">Track Orders</a>
             <a href="tel:+61892485623" class="support-dock__action support-dock__action--secondary">Call 08 9248 5623</a>
@@ -161,19 +183,18 @@
         const closeButton = document.getElementById('support-close');
         const chatLog = document.getElementById('support-chat-log');
         const prompts = document.querySelectorAll('.support-prompt');
-        const answers = {
-          pickup:
-            'Checkout now lets customers choose a pickup date and time, and the selected slot is saved with the order record and receipt.',
-          payment:
-            'Payment is simulated inside the live checkout flow. The order stores a simulated approval reference and the chosen payment method.',
-          receipt:
-            'After checkout, the receipt page shows the confirmed order summary immediately and offers a downloadable PDF receipt.',
-          menu:
-            'You can browse categories, open item detail pages, add dishes to the cart, and continue directly into the live checkout flow.',
-          account:
-            'User-side features currently include menu browsing, cart management, checkout, simulated payment, pickup planning, receipt generation, and order history.',
-          support:
-            'For direct help, open Orders to track a receipt or call 08 9248 5623. The team can assist with pickup timing, payment questions, and receipt lookups.',
+        const chatForm = document.getElementById('support-chat-form');
+        const chatInput = document.getElementById('support-chat-input');
+        const chatNote = document.getElementById('support-chat-note');
+        const supportStatus = document.getElementById('support-status');
+        const supportChatUrl = "{{ url_for('user.support_chat') }}";
+        const promptMessages = {
+          pickup: 'How do pickup time selection and scheduled slots work?',
+          payment: 'What payment methods does the website support during checkout?',
+          receipt: 'How can I open the receipt or download the PDF again?',
+          menu: 'How should I add dishes and follow the ordering flow from the menu?',
+          account: 'Do I need an account to place orders or track receipts?',
+          support: 'How should I contact support if I need staff help?',
         };
 
         function setOpenState(isOpen) {
@@ -183,12 +204,77 @@
           closeButton.textContent = isOpen ? '-' : '+';
         }
 
-        function appendMessage(text, kind) {
+        function appendMessage(text, kind, allowHtml = false) {
           const message = document.createElement('div');
           message.className = `support-message support-message--${kind}`;
-          message.textContent = text;
+          if (allowHtml) {
+            message.innerHTML = text;
+          } else {
+            message.textContent = text;
+          }
           chatLog.appendChild(message);
           chatLog.scrollTop = chatLog.scrollHeight;
+          return message;
+        }
+
+        function setChatNote(message, isError = false) {
+          if (!chatNote) return;
+          chatNote.textContent = message;
+          chatNote.classList.toggle('is-error', Boolean(isError));
+        }
+
+        function updateStatusBadge(mode) {
+          if (!supportStatus) return;
+          const isAi = mode === 'ai';
+          supportStatus.textContent = isAi ? 'AI Assistant Online' : 'Fallback Assistant';
+          supportStatus.classList.toggle('is-offline', !isAi);
+        }
+
+        async function sendSupportMessage(message) {
+          if (!message) return;
+          appendMessage(message, 'user');
+          const pending = appendMessage('MCQ assistant is thinking...', 'assistant');
+
+          if (chatInput) {
+            chatInput.disabled = true;
+          }
+          const submitButton = chatForm?.querySelector('button[type="submit"]');
+          if (submitButton) {
+            submitButton.disabled = true;
+          }
+
+          try {
+            const response = await fetch(supportChatUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify({ message }),
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              throw new Error(payload.error || 'Could not reach the support assistant right now.');
+            }
+
+            pending.textContent = payload.reply || 'No reply was returned.';
+            updateStatusBadge(payload.mode);
+            if (payload.mode === 'ai') {
+              setChatNote('Live AI replies are active for this website session.');
+            } else if (payload.fallback_reason === 'missing_api_key') {
+              setChatNote('No OpenAI key is configured on this machine yet, so the chatbox is using its built-in assistant.', false);
+            } else {
+              setChatNote('The AI service was not available for that message, so the website assistant answered instead.', false);
+            }
+          } catch (error) {
+            pending.textContent = error.message || 'Could not reach the support assistant right now.';
+            setChatNote('Support chat request failed. You can still call the store directly.', true);
+          } finally {
+            if (chatInput) {
+              chatInput.disabled = false;
+              chatInput.focus();
+            }
+            if (submitButton) {
+              submitButton.disabled = false;
+            }
+          }
         }
 
         launcher.addEventListener('click', () => {
@@ -202,11 +288,33 @@
         prompts.forEach((prompt) => {
           prompt.addEventListener('click', () => {
             const key = prompt.dataset.answer;
-            appendMessage(prompt.textContent, 'user');
-            window.setTimeout(() => {
-              appendMessage(answers[key] || answers.support, 'assistant');
-            }, 180);
+            const message = promptMessages[key] || prompt.textContent;
+            sendSupportMessage(message);
           });
+        });
+
+        chatForm?.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const message = chatInput?.value.trim();
+          if (!message) {
+            setChatNote('Enter a question before sending.', true);
+            return;
+          }
+          chatInput.value = '';
+          setChatNote(
+            supportStatus?.classList.contains('is-offline')
+              ? 'Sending to the built-in assistant...'
+              : 'Sending to the AI assistant...',
+            false,
+          );
+          sendSupportMessage(message);
+        });
+
+        chatInput?.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            chatForm?.requestSubmit();
+          }
         });
 
         if (window.matchMedia('(max-width: 720px)').matches) {

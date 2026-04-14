@@ -27,6 +27,11 @@ class Config:
     ADMIN_NAME = os.environ.get("ADMIN_NAME", "MCQ Admin")
     ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@mcq.local")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin@123")
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+    OPENAI_API_BASE = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1")
+    OPENAI_CHAT_MODEL = os.environ.get("OPENAI_CHAT_MODEL", "gpt-5-mini")
+    SUPPORT_CHAT_TIMEOUT_SECONDS = float(os.environ.get("SUPPORT_CHAT_TIMEOUT_SECONDS", "20"))
+    SUPPORT_CHAT_MAX_HISTORY_MESSAGES = int(os.environ.get("SUPPORT_CHAT_MAX_HISTORY_MESSAGES", "10"))
 
     APP_TIMEZONE = os.environ.get("APP_TIMEZONE", "Australia/Perth")
     PICKUP_OPEN_HOUR = int(os.environ.get("PICKUP_OPEN_HOUR", "10"))
