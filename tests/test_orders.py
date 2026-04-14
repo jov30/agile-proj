@@ -42,6 +42,7 @@ class TestCheckoutAndOrders(unittest.TestCase):
         self,
         *,
         days_ahead: int = 1,
+        fulfillment_type: str = "scheduled",
         card_number: str = "4242 4242 4242 4242",
         special_instructions: str = "Please keep the soup separate.",
     ) -> dict[str, str]:
@@ -52,10 +53,11 @@ class TestCheckoutAndOrders(unittest.TestCase):
             second=0,
             microsecond=0,
         )
-        return {
+        form = {
             "customer_name": "Nguyen Tester",
             "customer_email": "tester@example.com",
             "customer_phone": "0412 345 678",
+            "fulfillment_type": fulfillment_type,
             "pickup_date": pickup.strftime("%Y-%m-%d"),
             "pickup_time": pickup.strftime("%H:%M"),
             "payment_method": "card",
@@ -65,6 +67,10 @@ class TestCheckoutAndOrders(unittest.TestCase):
             "card_cvv": "123",
             "special_instructions": special_instructions,
         }
+        if fulfillment_type == "instant":
+            form["pickup_date"] = ""
+            form["pickup_time"] = ""
+        return form
 
     def _place_order(self, form_data: dict[str, str] | None = None) -> str:
         self._seed_cart()
@@ -228,6 +234,46 @@ class TestCheckoutAndOrders(unittest.TestCase):
         blocked = self.client.post("/checkout", data=order_form)
         self.assertEqual(blocked.status_code, 400)
         self.assertIn("pickup slot is unavailable", blocked.get_data(as_text=True).lower())
+
+    def test_instant_order_assigns_queue_number_and_eta(self):
+        order_number = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+
+        with self.app.app_context():
+            order = Order.query.filter_by(order_number=order_number).first()
+            self.assertIsNotNone(order)
+            self.assertEqual(order.fulfillment_type, "instant")
+            self.assertEqual(order.queue_number, 1)
+            self.assertIsNotNone(order.quoted_wait_minutes)
+            self.assertGreater(order.quoted_wait_minutes, 0)
+            self.assertIsNotNone(order.counter_label)
+
+        detail = self.client.get(f"/api/orders/{order_number}")
+        self.assertEqual(detail.status_code, 200)
+        payload = detail.get_json()
+        self.assertTrue(payload["is_instant"])
+        self.assertEqual(payload["queue_display"], "#001")
+        self.assertIn("Instant counter pickup", payload["fulfillment_label"])
+
+    def test_instant_queue_number_increments_by_order(self):
+        first = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+        second = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+
+        with self.app.app_context():
+            first_order = Order.query.filter_by(order_number=first).first()
+            second_order = Order.query.filter_by(order_number=second).first()
+            self.assertIsNotNone(first_order)
+            self.assertIsNotNone(second_order)
+            self.assertEqual(first_order.queue_number, 1)
+            self.assertEqual(second_order.queue_number, 2)
+
+    def test_instant_queue_capacity_blocks_new_order(self):
+        self.app.config["INSTANT_ORDERING_MAX_ACTIVE_ORDERS"] = 1
+        self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+
+        self._seed_cart()
+        blocked = self.client.post("/checkout", data=self._valid_checkout_form(fulfillment_type="instant"))
+        self.assertEqual(blocked.status_code, 400)
+        self.assertIn("instant queue is full", blocked.get_data(as_text=True).lower())
 
 
 if __name__ == "__main__":
