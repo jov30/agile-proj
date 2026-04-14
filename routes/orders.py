@@ -24,6 +24,7 @@ from models import (
     db,
 )
 from receipt_pdf import build_receipt_pdf
+from routes.auth import admin_required
 from routes.cart_api import SESSION_LINES_KEY, _build_cart_payload, _menu, _save_lines
 
 
@@ -212,23 +213,22 @@ def _service_hours_for(day_value) -> tuple[datetime, datetime]:
 
 
 def _current_instant_queue_counter(day_value) -> int:
+    counter_value = 0
     counter = DailyQueueCounter.query.filter_by(counter_date=day_value).first()
     if counter is not None:
-        return max(0, int(counter.last_number))
+        counter_value = max(0, int(counter.last_number))
 
-    day_start_naive = datetime.combine(day_value, time.min)
-    day_end_naive = datetime.combine(day_value + timedelta(days=1), time.min)
     latest_order = (
         Order.query.filter(
             Order.fulfillment_type == FULFILLMENT_TYPES[0],
             Order.queue_number.isnot(None),
-            Order.pickup_at >= day_start_naive,
-            Order.pickup_at < day_end_naive,
+            Order.queue_date == day_value,
         )
         .order_by(Order.queue_number.desc())
         .first()
     )
-    return latest_order.queue_number if latest_order and latest_order.queue_number else 0
+    latest_value = latest_order.queue_number if latest_order and latest_order.queue_number else 0
+    return max(counter_value, latest_value)
 
 
 def _reserve_next_instant_queue_number(day_value) -> int:
@@ -243,29 +243,95 @@ def _reserve_next_instant_queue_number(day_value) -> int:
             except IntegrityError:
                 db.session.rollback()
                 continue
-        counter.last_number = max(0, int(counter.last_number)) + 1
+        counter.last_number = _current_instant_queue_counter(day_value) + 1
         db.session.flush()
         return counter.last_number
     raise RuntimeError("Could not reserve instant queue number after retries.")
 
 
+def _minutes_ceil(delta: timedelta) -> int:
+    return max(0, int((delta.total_seconds() + 59) // 60))
+
+
+def _instant_eta_payload(order: Order) -> dict | None:
+    fulfillment_type = order.fulfillment_type if order.fulfillment_type in FULFILLMENT_TYPES else FULFILLMENT_TYPES[1]
+    if fulfillment_type != FULFILLMENT_TYPES[0]:
+        return None
+
+    pickup_local = order.pickup_at.replace(tzinfo=_timezone())
+    service_day = order.queue_date or pickup_local.date()
+    queue_number = order.queue_number or 0
+    current_eta = pickup_local
+    backlog_ahead_count = 0
+    active_queue_count = 0
+
+    if order.order_status not in {ORDER_STATUS_SEQUENCE[2], ORDER_STATUS_SEQUENCE[3]}:
+        active_statuses = ORDER_STATUS_SEQUENCE[:2]
+        backlog_ahead_count = (
+            Order.query.filter(
+                Order.fulfillment_type == FULFILLMENT_TYPES[0],
+                Order.queue_date == service_day,
+                Order.queue_number.isnot(None),
+                Order.queue_number < queue_number,
+                Order.order_status.in_(active_statuses),
+            )
+            .count()
+        )
+        active_queue_count = (
+            Order.query.filter(
+                Order.fulfillment_type == FULFILLMENT_TYPES[0],
+                Order.queue_date == service_day,
+                Order.order_status.in_(active_statuses),
+            )
+            .count()
+        )
+        item_units = max(1, sum(line.quantity for line in order.line_items))
+        base_wait = max(1, int(current_app.config["INSTANT_ORDERING_BASE_PREP_MINUTES"]))
+        per_active_wait = max(0, int(current_app.config["INSTANT_ORDERING_PER_ACTIVE_ORDER_MINUTES"]))
+        per_item_wait = max(0, int(current_app.config["INSTANT_ORDERING_PER_ITEM_MINUTES"]))
+        remaining_prep_minutes = base_wait + (max(0, item_units - 1) * per_item_wait)
+        if order.order_status == ORDER_STATUS_SEQUENCE[1]:
+            remaining_prep_minutes = max(4, remaining_prep_minutes // 2)
+        live_minutes = remaining_prep_minutes + (backlog_ahead_count * per_active_wait)
+        current_eta = max(pickup_local, _now_local() + timedelta(minutes=live_minutes))
+
+    eta_delay_minutes = _minutes_ceil(current_eta - pickup_local)
+    is_eta_delayed = eta_delay_minutes > 0
+    if order.order_status == ORDER_STATUS_SEQUENCE[2]:
+        status_message = "Ready now at the pickup counter."
+    elif order.order_status == ORDER_STATUS_SEQUENCE[3]:
+        status_message = "Collected from the pickup counter."
+    elif is_eta_delayed:
+        status_message = f"Kitchen is running about {eta_delay_minutes} minutes behind the original ETA."
+    else:
+        status_message = "Kitchen is on track for the quoted instant ETA."
+
+    return {
+        "current_eta_at": current_eta.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+        "current_eta_time": current_eta.strftime("%I:%M %p").lstrip("0"),
+        "eta_delay_minutes": eta_delay_minutes,
+        "is_eta_delayed": is_eta_delayed,
+        "eta_status_message": status_message,
+        "backlog_ahead_count": backlog_ahead_count,
+        "active_queue_count": active_queue_count,
+    }
+
+
 def _instant_queue_snapshot(cart: dict | None = None) -> dict:
     now = _now_local()
     opening, closing = _service_hours_for(now.date())
-    day_start_naive = datetime.combine(now.date(), time.min)
-    day_end_naive = datetime.combine(now.date() + timedelta(days=1), time.min)
 
     active_orders = (
         Order.query.filter(
             Order.fulfillment_type == FULFILLMENT_TYPES[0],
             Order.order_status != ORDER_STATUS_SEQUENCE[-1],
-            Order.pickup_at >= day_start_naive,
-            Order.pickup_at < day_end_naive,
+            Order.queue_date == now.date(),
         )
         .order_by(Order.created_at.asc())
         .all()
     )
     active_count = len(active_orders)
+    kitchen_active_count = sum(1 for order in active_orders if order.order_status in ORDER_STATUS_SEQUENCE[:2])
     max_active = max(1, int(current_app.config["INSTANT_ORDERING_MAX_ACTIVE_ORDERS"]))
     remaining_capacity = max(0, max_active - active_count)
     item_units = sum(line.get("quantity", 0) for line in (cart or {}).get("lines", []))
@@ -273,7 +339,7 @@ def _instant_queue_snapshot(cart: dict | None = None) -> dict:
     base_wait = max(1, int(current_app.config["INSTANT_ORDERING_BASE_PREP_MINUTES"]))
     per_active_wait = max(0, int(current_app.config["INSTANT_ORDERING_PER_ACTIVE_ORDER_MINUTES"]))
     per_item_wait = max(0, int(current_app.config["INSTANT_ORDERING_PER_ITEM_MINUTES"]))
-    quoted_wait = base_wait + (active_count * per_active_wait) + (max(0, item_units - 1) * per_item_wait)
+    quoted_wait = base_wait + (kitchen_active_count * per_active_wait) + (max(0, item_units - 1) * per_item_wait)
     estimated_ready = now + timedelta(minutes=quoted_wait)
 
     next_queue_number = _current_instant_queue_counter(now.date()) + 1
@@ -298,6 +364,7 @@ def _instant_queue_snapshot(cart: dict | None = None) -> dict:
         "enabled": enabled,
         "counter_label": current_app.config["INSTANT_ORDERING_COUNTER_LABEL"],
         "active_count": active_count,
+        "kitchen_active_count": kitchen_active_count,
         "max_active_orders": max_active,
         "remaining_capacity": remaining_capacity,
         "next_queue_number": next_queue_number,
@@ -411,6 +478,16 @@ def _status_timeline(order_status: str, fulfillment_type: str) -> list[dict]:
     ]
 
 
+def _next_order_status(current_status: str) -> str | None:
+    try:
+        current_index = ORDER_STATUS_SEQUENCE.index(current_status)
+    except ValueError:
+        return None
+    if current_index >= len(ORDER_STATUS_SEQUENCE) - 1:
+        return None
+    return ORDER_STATUS_SEQUENCE[current_index + 1]
+
+
 def _serialize_payment_attempt(attempt: PaymentAttempt) -> dict:
     local_created = attempt.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
     return {
@@ -467,10 +544,13 @@ def _serialize_notification(notification: OrderNotification) -> dict:
     created_local = notification.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
     return {
         "event_type": notification.event_type,
+        "event_label": notification.event_type.replace("_", " ").title(),
         "channel": notification.channel,
+        "channel_label": notification.channel.upper(),
         "delivery_status": notification.delivery_status,
         "message": notification.message,
         "created_at": created_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+        "created_at_iso": created_local.isoformat(),
     }
 
 
@@ -752,6 +832,7 @@ def _build_order_from_cart(form_data: dict[str, str], fulfillment_plan: dict, ca
     queue_number = fulfillment_plan["queue_number"]
     quoted_wait = fulfillment_plan["quoted_wait_minutes"]
     counter_label = fulfillment_plan["counter_label"]
+    queue_date = None
     if fulfillment_type == FULFILLMENT_TYPES[0]:
         service_day = _now_local().date()
         queue_number = _reserve_next_instant_queue_number(service_day)
@@ -759,6 +840,7 @@ def _build_order_from_cart(form_data: dict[str, str], fulfillment_plan: dict, ca
         quoted_wait = instant_snapshot["quoted_wait_minutes"]
         pickup_at = instant_snapshot["estimated_ready_at"]
         counter_label = instant_snapshot["counter_label"]
+        queue_date = service_day
         kitchen_notes = (
             f"Instant queue #{queue_number} at {counter_label}. "
             f"Target ready around {instant_snapshot['estimated_ready_label']}."
@@ -774,6 +856,7 @@ def _build_order_from_cart(form_data: dict[str, str], fulfillment_plan: dict, ca
         customer_phone=form_data["customer_phone"],
         fulfillment_type=fulfillment_type,
         pickup_at=pickup_at.astimezone(_timezone()).replace(tzinfo=None),
+        queue_date=queue_date,
         queue_number=queue_number,
         quoted_wait_minutes=quoted_wait,
         counter_label=counter_label,
@@ -803,6 +886,52 @@ def _build_order_from_cart(form_data: dict[str, str], fulfillment_plan: dict, ca
 
     db.session.add(order)
     return order
+
+
+def _is_queue_number_conflict(error: IntegrityError) -> bool:
+    message = str(getattr(error, "orig", error)).lower()
+    return "orders.queue_date, orders.queue_number" in message or "uq_orders_queue_date_number" in message
+
+
+def _create_order_with_retries(
+    form_data: dict[str, str],
+    fulfillment_plan: dict,
+    cart: dict,
+    payment_attempt: PaymentAttempt,
+) -> Order:
+    checkout_token = session.get(SESSION_CHECKOUT_TOKEN_KEY)
+    payment_attempt_id = payment_attempt.id
+
+    for attempt_number in range(3):
+        try:
+            payment_record = db.session.get(PaymentAttempt, payment_attempt_id)
+            if payment_record is None:
+                raise RuntimeError("Payment attempt record could not be reloaded.")
+
+            order = _build_order_from_cart(form_data, fulfillment_plan, cart)
+            order.payment_reference = payment_record.reference
+            order.payment_status = payment_record.status
+            if isinstance(checkout_token, str) and checkout_token:
+                attempts = PaymentAttempt.query.filter_by(checkout_token=checkout_token).all()
+                for attempt in attempts:
+                    attempt.order = order
+                    attempt.checkout_token = None
+            else:
+                payment_record.order = order
+                payment_record.checkout_token = None
+            db.session.flush()
+            return order
+        except IntegrityError as error:
+            db.session.rollback()
+            is_retryable = (
+                fulfillment_plan["fulfillment_type"] == FULFILLMENT_TYPES[0]
+                and _is_queue_number_conflict(error)
+                and attempt_number < 2
+            )
+            if not is_retryable:
+                raise
+
+    raise RuntimeError("Could not store the instant order after retrying queue assignment.")
 
 
 def _finalize_successful_order(order: Order) -> None:
@@ -884,11 +1013,18 @@ def _serialize_order(order: Order) -> dict:
     is_instant = fulfillment_type == FULFILLMENT_TYPES[0]
     queue_display = f"#{order.queue_number:03d}" if order.queue_number else ("#PENDING" if is_instant else None)
     quoted_wait = order.quoted_wait_minutes if order.quoted_wait_minutes is not None else None
+    live_eta = _instant_eta_payload(order)
     if is_instant:
-        fulfillment_summary = (
-            f"Queue {queue_display} at {order.counter_label or current_app.config['INSTANT_ORDERING_COUNTER_LABEL']} "
-            f"· ready around {pickup_local.strftime('%I:%M %p').lstrip('0')}"
-        )
+        if live_eta and live_eta["is_eta_delayed"]:
+            fulfillment_summary = (
+                f"Queue {queue_display} at {order.counter_label or current_app.config['INSTANT_ORDERING_COUNTER_LABEL']} "
+                f"· delayed ETA {live_eta['current_eta_time']} ({live_eta['eta_delay_minutes']} min later)"
+            )
+        else:
+            fulfillment_summary = (
+                f"Queue {queue_display} at {order.counter_label or current_app.config['INSTANT_ORDERING_COUNTER_LABEL']} "
+                f"· ready around {pickup_local.strftime('%I:%M %p').lstrip('0')}"
+            )
     else:
         fulfillment_summary = f"Scheduled pickup on {pickup_local.strftime('%A, %d %b')} at {pickup_local.strftime('%I:%M %p').lstrip('0')}"
     attempts = sorted(order.payment_attempts, key=lambda attempt: attempt.created_at, reverse=True)
@@ -902,14 +1038,17 @@ def _serialize_order(order: Order) -> dict:
         "customer_email": order.customer_email,
         "customer_phone": order.customer_phone,
         "created_at": created_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+        "created_at_iso": created_local.isoformat(),
         "created_relative_date": created_local.strftime("%d %b %Y"),
         "updated_at": updated_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+        "updated_at_iso": updated_local.isoformat(),
         "fulfillment_type": fulfillment_type,
         "fulfillment_label": FULFILLMENT_LABELS[fulfillment_type],
         "is_instant": is_instant,
         "counter_label": order.counter_label or current_app.config["INSTANT_ORDERING_COUNTER_LABEL"],
         "queue_number": order.queue_number,
         "queue_display": queue_display,
+        "queue_date": (order.queue_date or pickup_local.date()).isoformat() if is_instant else None,
         "quoted_wait_minutes": quoted_wait,
         "quoted_wait_display": f"{quoted_wait} minutes" if quoted_wait is not None else None,
         "fulfillment_summary": fulfillment_summary,
@@ -935,6 +1074,13 @@ def _serialize_order(order: Order) -> dict:
         "payment_attempt_count": len(attempts),
         "latest_payment_attempt": _serialize_payment_attempt(attempts[0]) if attempts else None,
         "payment_attempts": [_serialize_payment_attempt(attempt) for attempt in attempts],
+        "current_eta_at": live_eta["current_eta_at"] if live_eta else None,
+        "current_eta_time": live_eta["current_eta_time"] if live_eta else None,
+        "eta_delay_minutes": live_eta["eta_delay_minutes"] if live_eta else 0,
+        "is_eta_delayed": live_eta["is_eta_delayed"] if live_eta else False,
+        "eta_status_message": live_eta["eta_status_message"] if live_eta else None,
+        "queue_backlog_count": live_eta["backlog_ahead_count"] if live_eta else 0,
+        "active_queue_count": live_eta["active_queue_count"] if live_eta else 0,
         "notification_count": len(serialized_notifications),
         "notifications": serialized_notifications,
         "ready_notification_count": len(ready_notifications),
@@ -1010,6 +1156,19 @@ def _ready_notification_banners(orders: list[dict]) -> list[dict]:
     return banners[:4]
 
 
+def public_ordering_snapshot() -> dict:
+    windows = _pickup_windows()
+    next_available = _first_available_pickup(windows)
+    instant_queue = _instant_queue_snapshot()
+    ready_count = Order.query.filter(Order.order_status == ORDER_STATUS_SEQUENCE[2]).count()
+    return {
+        "instant_queue": instant_queue,
+        "next_available_pickup": next_available,
+        "ready_count": ready_count,
+        "scheduled_capacity": current_app.config["PICKUP_SLOT_CAPACITY"],
+    }
+
+
 def _session_orders() -> list[Order]:
     order_numbers = _history_numbers()
     if not order_numbers:
@@ -1078,18 +1237,20 @@ def checkout() -> str | Response:
             )
             return render_template("menu/checkout.html", **context), 402
 
-        checkout_token = session.get(SESSION_CHECKOUT_TOKEN_KEY)
-        order = _build_order_from_cart(form_data, fulfillment_plan, cart)
-        order.payment_reference = payment_attempt.reference
-        order.payment_status = payment_attempt.status
-        if isinstance(checkout_token, str) and checkout_token:
-            attempts = PaymentAttempt.query.filter_by(checkout_token=checkout_token).all()
-            for attempt in attempts:
-                attempt.order = order
-                attempt.checkout_token = None
-        else:
-            payment_attempt.order = order
-            payment_attempt.checkout_token = None
+        try:
+            order = _create_order_with_retries(form_data, fulfillment_plan, cart, payment_attempt)
+        except (IntegrityError, RuntimeError):
+            db.session.rollback()
+            retry_message = (
+                "The live queue changed while this order was being saved. Please submit checkout again to refresh the queue."
+            )
+            context = _get_checkout_context(
+                form_data=form_data,
+                errors=[retry_message],
+                field_errors={"fulfillment_type": retry_message},
+                entry_step="checkout",
+            )
+            return render_template("menu/checkout.html", **context), 409
         _finalize_successful_order(order)
         return redirect(url_for("orders.receipt", order=order.order_number))
 
@@ -1166,6 +1327,7 @@ def api_order_detail(order_number: str):
 
 
 @orders_bp.patch("/api/orders/<order_number>/status")
+@admin_required
 def api_update_order_status(order_number: str):
     order = Order.query.filter_by(order_number=order_number).first_or_404()
     body = request.get_json(silent=True) or {}
@@ -1181,9 +1343,21 @@ def api_update_order_status(order_number: str):
                 }
             ),
             400,
-        )
+    )
     if kitchen_notes is not None and not isinstance(kitchen_notes, str):
         return jsonify({"error": "kitchen_notes must be a string when provided"}), 400
+    allowed_next_status = _next_order_status(order.order_status)
+    if next_status != allowed_next_status:
+        return (
+            jsonify(
+                {
+                    "error": "status transitions must move forward one step at a time",
+                    "current_status": order.order_status,
+                    "allowed_next_status": allowed_next_status,
+                }
+            ),
+            400,
+        )
 
     order.order_status = next_status
     if kitchen_notes is not None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -36,6 +36,9 @@ def utc_now_naive() -> datetime:
 
 class Order(db.Model):
     __tablename__ = "orders"
+    __table_args__ = (
+        db.UniqueConstraint("queue_date", "queue_number", name="uq_orders_queue_date_number"),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     order_number = db.Column(db.String(32), unique=True, nullable=False, index=True)
@@ -50,6 +53,7 @@ class Order(db.Model):
         index=True,
     )
     pickup_at = db.Column(db.DateTime, nullable=False, index=True)
+    queue_date = db.Column(db.Date, nullable=True, index=True)
     queue_number = db.Column(db.Integer, nullable=True, index=True)
     quoted_wait_minutes = db.Column(db.Integer, nullable=True)
     counter_label = db.Column(db.String(120), nullable=True)
@@ -211,13 +215,74 @@ def _sync_legacy_schema() -> None:
             conn.execute(text("ALTER TABLE orders ADD COLUMN fulfillment_type VARCHAR(20)"))
         if "queue_number" not in order_columns:
             conn.execute(text("ALTER TABLE orders ADD COLUMN queue_number INTEGER"))
+        if "queue_date" not in order_columns:
+            conn.execute(text("ALTER TABLE orders ADD COLUMN queue_date DATE"))
         if "quoted_wait_minutes" not in order_columns:
             conn.execute(text("ALTER TABLE orders ADD COLUMN quoted_wait_minutes INTEGER"))
         if "counter_label" not in order_columns:
             conn.execute(text("ALTER TABLE orders ADD COLUMN counter_label VARCHAR(120)"))
         conn.execute(text("UPDATE orders SET fulfillment_type = 'scheduled' WHERE fulfillment_type IS NULL"))
+        conn.execute(
+            text(
+                "UPDATE orders SET queue_date = DATE(pickup_at) "
+                "WHERE queue_number IS NOT NULL AND queue_date IS NULL"
+            )
+        )
+        duplicate_days = [
+            row[0]
+            for row in conn.execute(
+                text(
+                    "SELECT queue_date "
+                    "FROM orders "
+                    "WHERE queue_date IS NOT NULL AND queue_number IS NOT NULL "
+                    "GROUP BY queue_date, queue_number "
+                    "HAVING COUNT(*) > 1"
+                )
+            ).fetchall()
+        ]
+        for queue_date in sorted(set(duplicate_days)):
+            ordered_rows = conn.execute(
+                text(
+                    "SELECT id "
+                    "FROM orders "
+                    "WHERE queue_date = :queue_date AND queue_number IS NOT NULL "
+                    "ORDER BY created_at ASC, id ASC"
+                ),
+                {"queue_date": queue_date},
+            ).fetchall()
+            for index, row in enumerate(ordered_rows, start=1):
+                conn.execute(
+                    text("UPDATE orders SET queue_number = :queue_number WHERE id = :order_id"),
+                    {"queue_number": index, "order_id": row[0]},
+                )
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_orders_fulfillment_type ON orders (fulfillment_type)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_orders_queue_number ON orders (queue_number)"))
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_orders_queue_date ON orders (queue_date)"))
+        conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_orders_queue_date_number "
+                "ON orders (queue_date, queue_number)"
+            )
+        )
+        if "daily_queue_counters" in tables:
+            queue_days = conn.execute(
+                text(
+                    "SELECT queue_date, MAX(queue_number) "
+                    "FROM orders "
+                    "WHERE queue_date IS NOT NULL AND queue_number IS NOT NULL "
+                    "GROUP BY queue_date"
+                )
+            ).fetchall()
+            for queue_date, max_number in queue_days:
+                conn.execute(
+                    text(
+                        "INSERT INTO daily_queue_counters (counter_date, last_number, updated_at) "
+                        "VALUES (:counter_date, :last_number, CURRENT_TIMESTAMP) "
+                        "ON CONFLICT(counter_date) DO UPDATE SET "
+                        "last_number = excluded.last_number, updated_at = CURRENT_TIMESTAMP"
+                    ),
+                    {"counter_date": queue_date, "last_number": max_number or 0},
+                )
 
 
 def init_db(app: Flask) -> None:

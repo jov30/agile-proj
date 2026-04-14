@@ -17,6 +17,10 @@ class TestCheckoutAndOrders(unittest.TestCase):
             {
                 "TESTING": True,
                 "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}",
+                "PICKUP_OPEN_HOUR": 0,
+                "PICKUP_OPEN_MINUTE": 0,
+                "PICKUP_CLOSE_HOUR": 23,
+                "PICKUP_CLOSE_MINUTE": 59,
             }
         )
         self.client = self.app.test_client()
@@ -85,6 +89,17 @@ class TestCheckoutAndOrders(unittest.TestCase):
             order = Order.query.filter_by(order_number=order_number).first()
             self.assertIsNotNone(order)
             return order_number
+
+    def _login_admin(self) -> None:
+        response = self.client.post(
+            "/login",
+            data={
+                "email": self.app.config["ADMIN_EMAIL"],
+                "password": self.app.config["ADMIN_PASSWORD"],
+            },
+            follow_redirects=False,
+        )
+        self.assertEqual(response.status_code, 302)
 
     def test_checkout_page_renders_summary_from_cart(self):
         item = self._seed_cart()
@@ -183,6 +198,7 @@ class TestCheckoutAndOrders(unittest.TestCase):
     def test_order_filters_detail_view_and_status_patch(self):
         first_order = self._place_order(self._valid_checkout_form(days_ahead=1))
         second_order = self._place_order(self._valid_checkout_form(days_ahead=2, special_instructions="No coriander, please."))
+        self._login_admin()
 
         update = self.client.patch(
             f"/api/orders/{first_order}/status",
@@ -243,6 +259,7 @@ class TestCheckoutAndOrders(unittest.TestCase):
             self.assertIsNotNone(order)
             self.assertEqual(order.fulfillment_type, "instant")
             self.assertEqual(order.queue_number, 1)
+            self.assertIsNotNone(order.queue_date)
             self.assertIsNotNone(order.quoted_wait_minutes)
             self.assertGreater(order.quoted_wait_minutes, 0)
             self.assertIsNotNone(order.counter_label)
@@ -265,8 +282,28 @@ class TestCheckoutAndOrders(unittest.TestCase):
             self.assertIsNotNone(second_order)
             self.assertEqual(first_order.queue_number, 1)
             self.assertEqual(second_order.queue_number, 2)
+            self.assertEqual(first_order.queue_date, second_order.queue_date)
             queue_counter = DailyQueueCounter.query.one()
             self.assertEqual(queue_counter.last_number, 2)
+
+    def test_instant_queue_repairs_stale_counter_before_assigning_next_number(self):
+        first = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+
+        with self.app.app_context():
+            queue_counter = DailyQueueCounter.query.one()
+            queue_counter.last_number = 0
+            db.session.commit()
+
+        second = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+
+        with self.app.app_context():
+            first_order = Order.query.filter_by(order_number=first).first()
+            second_order = Order.query.filter_by(order_number=second).first()
+            self.assertIsNotNone(first_order)
+            self.assertIsNotNone(second_order)
+            self.assertEqual(first_order.queue_number, 1)
+            self.assertEqual(second_order.queue_number, 2)
+            self.assertEqual(first_order.queue_date, second_order.queue_date)
 
     def test_instant_queue_capacity_blocks_new_order(self):
         self.app.config["INSTANT_ORDERING_MAX_ACTIVE_ORDERS"] = 1
@@ -279,6 +316,12 @@ class TestCheckoutAndOrders(unittest.TestCase):
 
     def test_ready_status_triggers_mock_notifications_and_history_banner(self):
         order_number = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+        self._login_admin()
+        preparing = self.client.patch(
+            f"/api/orders/{order_number}/status",
+            json={"status": "Preparing"},
+        )
+        self.assertEqual(preparing.status_code, 200)
         response = self.client.patch(
             f"/api/orders/{order_number}/status",
             json={"status": "Ready for Pickup"},
@@ -307,6 +350,7 @@ class TestCheckoutAndOrders(unittest.TestCase):
     def test_admin_queue_page_lists_active_orders(self):
         instant_order = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
         scheduled_order = self._place_order(self._valid_checkout_form(fulfillment_type="scheduled"))
+        self._login_admin()
 
         page = self.client.get("/admin/orders/queue")
         self.assertEqual(page.status_code, 200)
@@ -314,6 +358,76 @@ class TestCheckoutAndOrders(unittest.TestCase):
         self.assertIn("Live pickup queue management", html)
         self.assertIn(instant_order, html)
         self.assertIn(scheduled_order, html)
+
+    def test_status_patch_requires_admin_and_forces_sequential_progression(self):
+        order_number = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+
+        forbidden = self.client.patch(
+            f"/api/orders/{order_number}/status",
+            json={"status": "Preparing"},
+        )
+        self.assertEqual(forbidden.status_code, 403)
+
+        self._login_admin()
+        skipped = self.client.patch(
+            f"/api/orders/{order_number}/status",
+            json={"status": "Ready for Pickup"},
+        )
+        self.assertEqual(skipped.status_code, 400)
+        self.assertEqual(skipped.get_json()["allowed_next_status"], "Preparing")
+
+        preparing = self.client.patch(
+            f"/api/orders/{order_number}/status",
+            json={"status": "Preparing"},
+        )
+        self.assertEqual(preparing.status_code, 200)
+
+        backwards = self.client.patch(
+            f"/api/orders/{order_number}/status",
+            json={"status": "Confirmed"},
+        )
+        self.assertEqual(backwards.status_code, 400)
+        self.assertEqual(backwards.get_json()["allowed_next_status"], "Ready for Pickup")
+
+    def test_track_order_redirects_to_detail_and_receipt(self):
+        order_number = self._place_order()
+
+        detail = self.client.post(
+            "/track-order",
+            data={"order_number": order_number.lower(), "destination": "detail"},
+            follow_redirects=False,
+        )
+        self.assertEqual(detail.status_code, 302)
+        self.assertTrue(detail.headers["Location"].endswith(f"/orders/{order_number}"))
+
+        receipt = self.client.post(
+            "/track-order",
+            data={"order_number": order_number, "destination": "receipt"},
+            follow_redirects=False,
+        )
+        self.assertEqual(receipt.status_code, 302)
+        self.assertTrue(receipt.headers["Location"].endswith(f"/receipt?order={order_number}"))
+
+    def test_instant_order_api_reports_live_eta_delay_when_queue_slows(self):
+        first = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+        second = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+
+        with self.app.app_context():
+            delayed_order = Order.query.filter_by(order_number=second).first()
+            self.assertIsNotNone(delayed_order)
+            delayed_order.pickup_at = datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"])).replace(
+                tzinfo=None,
+                microsecond=0,
+            ) - timedelta(minutes=3)
+            db.session.commit()
+
+        detail = self.client.get(f"/api/orders/{second}")
+        self.assertEqual(detail.status_code, 200)
+        payload = detail.get_json()
+        self.assertTrue(payload["is_eta_delayed"])
+        self.assertGreater(payload["eta_delay_minutes"], 0)
+        self.assertTrue(payload["current_eta_time"])
+        self.assertEqual(payload["queue_backlog_count"], 1)
 
 
 if __name__ == "__main__":
