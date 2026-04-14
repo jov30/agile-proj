@@ -22,6 +22,9 @@
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
     font-size: clamp(1.8rem, 3vw, 2.35rem);
   }
+  .cart-page__header p {
+    margin-bottom: 0.25rem;
+  }
 
   .cart-lines {
     display: grid;
@@ -112,6 +115,18 @@
     font-size: 1.35rem;
     font-weight: 800;
   }
+  .cart-summary__stack {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .cart-summary__meta {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--text-muted);
+  }
+  .cart-summary__meta strong {
+    color: var(--text-main);
+  }
   .cart-summary__actions {
     display: flex;
     flex-wrap: wrap;
@@ -145,10 +160,12 @@
 <div class="cart-page section-panel">
   <div class="cart-page__header">
     <div>
-      <p class="eyebrow">Your order</p>
+      <p class="eyebrow">
+        Your order · {% if preferred_fulfillment == 'scheduled' %}Scheduled pickup path{% else %}Instant queue path{% endif %}
+      </p>
       <h1>Cart</h1>
     </div>
-    <a class="button button--secondary" href="{{ url_for('public.menu') }}">Browse menu</a>
+    <a class="button button--secondary" href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">Browse menu</a>
   </div>
 
   <div id="cart-root" class="cart-lines" aria-live="polite"></div>
@@ -157,7 +174,7 @@
 
   <div id="cart-empty" class="cart-empty" hidden>
     <p>Your cart is empty.</p>
-    <p><a href="{{ url_for('public.menu') }}">Explore the menu</a> to add dishes.</p>
+    <p><a href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">Explore the menu</a> to add dishes.</p>
   </div>
 
   <p id="cart-error" class="menu-error" style="margin-top: 1rem; display: none" role="alert"></p>
@@ -168,10 +185,19 @@
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script>
   (() => {
+    const preferredFulfillment = {{ preferred_fulfillment | tojson }};
     const root = document.getElementById("cart-root");
     const summaryEl = document.getElementById("cart-summary");
     const emptyEl = document.getElementById("cart-empty");
     const errEl = document.getElementById("cart-error");
+
+    function modeLabel(mode) {
+      return mode === "scheduled" ? "Scheduled Pickup" : "Instant Queue";
+    }
+
+    function checkoutLabel(mode) {
+      return mode === "scheduled" ? "Continue to Scheduled Checkout" : "Continue to Instant Checkout";
+    }
 
     function showError(msg) {
       errEl.style.display = msg ? "block" : "none";
@@ -217,13 +243,36 @@
       }
       root.appendChild(frag);
 
+      const mode = data.preferred_fulfillment || preferredFulfillment;
+      const alternateMode = data.alternate_fulfillment || (mode === "scheduled" ? "instant" : "scheduled");
       summaryEl.innerHTML = `
-        <p class="cart-summary__total">Total: ${data.total_display}</p>
+        <div class="cart-summary__stack">
+          <p class="cart-summary__total">${data.item_count} item(s) · ${data.total_display}</p>
+          <div class="cart-summary__meta">
+            <span><strong>Subtotal:</strong> ${data.total_display}</span>
+            <span><strong>Pickup fee at checkout:</strong> ${data.service_fee_display}</span>
+            <span><strong>Estimated checkout total:</strong> ${data.checkout_total_display}</span>
+            <span><strong>Current path:</strong> ${modeLabel(mode)}. You can still switch before placing the order.</span>
+          </div>
+        </div>
         <div class="cart-summary__actions">
-          <a class="button button--primary" href="/checkout">Checkout</a>
-          <a class="button button--secondary" href="/menu">Add more items</a>
+          <a class="button button--primary" href="/checkout?fulfillment=${encodeURIComponent(mode)}">${checkoutLabel(mode)}</a>
+          <a class="button button--secondary" href="/checkout?fulfillment=${encodeURIComponent(alternateMode)}">Switch to ${modeLabel(alternateMode)}</a>
+          <a class="button button--secondary" href="/menu?fulfillment=${encodeURIComponent(mode)}">Add more items</a>
+          <button type="button" class="button button--secondary button--inline" id="clear-cart-button">Clear cart</button>
         </div>
       `;
+
+      const clearButton = document.getElementById("clear-cart-button");
+      clearButton?.addEventListener("click", async () => {
+        try {
+          await window.McqCart.clear();
+          const fresh = await window.McqCart.get();
+          render(fresh);
+        } catch (e) {
+          showError(e.message || "Could not clear cart.");
+        }
+      });
 
       root.querySelectorAll(".cart-line").forEach((lineEl) => {
         const itemId = lineEl.dataset.itemId;
@@ -278,4 +327,3 @@
   })();
 </script>
 {% endblock %}
-

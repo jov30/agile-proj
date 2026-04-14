@@ -611,15 +611,14 @@
       scheduled pickup slot. Tracking, notifications, receipts, and history all connect back to the same order data.
     </p>
     <div class="button-row">
-      <a href="/checkout" class="button button--primary">Order Now (Instant Queue)</a>
-      <a href="/pickup-planner" class="button button--secondary">Schedule Pickup</a>
+      <a href="/menu?fulfillment=instant" class="button button--primary">Start Instant Order</a>
+      <a href="/menu?fulfillment=scheduled" class="button button--secondary">Build Scheduled Order</a>
       <a href="/orders" class="button button--secondary">Track Existing Order</a>
-      <a href="/register" class="button button--secondary">Create Account</a>
-      <a href="/support" class="button button--secondary">Customer Support</a>
+      <a href="/login" class="button button--secondary">Login</a>
     </div>
     <div class="pill-row">
-      <span class="pill"><strong>Instant queue</strong> join the live counter line with ETA and in-site notifications.</span>
-      <span class="pill"><strong>Scheduled pickup</strong> reserve the next available slot with capacity and lead-time checks.</span>
+      <span class="pill"><strong>Instant queue</strong> start from the menu, add dishes, then check out into the live pickup line.</span>
+      <span class="pill"><strong>Scheduled pickup</strong> build the cart first, then reserve the best available pickup slot.</span>
       <span class="pill"><strong>Track order</strong> jump straight to detail or receipt from the homepage.</span>
     </div>
   </div>
@@ -659,7 +658,7 @@
   </div>
 </section>
 
-<section class="live-ops section-panel">
+<section class="live-ops section-panel" id="live-ordering">
   <div class="live-ops__grid">
     <div>
       <p class="eyebrow">Live ordering status</p>
@@ -743,56 +742,54 @@
     </div>
     <p>
       The homepage now exposes the planned customer journey more clearly: account setup, menu browsing, cart,
-      instant ordering, scheduled pickup, payment, receipt, live order tracking, favourites, shared meals, and support.
+      instant ordering, scheduled pickup, checkout, receipt, live order tracking, and support.
     </p>
   </div>
   <div class="launchpad__grid">
     <article class="launch-card">
       <p class="launch-card__kicker">Account</p>
       <h3>Get customers in fast</h3>
-      <p>Registration, login, and profile access now have visible entry points instead of being hidden future tasks.</p>
+      <p>Keep account entry simple so returning customers can sign in quickly before placing or tracking an order.</p>
       <div class="launch-card__actions">
         <a class="feature-button feature-button--accent" href="/register">Register</a>
         <a class="feature-button" href="/login">Login</a>
-        <a class="feature-button" href="/profile">Profile</a>
       </div>
     </article>
     <article class="launch-card">
       <p class="launch-card__kicker">Ordering</p>
       <h3>Cover both ordering paths</h3>
-      <p>These buttons map directly to the two real customer journeys: instant queue ordering now or scheduled pickup later.</p>
+      <p>These buttons map directly to the two real customer journeys and both start in the menu, where customers choose dishes first.</p>
       <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/menu">Browse Menu</a>
-        <a class="feature-button" href="/cart">Cart</a>
-        <a class="feature-button" href="/checkout">Checkout</a>
+        <a class="feature-button feature-button--accent" href="/menu?fulfillment=instant">Instant Menu</a>
+        <a class="feature-button" href="/menu?fulfillment=scheduled">Scheduled Menu</a>
+        <a class="feature-button" href="/cart?fulfillment=instant">Cart</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Checkout Flow</p>
+      <h3>Keep the next step obvious</h3>
+      <p>Once dishes are in the cart, customers can move into instant checkout, scheduled pickup planning, or order history without detours.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/checkout?fulfillment=instant">Instant Checkout</a>
+        <a class="feature-button" href="/pickup-planner?fulfillment=scheduled">Scheduled Pickup</a>
         <a class="feature-button" href="/orders">Order History</a>
       </div>
     </article>
     <article class="launch-card">
-      <p class="launch-card__kicker">Payment and Pickup</p>
-      <h3>Track queue, slots, and receipts</h3>
-      <p>Payment, instant counter ETA, scheduled pickup planning, and receipt confirmation now have dedicated entry points.</p>
+      <p class="launch-card__kicker">Tracking</p>
+      <h3>Receipts and live updates</h3>
+      <p>Customers can jump back into tracking, receipt lookup, and live pickup notifications from one clear section.</p>
       <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/payment">Payment</a>
-        <a class="feature-button" href="/pickup-planner">Pickup Planner</a>
-        <a class="feature-button" href="/receipt">Receipt</a>
-      </div>
-    </article>
-    <article class="launch-card">
-      <p class="launch-card__kicker">Community</p>
-      <h3>Keep meal sharing visible</h3>
-      <p>Meal sharing is part of the project identity, so favourites and shared meals are now surfaced as first-class actions.</p>
-      <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/favorites">Favourites</a>
-        <a class="feature-button" href="/shared-meals">Shared Meals</a>
+        <a class="feature-button feature-button--accent" href="/orders">Open Orders</a>
+        <a class="feature-button" href="#live-ordering">Track by Order Number</a>
       </div>
     </article>
     <article class="launch-card">
       <p class="launch-card__kicker">Support</p>
       <h3>Help is always nearby</h3>
-      <p>The floating chatbox is backed by a visible support route and phone contact so customers always have a help path.</p>
+      <p>The floating chatbox and phone contact keep help visible without interrupting the main ordering path.</p>
       <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/support">Customer Support</a>
+        <a class="feature-button feature-button--accent" href="tel:+61892485623">Call 08 9248 5623</a>
         <a class="feature-button" href="tel:+61892485623">08 9248 5623</a>
       </div>
     </article>
@@ -964,16 +961,16 @@
       the bottom of the website so customers always have a visible support entry point while browsing.
     </p>
     <div class="button-row">
-      <a href="/support" class="button button--primary">Visit Customer Support</a>
-      <a href="/payment" class="button button--secondary">Payment Flow</a>
-      <a href="/pickup-planner" class="button button--secondary">Pickup Planner</a>
-      <a href="tel:+61892485623" class="button button--secondary">Call 08 9248 5623</a>
+      <a href="tel:+61892485623" class="button button--primary">Call 08 9248 5623</a>
+      <a href="#live-ordering" class="button button--secondary">Track Order</a>
+      <a href="/menu?fulfillment=instant" class="button button--secondary">Browse Menu</a>
+      <a href="/orders" class="button button--secondary">Order History</a>
     </div>
   </div>
   <div class="support-story__panel">
     <div class="support-card">
       <strong>Built around the project brief</strong>
-      <span>User registration, login, menu browsing, cart, instant ordering, scheduled pickup, receipt, order history, favourites, and shared meals are all represented in the new layout.</span>
+      <span>User registration, login, menu browsing, cart, instant ordering, scheduled pickup, receipt, order history, and support are all represented in the new layout.</span>
     </div>
     <div class="support-card">
       <strong>Chat support entry point</strong>

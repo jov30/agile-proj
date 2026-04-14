@@ -191,6 +191,58 @@
     color: rgba(255, 247, 239, 0.9);
   }
 
+  .menu-flow {
+    display: grid;
+    gap: 0.95rem;
+    margin-top: 1rem;
+  }
+
+  .menu-flow__switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .menu-flow__mode {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.82rem 1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 800;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.06);
+  }
+
+  .menu-flow__mode.is-active {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-color: transparent;
+  }
+
+  .menu-flow__summary {
+    padding: 1rem 1.05rem;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 180, 54, 0.22);
+    background:
+      linear-gradient(135deg, rgba(255, 180, 54, 0.14), rgba(255, 106, 19, 0.08)),
+      rgba(255, 255, 255, 0.84);
+  }
+
+  .menu-flow__summary strong {
+    display: block;
+    margin-bottom: 0.24rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .menu-flow__summary p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
   .menu-browser {
     padding: clamp(1.3rem, 3vw, 2rem);
   }
@@ -467,6 +519,23 @@
     width: 100%;
   }
 
+  .menu-card__cart-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
+  .menu-card__cart-badge[hidden] {
+    display: none;
+  }
+
   .menu-card__qty {
     display: inline-flex;
     align-items: center;
@@ -554,6 +623,74 @@
     color: #7c2218;
   }
 
+  .menu-feedback {
+    margin-bottom: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 22px;
+    border: 1px solid rgba(0, 111, 116, 0.16);
+    background: rgba(0, 111, 116, 0.08);
+    color: var(--text-main);
+  }
+
+  .menu-feedback.is-error {
+    color: #7c2218;
+    background: rgba(235, 81, 48, 0.12);
+    border-color: rgba(235, 81, 48, 0.18);
+  }
+
+  .menu-feedback[hidden] {
+    display: none;
+  }
+
+  .menu-cart-dock {
+    position: fixed;
+    left: 50%;
+    bottom: 1rem;
+    z-index: 40;
+    width: min(1080px, calc(100vw - 2rem));
+    transform: translateX(-50%);
+  }
+
+  .menu-cart-dock[hidden] {
+    display: none;
+  }
+
+  .menu-cart-dock__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 26px;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.96), rgba(23, 19, 21, 0.94)),
+      rgba(32, 23, 19, 0.92);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .menu-cart-dock__summary {
+    display: grid;
+    gap: 0.24rem;
+  }
+
+  .menu-cart-dock__summary strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.08rem;
+  }
+
+  .menu-cart-dock__summary span {
+    color: rgba(255, 247, 239, 0.82);
+    line-height: 1.5;
+  }
+
+  .menu-cart-dock__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
   @media (max-width: 1080px) {
     .menu-hero {
       grid-template-columns: 1fr;
@@ -635,6 +772,15 @@
     .menu-grid {
       grid-auto-columns: minmax(82vw, 300px);
     }
+
+    .menu-cart-dock {
+      bottom: 0.75rem;
+      width: calc(100vw - 1rem);
+    }
+
+    .menu-cart-dock__inner {
+      padding: 0.95rem;
+    }
   }
 </style>
 {% endblock %}
@@ -689,23 +835,47 @@
 <section class="menu-utility section-panel">
   <div class="menu-utility__header">
     <div>
-      <p class="eyebrow">Future user actions</p>
-      <h2>Important customer buttons stay close to the menu</h2>
+      <p class="eyebrow">Order path</p>
+      <h2>Keep the next step obvious while browsing</h2>
     </div>
     <p>
-      These links reflect the user-side project flow from the README, so the menu page already points toward cart,
-      checkout, payment, pickup planning, receipt, and the community features customers will use most.
+      Start by choosing the fulfillment path below, then add dishes. The cart, checkout, pickup planner, and tracking
+      actions stay focused on routes customers can use right now.
     </p>
   </div>
+  <div class="menu-flow">
+    <div class="menu-flow__switch" aria-label="Preferred pickup flow">
+      <a
+        class="menu-flow__mode {% if preferred_fulfillment == 'instant' %}is-active{% endif %}"
+        href="{{ url_for('public.menu', fulfillment='instant') }}"
+      >
+        Instant Queue
+      </a>
+      <a
+        class="menu-flow__mode {% if preferred_fulfillment == 'scheduled' %}is-active{% endif %}"
+        href="{{ url_for('public.menu', fulfillment='scheduled') }}"
+      >
+        Scheduled Pickup
+      </a>
+    </div>
+    <div class="menu-flow__summary">
+      {% if preferred_fulfillment == 'instant' %}
+        <strong>Instant queue mode is active.</strong>
+        <p>Add dishes, then continue into instant checkout to receive a live queue number and ready-time estimate.</p>
+      {% else %}
+        <strong>Scheduled pickup mode is active.</strong>
+        <p>Add dishes, then continue into checkout to reserve a pickup slot that fits kitchen capacity and lead time.</p>
+      {% endif %}
+    </div>
+  </div>
   <div class="menu-utility__grid">
-    <a class="menu-utility__link menu-utility__link--accent" href="/cart">Cart</a>
-    <a class="menu-utility__link" href="/checkout">Checkout</a>
-    <a class="menu-utility__link" href="/payment">Payment</a>
-    <a class="menu-utility__link" href="/pickup-planner">Pickup Planner</a>
-    <a class="menu-utility__link" href="/receipt">Receipt</a>
-    <a class="menu-utility__link" href="/favorites">Favourites</a>
-    <a class="menu-utility__link" href="/shared-meals">Shared Meals</a>
-    <a class="menu-utility__link" href="/support">Support</a>
+    <a class="menu-utility__link menu-utility__link--accent" href="{{ url_for('orders.cart', fulfillment=preferred_fulfillment) }}">Cart</a>
+    <a class="menu-utility__link" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">
+      {% if preferred_fulfillment == 'instant' %}Instant Checkout{% else %}Scheduled Checkout{% endif %}
+    </a>
+    <a class="menu-utility__link" href="{{ url_for('orders.pickup_planner', fulfillment='scheduled') }}">Pickup Planner</a>
+    <a class="menu-utility__link" href="{{ url_for('orders.orders') }}">Order History</a>
+    <a class="menu-utility__link" href="tel:+61892485623">Call Store</a>
   </div>
 </section>
 
@@ -753,12 +923,16 @@
     </label>
   </div>
 
+  <p id="menu-feedback" class="menu-feedback" hidden role="status"></p>
+
   <div id="menu-categories" class="menu-categories" role="tablist" aria-label="Menu categories"></div>
   <div id="menu-category-note" class="menu-category-note" hidden></div>
   <div id="menu-items-rail" class="menu-items-rail" aria-live="polite">
     <div id="menu-items" class="menu-grid"></div>
   </div>
 </section>
+
+<div id="menu-cart-dock" class="menu-cart-dock" hidden aria-live="polite"></div>
 
 <template id="menu-card-template">
   <article class="menu-card">
@@ -785,6 +959,7 @@
             <button type="button" class="menu-card__qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
           </div>
         </div>
+        <span class="menu-card__cart-badge" hidden>In cart: 1</span>
       </div>
     </div>
   </article>
@@ -797,6 +972,7 @@
 const menuDataUrl = "{{ url_for('public.api_menu') }}";
 const staticBase = "{{ url_for('static', filename='') }}";
 const fallbackImage = "{{ url_for('static', filename='images/menu/pho-classic.jpg') }}";
+const preferredFulfillment = {{ preferred_fulfillment | tojson }};
 const categoriesEl = document.getElementById('menu-categories');
 const itemsEl = document.getElementById('menu-items');
 const itemsRailEl = document.getElementById('menu-items-rail');
@@ -807,6 +983,8 @@ const categoryTotalEl = document.getElementById('menu-category-total');
 const itemTotalEl = document.getElementById('menu-item-total');
 const activeCategoryEl = document.getElementById('menu-active-category');
 const menuRailButtons = document.querySelectorAll('[data-menu-shift]');
+const feedbackEl = document.getElementById('menu-feedback');
+const cartDockEl = document.getElementById('menu-cart-dock');
 
 let menuCategories = [];
 const searchInput = document.getElementById('menu-search');
@@ -822,11 +1000,54 @@ function cacheCartQuantities(cartPayload) {
   });
 }
 
+function showFeedback(message, isError = false) {
+  if (!feedbackEl) return;
+  if (!message) {
+    feedbackEl.hidden = true;
+    feedbackEl.textContent = '';
+    feedbackEl.classList.remove('is-error');
+    return;
+  }
+  feedbackEl.hidden = false;
+  feedbackEl.textContent = message;
+  feedbackEl.classList.toggle('is-error', Boolean(isError));
+}
+
+function modeLabel(mode) {
+  return mode === 'scheduled' ? 'Scheduled Pickup' : 'Instant Queue';
+}
+
+function renderCartDock(cartPayload) {
+  if (!cartDockEl) return;
+  if (!cartPayload || !cartPayload.item_count) {
+    cartDockEl.hidden = true;
+    cartDockEl.innerHTML = '';
+    return;
+  }
+
+  const mode = cartPayload.preferred_fulfillment || preferredFulfillment;
+  const primaryLabel = mode === 'scheduled' ? 'Continue to Scheduled Checkout' : 'Continue to Instant Checkout';
+  cartDockEl.hidden = false;
+  cartDockEl.innerHTML = `
+    <div class="menu-cart-dock__inner">
+      <div class="menu-cart-dock__summary">
+        <strong>${cartPayload.item_count} item(s) in cart · ${cartPayload.total_display}</strong>
+        <span>${modeLabel(mode)} selected. Pickup fee ${cartPayload.service_fee_display} applies at checkout, estimated total ${cartPayload.checkout_total_display}.</span>
+      </div>
+      <div class="menu-cart-dock__actions">
+        <a class="button button--secondary" href="/cart?fulfillment=${encodeURIComponent(mode)}">View Cart</a>
+        <a class="button button--primary" href="/checkout?fulfillment=${encodeURIComponent(mode)}">${primaryLabel}</a>
+      </div>
+    </div>
+  `;
+}
+
 async function refreshCartSnapshot() {
   if (!window.McqCart) return;
   try {
     const cart = await window.McqCart.get();
     cacheCartQuantities(cart);
+    renderCartDock(cart);
   } catch (error) {
     console.warn('Cart snapshot unavailable', error);
   }
@@ -899,7 +1120,7 @@ function renderSearchResults(q) {
   itemsEl.appendChild(fragment);
 }
 
-if (searchInput) {
+  if (searchInput) {
   searchInput.addEventListener('input', () => {
     window.clearTimeout(searchTimer);
     searchTimer = window.setTimeout(() => {
@@ -985,6 +1206,7 @@ function buildCard(item, categoryTitle) {
   const qtyWrap = clone.querySelector('.menu-card__qty');
   const qtyValue = clone.querySelector('.menu-card__qty-value');
   const qtyButtons = clone.querySelectorAll('.menu-card__qty-btn');
+  const cartBadge = clone.querySelector('.menu-card__cart-badge');
   const itemId = item.id;
 
   img.src = item.image ? staticBase + item.image : fallbackImage;
@@ -1002,7 +1224,7 @@ function buildCard(item, categoryTitle) {
 
   if (detail) {
     if (itemId) {
-      detail.href = '/menu/item/' + encodeURIComponent(itemId);
+      detail.href = '/menu/item/' + encodeURIComponent(itemId) + '?fulfillment=' + encodeURIComponent(preferredFulfillment);
       detail.removeAttribute('aria-disabled');
     } else {
       detail.setAttribute('aria-disabled', 'true');
@@ -1015,6 +1237,10 @@ function buildCard(item, categoryTitle) {
     if (qtyValue) qtyValue.textContent = String(safeQty || 1);
     if (addBtn) addBtn.hidden = safeQty > 0;
     if (qtyWrap) qtyWrap.hidden = safeQty < 1;
+    if (cartBadge) {
+      cartBadge.hidden = safeQty < 1;
+      cartBadge.textContent = `In cart: ${safeQty}`;
+    }
   }
 
   async function syncQuantity(nextQty) {
@@ -1042,7 +1268,11 @@ function buildCard(item, categoryTitle) {
         try {
           const payload = await window.McqCart.add(itemId, 1);
           cacheCartQuantities(payload);
+          renderCartDock(payload);
           setCardQuantity(cartQtyById.get(itemId) || 0);
+          showFeedback(`${item.name} added. ${cartQtyById.get(itemId) || 1} now in cart.`, false);
+        } catch (error) {
+          showFeedback(error.message || 'Could not add this item to the cart.', true);
         } finally {
           addBtn.classList.remove('is-busy');
           addBtn.disabled = false;
@@ -1065,6 +1295,14 @@ function buildCard(item, categoryTitle) {
       });
       try {
         await syncQuantity(nextQty);
+        const currentQty = cartQtyById.get(itemId) || 0;
+        if (currentQty > 0) {
+          showFeedback(`${item.name} updated. ${currentQty} now in cart.`, false);
+        } else {
+          showFeedback(`${item.name} removed from the cart.`, false);
+        }
+      } catch (error) {
+        showFeedback(error.message || 'Could not update this cart quantity.', true);
       } finally {
         qtyButtons.forEach((b) => {
           b.disabled = false;

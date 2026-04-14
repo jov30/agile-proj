@@ -69,6 +69,52 @@
     gap: 0.75rem;
     margin-bottom: 1.5rem;
   }
+  .item-detail__cart-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .item-detail__qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.16);
+    background: rgba(255, 255, 255, 0.9);
+  }
+  .item-detail__qty[hidden],
+  .item-detail__cart-badge[hidden] {
+    display: none;
+  }
+  .item-detail__qty button {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    cursor: pointer;
+  }
+  .item-detail__qty span {
+    min-width: 1.4rem;
+    text-align: center;
+    font-weight: 800;
+  }
+  .item-detail__cart-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.58rem 0.78rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
   .item-detail__section {
     margin-top: 1.1rem;
     padding-top: 1.1rem;
@@ -122,11 +168,22 @@
         <p class="item-detail__price">{{ item.price }}</p>
       {% endif %}
       <div class="item-detail__actions">
-        <button type="button" class="button button--primary" id="detail-add-cart" data-item-id="{{ item.id }}">
-          Add to cart
-        </button>
-        <a class="button button--secondary" href="{{ url_for('public.menu') }}">Back to menu</a>
-        <a class="button button--secondary" href="{{ url_for('orders.cart') }}">View cart</a>
+        <div class="item-detail__cart-tools">
+          <button type="button" class="button button--primary" id="detail-add-cart" data-item-id="{{ item.id }}">
+            Add to cart
+          </button>
+          <div class="item-detail__qty" id="detail-qty" hidden>
+            <button type="button" id="detail-decrease" aria-label="Decrease quantity">-</button>
+            <span id="detail-qty-value">1</span>
+            <button type="button" id="detail-increase" aria-label="Increase quantity">+</button>
+          </div>
+          <span class="item-detail__cart-badge" id="detail-cart-count" hidden>In cart: 1</span>
+        </div>
+        <a class="button button--secondary" href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">Back to menu</a>
+        <a class="button button--secondary" href="{{ url_for('orders.cart', fulfillment=preferred_fulfillment) }}">View cart</a>
+        <a class="button button--secondary" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">
+          {% if preferred_fulfillment == 'scheduled' %}Scheduled checkout{% else %}Instant checkout{% endif %}
+        </a>
       </div>
       <p class="item-detail__toast" id="detail-cart-toast" aria-live="polite"></p>
       {% for section in item.sections or [] %}
@@ -151,23 +208,86 @@
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script>
   (() => {
+    const preferredFulfillment = {{ preferred_fulfillment | tojson }};
     const btn = document.getElementById("detail-add-cart");
     const toast = document.getElementById("detail-cart-toast");
-    if (!btn || !window.McqCart) return;
+    const qtyWrap = document.getElementById("detail-qty");
+    const qtyValue = document.getElementById("detail-qty-value");
+    const decreaseBtn = document.getElementById("detail-decrease");
+    const increaseBtn = document.getElementById("detail-increase");
+    const countBadge = document.getElementById("detail-cart-count");
+    const itemId = btn?.dataset.itemId;
+    if (!btn || !window.McqCart || !itemId) return;
+
+    function showToast(message, isError = false) {
+      toast.textContent = message || "";
+      toast.classList.toggle("is-error", Boolean(isError));
+    }
+
+    function setQuantityState(quantity) {
+      const safeQty = Math.max(0, Number(quantity || 0));
+      btn.hidden = safeQty > 0;
+      qtyWrap.hidden = safeQty < 1;
+      countBadge.hidden = safeQty < 1;
+      qtyValue.textContent = String(safeQty || 1);
+      countBadge.textContent = `In cart: ${safeQty}`;
+    }
+
+    async function refreshQuantity() {
+      const payload = await window.McqCart.get();
+      const line = (payload.lines || []).find((entry) => entry.item_id === itemId);
+      setQuantityState(line ? line.quantity : 0);
+      return line ? Number(line.quantity || 0) : 0;
+    }
+
+    async function syncQuantity(nextQuantity) {
+      if (nextQuantity < 1) {
+        await window.McqCart.remove(itemId);
+      } else {
+        await window.McqCart.setQuantity(itemId, nextQuantity);
+      }
+      return refreshQuantity();
+    }
 
     btn.addEventListener("click", async () => {
-      toast.textContent = "";
-      toast.classList.remove("is-error");
+      showToast("");
       btn.disabled = true;
       try {
-        await window.McqCart.add(btn.dataset.itemId, 1);
-        toast.textContent = "Added to cart.";
+        await window.McqCart.add(itemId, 1);
+        const quantity = await refreshQuantity();
+        showToast(`Added to cart. ${quantity} now in cart for ${preferredFulfillment === "scheduled" ? "scheduled pickup" : "instant checkout"}.`);
       } catch (e) {
-        toast.classList.add("is-error");
-        toast.textContent = e.message || "Could not add to cart.";
+        showToast(e.message || "Could not add to cart.", true);
       } finally {
         btn.disabled = false;
       }
+    });
+
+    [decreaseBtn, increaseBtn].forEach((control) => {
+      control?.addEventListener("click", async () => {
+        const currentQty = Number(qtyValue.textContent || "0");
+        const nextQty = currentQty + Number(control === increaseBtn ? 1 : -1);
+        decreaseBtn.disabled = true;
+        increaseBtn.disabled = true;
+        showToast("");
+        try {
+          const quantity = await syncQuantity(nextQty);
+          if (quantity > 0) {
+            showToast(`Updated cart. ${quantity} now in cart.`);
+          } else {
+            showToast("Item removed from cart.");
+          }
+        } catch (e) {
+          showToast(e.message || "Could not update cart quantity.", true);
+        } finally {
+          decreaseBtn.disabled = false;
+          increaseBtn.disabled = false;
+        }
+      });
+    });
+
+    refreshQuantity().catch((error) => {
+      showToast(error.message || "Could not load current cart quantity.", true);
     });
   })();
 </script>
