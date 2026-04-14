@@ -3,6 +3,7 @@ import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
 import re
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
@@ -25,12 +26,21 @@ class TestCheckoutAndOrders(unittest.TestCase):
             }
         )
         self.client = self.app.test_client()
+        self.base_now = datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"])).replace(
+            hour=12,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+        self._now_patch = patch("routes.orders._now_local", return_value=self.base_now)
+        self._now_patch.start()
 
         with self.app.app_context():
             db.drop_all()
             db.create_all()
 
     def tearDown(self) -> None:
+        self._now_patch.stop()
         self.tmpdir.cleanup()
 
     def _first_menu_item(self) -> dict:
@@ -51,8 +61,7 @@ class TestCheckoutAndOrders(unittest.TestCase):
         card_number: str = "4242 4242 4242 4242",
         special_instructions: str = "Please keep the soup separate.",
     ) -> dict[str, str]:
-        now = datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"]))
-        pickup = (now + timedelta(days=days_ahead)).replace(
+        pickup = (self.base_now + timedelta(days=days_ahead)).replace(
             hour=12,
             minute=30,
             second=0,
@@ -151,7 +160,9 @@ class TestCheckoutAndOrders(unittest.TestCase):
 
         receipt = self.client.get(f"/receipt?order={order_number}")
         self.assertEqual(receipt.status_code, 200)
-        self.assertIn(order_number, receipt.get_data(as_text=True))
+        receipt_html = receipt.get_data(as_text=True)
+        self.assertIn(order_number, receipt_html)
+        self.assertIn("mcq-logo.jpg", receipt_html)
 
         pdf = self.client.get(f"/orders/{order_number}/receipt.pdf")
         self.assertEqual(pdf.status_code, 200)
@@ -435,10 +446,7 @@ class TestCheckoutAndOrders(unittest.TestCase):
         with self.app.app_context():
             delayed_order = Order.query.filter_by(order_number=second).first()
             self.assertIsNotNone(delayed_order)
-            delayed_order.pickup_at = datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"])).replace(
-                tzinfo=None,
-                microsecond=0,
-            ) - timedelta(minutes=3)
+            delayed_order.pickup_at = self.base_now.replace(tzinfo=None, microsecond=0) - timedelta(minutes=3)
             db.session.commit()
 
         detail = self.client.get(f"/api/orders/{second}")

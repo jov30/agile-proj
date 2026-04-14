@@ -38,6 +38,72 @@
     box-shadow: var(--shadow-strong);
   }
 
+  .receipt-brand,
+  .receipt-ticket__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.95rem;
+  }
+
+  .receipt-brand {
+    margin-bottom: 1rem;
+  }
+
+  .receipt-brand img,
+  .receipt-ticket__brand img {
+    display: block;
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+    padding: 0.45rem;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.08);
+  }
+
+  .receipt-ticket__brand img {
+    width: 74px;
+    height: 74px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+    box-shadow: none;
+  }
+
+  .receipt-brand__copy,
+  .receipt-ticket__brand-copy {
+    display: grid;
+    gap: 0.18rem;
+  }
+
+  .receipt-brand__copy span,
+  .receipt-ticket__brand-copy span {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.96rem;
+    letter-spacing: 0.16em;
+    color: var(--brand-orange);
+  }
+
+  .receipt-ticket__brand-copy span {
+    color: rgba(255, 216, 115, 0.86);
+  }
+
+  .receipt-brand__copy strong,
+  .receipt-ticket__brand-copy strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.05rem;
+  }
+
+  .receipt-brand__copy p,
+  .receipt-ticket__brand-copy p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .receipt-ticket__brand-copy p {
+    color: rgba(255, 247, 239, 0.76);
+  }
+
   .receipt-ticket__label {
     margin: 0;
     font-family: "Bebas Neue", sans-serif;
@@ -170,8 +236,11 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.4rem 1rem;
+    align-items: start;
     padding: 0.9rem 0;
     border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .receipt-line:last-child {
@@ -182,6 +251,7 @@
   .receipt-line__title {
     margin: 0;
     font-weight: 800;
+    overflow-wrap: anywhere;
   }
 
   .receipt-line__meta {
@@ -189,12 +259,14 @@
     color: var(--text-muted);
     line-height: 1.55;
     font-size: 0.92rem;
+    overflow-wrap: anywhere;
   }
 
   .receipt-line__price {
     font-weight: 800;
     color: var(--brand-red);
     text-align: right;
+    overflow-wrap: anywhere;
   }
 
   .receipt-totals {
@@ -226,6 +298,8 @@
     border-radius: 22px;
     background: rgba(255, 255, 255, 0.74);
     border: 1px solid rgba(112, 85, 66, 0.12);
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .receipt-meta__item span {
@@ -241,12 +315,14 @@
     display: block;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
     font-size: 1.05rem;
+    overflow-wrap: anywhere;
   }
 
   .receipt-meta__item p {
     margin: 0.38rem 0 0;
     color: var(--text-muted);
     line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
   .receipt-timeline {
@@ -263,6 +339,8 @@
     border-radius: 22px;
     border: 1px solid rgba(112, 85, 66, 0.12);
     background: rgba(255, 255, 255, 0.72);
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .receipt-timeline__step.is-active {
@@ -294,6 +372,8 @@
     background: rgba(0, 111, 116, 0.08);
     border: 1px solid rgba(0, 111, 116, 0.14);
     color: var(--text-main);
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .receipt-note strong {
@@ -306,6 +386,7 @@
     margin: 0;
     color: var(--text-muted);
     line-height: 1.6;
+    overflow-wrap: anywhere;
   }
 
   .receipt-note ul {
@@ -316,6 +397,10 @@
 
   .receipt-note li + li {
     margin-top: 0.35rem;
+  }
+
+  .receipt-note li {
+    overflow-wrap: anywhere;
   }
 
   .receipt-print-only {
@@ -365,6 +450,11 @@
   }
 
   @media print {
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+
     body {
       background: #fff;
     }
@@ -392,11 +482,32 @@
       color: #000;
     }
 
+    .receipt-hero__grid,
+    .receipt-layout {
+      grid-template-columns: 1fr;
+    }
+
     .receipt-ticket p,
     .receipt-ticket__label,
     .receipt-ticket__meta span,
     .receipt-policy__item p {
       color: #000;
+    }
+
+    .receipt-brand img,
+    .receipt-ticket__brand img {
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: none;
+    }
+
+    .receipt-card,
+    .receipt-ticket,
+    .receipt-meta__item,
+    .receipt-note,
+    .receipt-timeline__step,
+    .receipt-line {
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .receipt-print-only {
@@ -424,6 +535,14 @@
     <section class="receipt-hero section-panel">
       <div class="receipt-hero__grid">
         <div>
+          <div class="receipt-brand">
+            <img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ Vietnamese Street Food logo" />
+            <div class="receipt-brand__copy">
+              <span>MCQ customer receipt</span>
+              <strong>Branded receipt and printable pickup copy</strong>
+              <p>{{ order.order_number }} · last updated {{ order.updated_at }}</p>
+            </div>
+          </div>
           <p class="eyebrow">Order confirmed</p>
           <h1 class="section-title">
             {% if order.is_instant %}
@@ -465,6 +584,14 @@
           </div>
         </div>
         <aside class="receipt-ticket">
+          <div class="receipt-ticket__brand">
+            <img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ logo" />
+            <div class="receipt-ticket__brand-copy">
+              <span>MCQ verification</span>
+              <strong>{{ order.order_number }}</strong>
+              <p>Present this ticket at pickup with the QR code below.</p>
+            </div>
+          </div>
           <p class="receipt-ticket__label">{% if order.is_instant %}Queue ticket{% else %}Pickup ticket{% endif %}</p>
           <h2>{% if order.is_instant %}{{ order.queue_display }}{% else %}{{ order.pickup_time }}{% endif %}</h2>
           <p>

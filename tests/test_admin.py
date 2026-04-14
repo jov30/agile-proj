@@ -2,6 +2,7 @@ import tempfile
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
+from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 from app import create_app
@@ -23,12 +24,21 @@ class TestAdminQueueOperations(unittest.TestCase):
             }
         )
         self.client = self.app.test_client()
+        self.base_now = datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"])).replace(
+            hour=12,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+        self._now_patch = patch("routes.orders._now_local", return_value=self.base_now)
+        self._now_patch.start()
 
         with self.app.app_context():
             db.drop_all()
             db.create_all()
 
     def tearDown(self) -> None:
+        self._now_patch.stop()
         self.tmpdir.cleanup()
 
     def _first_menu_item(self) -> dict:
@@ -57,8 +67,7 @@ class TestAdminQueueOperations(unittest.TestCase):
         }
 
     def _scheduled_form(self) -> dict[str, str]:
-        now = datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"]))
-        pickup = (now + timedelta(days=1)).replace(hour=12, minute=30, second=0, microsecond=0)
+        pickup = (self.base_now + timedelta(days=1)).replace(hour=12, minute=30, second=0, microsecond=0)
         return {
             "customer_name": "Queue Admin Test",
             "customer_email": "queueadmin@example.com",
