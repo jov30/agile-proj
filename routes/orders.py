@@ -66,7 +66,7 @@ PHONE_RE = re.compile(r"\d")
 
 @orders_bp.get("/cart")
 def cart() -> str:
-    return render_template("menu/cart.html")
+    return render_template("menu/cart.html", preferred_fulfillment=_preferred_fulfillment_hint())
 
 
 def _timezone() -> ZoneInfo:
@@ -613,6 +613,35 @@ def _save_checkout_prefill(prefill: dict[str, str]) -> None:
 def _clear_checkout_prefill() -> None:
     session.pop(SESSION_CHECKOUT_PREFILL_KEY, None)
     session.modified = True
+
+
+def _preferred_fulfillment_hint(default: str = FULFILLMENT_TYPES[0]) -> str:
+    raw_value = request.args.get("fulfillment", "").strip().lower()
+    if raw_value in FULFILLMENT_TYPES:
+        session["preferred_fulfillment"] = raw_value
+        session.modified = True
+        return raw_value
+
+    session_value = session.get("preferred_fulfillment")
+    if session_value in FULFILLMENT_TYPES:
+        return session_value
+    return default
+
+
+def _apply_checkout_fulfillment_hint(default: str | None = None) -> None:
+    hint = _preferred_fulfillment_hint(default or FULFILLMENT_TYPES[0])
+    if hint not in FULFILLMENT_TYPES:
+        return
+
+    prefill = _checkout_prefill()
+    if prefill.get("fulfillment_type") == hint:
+        return
+
+    prefill["fulfillment_type"] = hint
+    if hint == FULFILLMENT_TYPES[0]:
+        prefill.pop("pickup_date", None)
+        prefill.pop("pickup_time", None)
+    _save_checkout_prefill(prefill)
 
 
 def _get_checkout_context(
@@ -1256,6 +1285,10 @@ def checkout() -> str | Response:
 
     if _build_cart_payload(_menu())["lines"]:
         _checkout_token()
+    if request.method == "GET":
+        raw_hint = request.args.get("fulfillment", "").strip().lower()
+        if raw_hint in FULFILLMENT_TYPES:
+            _apply_checkout_fulfillment_hint(raw_hint)
     return render_template("menu/checkout.html", **_get_checkout_context(entry_step="checkout"))
 
 
@@ -1263,6 +1296,9 @@ def checkout() -> str | Response:
 def payment() -> str:
     if _build_cart_payload(_menu())["lines"]:
         _checkout_token()
+    raw_hint = request.args.get("fulfillment", "").strip().lower()
+    if raw_hint in FULFILLMENT_TYPES:
+        _apply_checkout_fulfillment_hint(raw_hint)
     return render_template("menu/checkout.html", **_get_checkout_context(entry_step="payment"))
 
 
@@ -1270,6 +1306,7 @@ def payment() -> str:
 def pickup_planner() -> str:
     if _build_cart_payload(_menu())["lines"]:
         _checkout_token()
+    _apply_checkout_fulfillment_hint(request.args.get("fulfillment", "").strip().lower() or FULFILLMENT_TYPES[1])
     return render_template("menu/checkout.html", **_get_checkout_context(entry_step="pickup"))
 
 

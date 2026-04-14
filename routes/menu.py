@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flask import Blueprint, abort, jsonify, redirect, render_template, request, url_for
+from flask import Blueprint, abort, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import find_item, load_enriched_menu
-from models import Order
+from models import FULFILLMENT_TYPES, Order
 
 public_bp = Blueprint("public", __name__)
 
@@ -14,6 +14,19 @@ _ROOT_DIR = Path(__file__).resolve().parent.parent
 
 def _menu_path() -> Path:
     return _ROOT_DIR / "static" / "data" / "menu.json"
+
+
+def _preferred_fulfillment(default: str = FULFILLMENT_TYPES[0]) -> str:
+    raw_value = request.args.get("fulfillment", "").strip().lower()
+    if raw_value in FULFILLMENT_TYPES:
+        session["preferred_fulfillment"] = raw_value
+        session.modified = True
+        return raw_value
+
+    session_value = session.get("preferred_fulfillment")
+    if session_value in FULFILLMENT_TYPES:
+        return session_value
+    return default
 
 
 def _home_context(*, track_error: str | None = None, track_value: str = "") -> dict:
@@ -58,7 +71,8 @@ def track_order():
 
 @public_bp.get("/menu")
 def menu() -> str:
-    return render_template("menu/menu.html")
+    preferred_fulfillment = _preferred_fulfillment()
+    return render_template("menu/menu.html", preferred_fulfillment=preferred_fulfillment)
 
 
 @public_bp.get("/api/menu")
@@ -74,4 +88,10 @@ def menu_item_detail(item_id: str) -> str:
     if not found:
         abort(404)
     category, item = found
-    return render_template("menu/item_detail.html", item=item, category=category)
+    preferred_fulfillment = _preferred_fulfillment()
+    return render_template(
+        "menu/item_detail.html",
+        item=item,
+        category=category,
+        preferred_fulfillment=preferred_fulfillment,
+    )

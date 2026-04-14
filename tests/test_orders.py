@@ -2,6 +2,7 @@ import tempfile
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
+import re
 from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
@@ -108,6 +109,25 @@ class TestCheckoutAndOrders(unittest.TestCase):
         text = response.get_data(as_text=True)
         self.assertIn("Pay", text)
         self.assertIn(item["name"], text)
+
+    def test_checkout_respects_fulfillment_hint_from_query(self):
+        self._seed_cart()
+
+        scheduled = self.client.get("/checkout?fulfillment=scheduled")
+        self.assertEqual(scheduled.status_code, 200)
+        scheduled_html = scheduled.get_data(as_text=True)
+        self.assertRegex(
+            scheduled_html,
+            re.compile(r'name="fulfillment_type"[^>]*value="scheduled"[^>]*checked', re.IGNORECASE),
+        )
+
+        instant = self.client.get("/checkout?fulfillment=instant")
+        self.assertEqual(instant.status_code, 200)
+        instant_html = instant.get_data(as_text=True)
+        self.assertRegex(
+            instant_html,
+            re.compile(r'name="fulfillment_type"[^>]*value="instant"[^>]*checked', re.IGNORECASE),
+        )
 
     def test_checkout_submission_creates_order_and_clears_cart(self):
         self._seed_cart()
