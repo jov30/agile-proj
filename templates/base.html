@@ -11,6 +11,42 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <style>
+      .site-alerts {
+        width: min(1180px, calc(100vw - 2rem));
+        margin: 0.9rem auto 0;
+        display: grid;
+        gap: 0.65rem;
+      }
+
+      .site-alert {
+        padding: 0.9rem 1rem;
+        border-radius: 20px;
+        color: var(--text-main);
+        background: linear-gradient(135deg, rgba(255, 180, 54, 0.15), rgba(255, 106, 19, 0.08));
+        border: 1px solid rgba(255, 180, 54, 0.18);
+        box-shadow: 0 14px 28px rgba(53, 30, 20, 0.06);
+      }
+
+      .site-alert strong {
+        display: block;
+        margin-bottom: 0.18rem;
+        font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+      }
+
+      .site-alert p {
+        margin: 0.2rem 0 0;
+        color: var(--text-muted);
+      }
+
+      .site-alert a {
+        display: inline-flex;
+        margin-top: 0.45rem;
+        font-weight: 700;
+        color: var(--brand-red);
+        text-decoration: none;
+      }
+    </style>
     {% block head %}{% endblock %}
   </head>
   <body>
@@ -35,13 +71,33 @@
           <a href="/cart" class="{% if request.path.startswith('/cart') %}is-active{% endif %}">Cart</a>
           <a href="/shared-meals" class="{% if request.path.startswith('/shared-meals') %}is-active{% endif %}">Shared Meals</a>
           <a href="/orders" class="{% if request.path.startswith('/orders') %}is-active{% endif %}">Orders</a>
-          <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin') %}is-active{% endif %}">Admin Queue</a>
+          {% if is_admin %}
+            <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin') %}is-active{% endif %}">Admin Queue</a>
+          {% endif %}
           <a href="/profile" class="{% if request.path.startswith('/profile') %}is-active{% endif %}">Profile</a>
           <a href="/support" class="{% if request.path.startswith('/support') %}is-active{% endif %}">Support</a>
         </nav>
-        <a href="/menu" class="header-cta">Order Pickup</a>
+        {% if current_user %}
+          <form method="post" action="{{ url_for('auth.logout') }}">
+            <button type="submit" class="header-cta">Logout {{ current_user.name }}</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="header-cta">Login</a>
+        {% endif %}
       </div>
     </header>
+    {% if site_notifications %}
+      <div class="site-alerts">
+        {% for note in site_notifications %}
+          <div class="site-alert">
+            <strong>{{ note.order_number }} · {{ note.channel }}</strong>
+            <span>{{ note.message }}</span>
+            <p>Recorded {{ note.created_at }}.</p>
+            <a href="{{ note.href }}">Open live order detail</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
     <main class="app-main">{% block content %}{% endblock %}</main>
     <footer class="app-footer">
       <div class="app-footer__inner">
@@ -81,7 +137,7 @@
             Visit our Customer Support for assistance or call us at <a href="tel:+61892485623">{{ restaurant_phone }}</a>.
           </div>
           <div class="support-message support-message--assistant">
-            I can help with menu browsing, checkout, simulated payment, scheduled pickup, receipts, and order history questions.
+            I can help with instant queue orders, scheduled pickup, checkout, simulated payment, receipts, and order tracking questions.
           </div>
           <div class="support-chat-log" id="support-chat-log"></div>
           <div class="support-dock__prompts">

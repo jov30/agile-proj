@@ -24,6 +24,9 @@ class Config:
         f"sqlite:///{_BASE_DIR / 'instance' / 'app.db'}",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    ADMIN_NAME = os.environ.get("ADMIN_NAME", "MCQ Admin")
+    ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@mcq.local")
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin@123")
 
     APP_TIMEZONE = os.environ.get("APP_TIMEZONE", "Australia/Perth")
     PICKUP_OPEN_HOUR = int(os.environ.get("PICKUP_OPEN_HOUR", "10"))
