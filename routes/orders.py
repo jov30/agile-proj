@@ -8,14 +8,18 @@ from zoneinfo import ZoneInfo
 
 import qrcode
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, session, url_for
+from sqlalchemy.exc import IntegrityError
 
 from menu_catalog import format_aud
 from models import (
+    ORDER_NOTIFICATION_CHANNELS,
     FULFILLMENT_TYPES,
     ORDER_STATUS_SEQUENCE,
     PAYMENT_ATTEMPT_STATUS_SEQUENCE,
+    DailyQueueCounter,
     Order,
     OrderLineItem,
+    OrderNotification,
     PaymentAttempt,
     db,
 )
@@ -207,6 +211,44 @@ def _service_hours_for(day_value) -> tuple[datetime, datetime]:
     return opening, closing
 
 
+def _current_instant_queue_counter(day_value) -> int:
+    counter = DailyQueueCounter.query.filter_by(counter_date=day_value).first()
+    if counter is not None:
+        return max(0, int(counter.last_number))
+
+    day_start_naive = datetime.combine(day_value, time.min)
+    day_end_naive = datetime.combine(day_value + timedelta(days=1), time.min)
+    latest_order = (
+        Order.query.filter(
+            Order.fulfillment_type == FULFILLMENT_TYPES[0],
+            Order.queue_number.isnot(None),
+            Order.pickup_at >= day_start_naive,
+            Order.pickup_at < day_end_naive,
+        )
+        .order_by(Order.queue_number.desc())
+        .first()
+    )
+    return latest_order.queue_number if latest_order and latest_order.queue_number else 0
+
+
+def _reserve_next_instant_queue_number(day_value) -> int:
+    # Keep queue assignment in a dedicated counter row so increments stay deterministic.
+    for _ in range(3):
+        counter = DailyQueueCounter.query.filter_by(counter_date=day_value).with_for_update().first()
+        if counter is None:
+            counter = DailyQueueCounter(counter_date=day_value, last_number=_current_instant_queue_counter(day_value))
+            db.session.add(counter)
+            try:
+                db.session.flush()
+            except IntegrityError:
+                db.session.rollback()
+                continue
+        counter.last_number = max(0, int(counter.last_number)) + 1
+        db.session.flush()
+        return counter.last_number
+    raise RuntimeError("Could not reserve instant queue number after retries.")
+
+
 def _instant_queue_snapshot(cart: dict | None = None) -> dict:
     now = _now_local()
     opening, closing = _service_hours_for(now.date())
@@ -234,17 +276,7 @@ def _instant_queue_snapshot(cart: dict | None = None) -> dict:
     quoted_wait = base_wait + (active_count * per_active_wait) + (max(0, item_units - 1) * per_item_wait)
     estimated_ready = now + timedelta(minutes=quoted_wait)
 
-    latest_queue = (
-        Order.query.filter(
-            Order.fulfillment_type == FULFILLMENT_TYPES[0],
-            Order.queue_number.isnot(None),
-            Order.pickup_at >= day_start_naive,
-            Order.pickup_at < day_end_naive,
-        )
-        .order_by(Order.queue_number.desc())
-        .first()
-    )
-    next_queue_number = (latest_queue.queue_number if latest_queue and latest_queue.queue_number else 0) + 1
+    next_queue_number = _current_instant_queue_counter(now.date()) + 1
 
     is_open = opening <= now <= closing
     kitchen_can_finish = estimated_ready <= closing
@@ -392,6 +424,53 @@ def _serialize_payment_attempt(attempt: PaymentAttempt) -> dict:
         "failure_code": attempt.failure_code,
         "failure_message": attempt.failure_message,
         "created_at": local_created.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
+    }
+
+
+def _notification_message(order: Order, channel: str) -> str:
+    pickup_label = order.pickup_at.replace(tzinfo=_timezone()).strftime("%I:%M %p").lstrip("0")
+    if order.fulfillment_type == FULFILLMENT_TYPES[0]:
+        queue_code = f"#{order.queue_number:03d}" if order.queue_number else "#PENDING"
+        base = (
+            f"MCQ update: Order {order.order_number} is ready for pickup at "
+            f"{order.counter_label or current_app.config['INSTANT_ORDERING_COUNTER_LABEL']}. "
+            f"Queue {queue_code}, target {pickup_label}."
+        )
+    else:
+        base = (
+            f"MCQ update: Order {order.order_number} is ready for pickup at your scheduled time "
+            f"({pickup_label})."
+        )
+    return f"[{channel.upper()}] {base}"
+
+
+def _ensure_ready_notifications(order: Order) -> None:
+    sent_channels = {
+        note.channel
+        for note in order.notifications
+        if note.event_type == "ready_for_pickup" and note.delivery_status == "Sent"
+    }
+    for channel in ORDER_NOTIFICATION_CHANNELS:
+        if channel in sent_channels:
+            continue
+        order.notifications.append(
+            OrderNotification(
+                event_type="ready_for_pickup",
+                channel=channel,
+                delivery_status="Sent",
+                message=_notification_message(order, channel),
+            )
+        )
+
+
+def _serialize_notification(notification: OrderNotification) -> dict:
+    created_local = notification.created_at.replace(tzinfo=ZoneInfo("UTC")).astimezone(_timezone())
+    return {
+        "event_type": notification.event_type,
+        "channel": notification.channel,
+        "delivery_status": notification.delivery_status,
+        "message": notification.message,
+        "created_at": created_local.strftime("%A, %d %b %Y at %I:%M %p").lstrip("0"),
     }
 
 
@@ -674,14 +753,15 @@ def _build_order_from_cart(form_data: dict[str, str], fulfillment_plan: dict, ca
     quoted_wait = fulfillment_plan["quoted_wait_minutes"]
     counter_label = fulfillment_plan["counter_label"]
     if fulfillment_type == FULFILLMENT_TYPES[0]:
-        latest_queue = _instant_queue_snapshot(cart)
-        queue_number = latest_queue["next_queue_number"]
-        quoted_wait = latest_queue["quoted_wait_minutes"]
-        pickup_at = latest_queue["estimated_ready_at"]
-        counter_label = latest_queue["counter_label"]
+        service_day = _now_local().date()
+        queue_number = _reserve_next_instant_queue_number(service_day)
+        instant_snapshot = _instant_queue_snapshot(cart)
+        quoted_wait = instant_snapshot["quoted_wait_minutes"]
+        pickup_at = instant_snapshot["estimated_ready_at"]
+        counter_label = instant_snapshot["counter_label"]
         kitchen_notes = (
             f"Instant queue #{queue_number} at {counter_label}. "
-            f"Target ready around {latest_queue['estimated_ready_label']}."
+            f"Target ready around {instant_snapshot['estimated_ready_label']}."
         )
     else:
         kitchen_notes = "Scheduled pickup order queued for the kitchen."
@@ -812,6 +892,9 @@ def _serialize_order(order: Order) -> dict:
     else:
         fulfillment_summary = f"Scheduled pickup on {pickup_local.strftime('%A, %d %b')} at {pickup_local.strftime('%I:%M %p').lstrip('0')}"
     attempts = sorted(order.payment_attempts, key=lambda attempt: attempt.created_at, reverse=True)
+    notifications = sorted(order.notifications, key=lambda note: note.created_at, reverse=True)
+    serialized_notifications = [_serialize_notification(note) for note in notifications]
+    ready_notifications = [note for note in serialized_notifications if note["event_type"] == "ready_for_pickup"]
     return {
         "order_number": order.order_number,
         "confirmation_code": order.confirmation_code,
@@ -852,6 +935,10 @@ def _serialize_order(order: Order) -> dict:
         "payment_attempt_count": len(attempts),
         "latest_payment_attempt": _serialize_payment_attempt(attempts[0]) if attempts else None,
         "payment_attempts": [_serialize_payment_attempt(attempt) for attempt in attempts],
+        "notification_count": len(serialized_notifications),
+        "notifications": serialized_notifications,
+        "ready_notification_count": len(ready_notifications),
+        "latest_ready_notification": ready_notifications[0] if ready_notifications else None,
         "lines": [
             {
                 "item_id": line.item_id,
@@ -899,6 +986,28 @@ def _filter_serialized_orders(orders: list[dict]) -> tuple[list[dict], dict[str,
         ]
 
     return filtered, {"status": status, "date_from": date_from, "date_to": date_to}
+
+
+def _ready_notification_banners(orders: list[dict]) -> list[dict]:
+    banners: list[dict] = []
+    for order in orders:
+        latest = order.get("latest_ready_notification")
+        if not latest:
+            continue
+        if order.get("order_status") not in {ORDER_STATUS_SEQUENCE[2], ORDER_STATUS_SEQUENCE[3]}:
+            continue
+        banners.append(
+            {
+                "order_number": order["order_number"],
+                "fulfillment_label": order["fulfillment_label"],
+                "queue_display": order.get("queue_display"),
+                "counter_label": order.get("counter_label"),
+                "pickup_time": order["pickup_time"],
+                "message": latest["message"],
+                "notified_at": latest["created_at"],
+            }
+        )
+    return banners[:4]
 
 
 def _session_orders() -> list[Order]:
@@ -1023,6 +1132,7 @@ def orders() -> str:
     session_orders = [_serialize_order(order) for order in _session_orders()]
     filtered_orders, filters = _filter_serialized_orders(session_orders)
     total_spend = sum(order["total_cents"] for order in filtered_orders)
+    ready_banners = _ready_notification_banners(filtered_orders if filtered_orders else session_orders)
     return render_template(
         "user/orders.html",
         orders=filtered_orders,
@@ -1032,6 +1142,7 @@ def orders() -> str:
         latest_order=filtered_orders[0] if filtered_orders else (session_orders[0] if session_orders else None),
         filters=filters,
         available_statuses=list(ORDER_STATUS_SEQUENCE),
+        ready_banners=ready_banners,
     )
 
 
@@ -1077,6 +1188,8 @@ def api_update_order_status(order_number: str):
     order.order_status = next_status
     if kitchen_notes is not None:
         order.kitchen_notes = kitchen_notes.strip() or None
+    if next_status == ORDER_STATUS_SEQUENCE[2]:
+        _ensure_ready_notifications(order)
     db.session.commit()
     return jsonify(_serialize_order(order))
 

@@ -15,6 +15,10 @@ ORDER_STATUS_SEQUENCE = (
     "Ready for Pickup",
     "Completed",
 )
+ORDER_NOTIFICATION_CHANNELS = (
+    "email",
+    "sms",
+)
 FULFILLMENT_TYPES = (
     "instant",
     "scheduled",
@@ -92,6 +96,12 @@ class Order(db.Model):
         back_populates="order",
         cascade="all, delete-orphan",
     )
+    notifications = db.relationship(
+        "OrderNotification",
+        back_populates="order",
+        cascade="all, delete-orphan",
+        order_by="OrderNotification.created_at.desc()",
+    )
 
 
 class OrderLineItem(db.Model):
@@ -144,6 +154,46 @@ class PaymentAttempt(db.Model):
     )
 
     order = db.relationship("Order", back_populates="payment_attempts")
+
+
+class DailyQueueCounter(db.Model):
+    __tablename__ = "daily_queue_counters"
+
+    id = db.Column(db.Integer, primary_key=True)
+    counter_date = db.Column(db.Date, nullable=False, unique=True, index=True)
+    last_number = db.Column(db.Integer, nullable=False, default=0)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        onupdate=utc_now_naive,
+    )
+
+
+class OrderNotification(db.Model):
+    __tablename__ = "order_notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False, index=True)
+    event_type = db.Column(db.String(40), nullable=False, default="ready_for_pickup", index=True)
+    channel = db.Column(db.String(20), nullable=False, index=True)
+    delivery_status = db.Column(db.String(20), nullable=False, default="Sent", index=True)
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        onupdate=utc_now_naive,
+        index=True,
+    )
+
+    order = db.relationship("Order", back_populates="notifications")
 
 
 def _sync_legacy_schema() -> None:
