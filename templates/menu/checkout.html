@@ -361,6 +361,31 @@
     color: rgba(255, 247, 239, 0.9);
   }
 
+  .checkout-payment-feedback {
+    margin-top: 0.9rem;
+    padding: 1rem 1.05rem;
+    border-radius: 22px;
+    border: 1px solid rgba(0, 111, 116, 0.14);
+    background: rgba(0, 111, 116, 0.08);
+  }
+
+  .checkout-payment-feedback--failed {
+    border-color: rgba(179, 48, 64, 0.2);
+    background: rgba(179, 48, 64, 0.08);
+  }
+
+  .checkout-payment-feedback strong {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .checkout-payment-feedback p {
+    margin: 0.28rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
   .checkout-card-fields {
     margin-top: 1rem;
     padding-top: 1rem;
@@ -832,6 +857,23 @@
               </div>
               {% if field_errors.payment_method %}<p class="field-error" style="margin-top: 0.7rem">{{ field_errors.payment_method }}</p>{% endif %}
 
+              {% if payment_feedback %}
+                <div class="checkout-payment-feedback {% if payment_feedback.status == 'Failed' %}checkout-payment-feedback--failed{% endif %}">
+                  <strong>
+                    Payment {{ payment_feedback.status }}
+                    · attempt {{ payment_feedback.attempt_number }}
+                    · {{ payment_feedback.reference }}
+                  </strong>
+                  <p>
+                    {% if payment_feedback.failure_message %}
+                      {{ payment_feedback.failure_message }}
+                    {% else %}
+                      Latest simulated payment log saved successfully for this checkout session.
+                    {% endif %}
+                  </p>
+                </div>
+              {% endif %}
+
               <div class="checkout-card-fields" id="card-fields">
                 <div class="field-grid">
                   <div class="field field-grid--single {% if field_errors.card_name %}is-invalid{% endif %}" style="grid-column: 1 / -1">
@@ -879,6 +921,11 @@
                     {% if field_errors.card_cvv %}<p class="field-error">{{ field_errors.card_cvv }}</p>{% endif %}
                   </div>
                 </div>
+                <p class="checkout-inline-status" style="margin-top: 0.8rem">
+                  Demo retry cases: card ending in <strong>0002</strong> declines, card ending in
+                  <strong>9995</strong> fails authentication. PayPal emails containing <strong>decline</strong>
+                  and Apple Pay phone numbers ending in <strong>0000</strong> also trigger a failed attempt.
+                </p>
               </div>
             </div>
           </section>

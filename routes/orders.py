@@ -23,6 +23,7 @@ from routes.cart_api import SESSION_LINES_KEY, _build_cart_payload, _menu, _save
 orders_bp = Blueprint("orders", __name__)
 SESSION_LAST_ORDER_KEY = "last_order_number"
 SESSION_ORDER_HISTORY_KEY = "order_history_numbers"
+SESSION_CHECKOUT_TOKEN_KEY = "checkout_payment_token"
 
 PAYMENT_METHODS = {
     "card": {
@@ -253,6 +254,31 @@ def _remember_order(order_number: str) -> None:
     session.modified = True
 
 
+def _checkout_token() -> str:
+    token = session.get(SESSION_CHECKOUT_TOKEN_KEY)
+    if not isinstance(token, str) or not token:
+        token = secrets.token_hex(8).upper()
+        session[SESSION_CHECKOUT_TOKEN_KEY] = token
+        session.modified = True
+    return token
+
+
+def _clear_checkout_token() -> None:
+    session.pop(SESSION_CHECKOUT_TOKEN_KEY, None)
+    session.modified = True
+
+
+def _latest_checkout_attempt() -> PaymentAttempt | None:
+    token = session.get(SESSION_CHECKOUT_TOKEN_KEY)
+    if not isinstance(token, str) or not token:
+        return None
+    return (
+        PaymentAttempt.query.filter_by(checkout_token=token)
+        .order_by(PaymentAttempt.created_at.desc())
+        .first()
+    )
+
+
 def _get_checkout_context(
     *,
     form_data: dict[str, str] | None = None,
@@ -274,6 +300,7 @@ def _get_checkout_context(
     if not selected_slots and windows:
         selected_slots = windows[0]["slots"]
     next_available_pickup = _first_available_pickup(windows)
+    payment_feedback = _latest_checkout_attempt() if cart["lines"] else None
 
     return {
         "entry_step": entry_step,
@@ -291,6 +318,7 @@ def _get_checkout_context(
         "pickup_lead_minutes": current_app.config["PICKUP_MIN_LEAD_MINUTES"],
         "pickup_slot_capacity": current_app.config["PICKUP_SLOT_CAPACITY"],
         "next_available_pickup": next_available_pickup,
+        "payment_feedback": _serialize_payment_attempt(payment_feedback) if payment_feedback else None,
         "restaurant_phone": current_app.config["RESTAURANT_PHONE"],
     }
 
@@ -406,7 +434,7 @@ def _validate_checkout(form_data: dict[str, str], cart: dict) -> tuple[list[str]
     return errors, field_errors, pickup_at
 
 
-def _create_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart: dict) -> Order:
+def _build_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart: dict) -> Order:
     subtotal = cart["total_cents"]
     service_fee = current_app.config["ORDER_SERVICE_FEE_CENTS"]
     total = subtotal + service_fee
@@ -445,11 +473,77 @@ def _create_order_from_cart(form_data: dict[str, str], pickup_at: datetime, cart
         )
 
     db.session.add(order)
+    return order
+
+
+def _finalize_successful_order(order: Order) -> None:
     db.session.commit()
     _save_lines([])
     session[SESSION_LINES_KEY] = []
     _remember_order(order.order_number)
-    return order
+    _clear_checkout_token()
+
+
+def _payment_failure_for(form_data: dict[str, str], card_last4: str | None) -> tuple[str, str] | None:
+    method = form_data["payment_method"]
+    email = form_data["customer_email"].lower()
+    phone_digits = re.sub(r"\D", "", form_data["customer_phone"])
+
+    if method == "card" and card_last4 == "0002":
+        return (
+            "card_declined",
+            "The test card ending in 0002 is configured to decline. Retry with another card or payment method.",
+        )
+    if method == "card" and card_last4 == "9995":
+        return (
+            "authentication_failed",
+            "The simulated bank could not authenticate this card. Retry the payment or choose a different method.",
+        )
+    if method == "paypal" and "decline" in email:
+        return (
+            "paypal_denied",
+            "The PayPal simulation declined approval for this checkout. Update the email or retry payment.",
+        )
+    if method == "apple_pay" and phone_digits.endswith("0000"):
+        return (
+            "device_auth_failed",
+            "Apple Pay simulation failed device authentication. Retry or switch payment method.",
+        )
+    return None
+
+
+def _run_payment_attempt(form_data: dict[str, str], total_cents: int) -> tuple[PaymentAttempt, str | None]:
+    payment_key = form_data["payment_method"]
+    card_number = re.sub(r"\D", "", form_data["card_number"])
+    attempt = PaymentAttempt(
+        checkout_token=_checkout_token(),
+        attempt_number=(
+            PaymentAttempt.query.filter_by(checkout_token=session[SESSION_CHECKOUT_TOKEN_KEY]).count() + 1
+        ),
+        payment_method=PAYMENT_METHODS[payment_key]["label"],
+        amount_cents=total_cents,
+        status=PAYMENT_ATTEMPT_STATUS_SEQUENCE[0],
+        reference=f"SIMPAY-{secrets.token_hex(4).upper()}",
+        customer_email=form_data["customer_email"],
+        card_last4=card_number[-4:] if card_number else None,
+    )
+    db.session.add(attempt)
+    db.session.commit()
+
+    failure = _payment_failure_for(form_data, attempt.card_last4)
+    if failure:
+        failure_code, failure_message = failure
+        attempt.status = PAYMENT_ATTEMPT_STATUS_SEQUENCE[2]
+        attempt.failure_code = failure_code
+        attempt.failure_message = failure_message
+        db.session.commit()
+        return attempt, failure_message
+
+    attempt.status = PAYMENT_ATTEMPT_STATUS_SEQUENCE[1]
+    attempt.failure_code = None
+    attempt.failure_message = None
+    db.session.commit()
+    return attempt, None
 
 
 def _serialize_order(order: Order) -> dict:
@@ -524,19 +618,42 @@ def checkout() -> str | Response:
                 entry_step="checkout",
             )
             return render_template("menu/checkout.html", **context), 400
-        order = _create_order_from_cart(form_data, pickup_at, cart)
+        payment_attempt, failure_message = _run_payment_attempt(form_data, cart["total_cents"] + current_app.config["ORDER_SERVICE_FEE_CENTS"])
+        if failure_message:
+            payment_field = "card_number" if form_data["payment_method"] == "card" else "payment_method"
+            field_errors[payment_field] = failure_message
+            context = _get_checkout_context(
+                form_data=form_data,
+                errors=[failure_message],
+                field_errors=field_errors,
+                entry_step="payment",
+            )
+            return render_template("menu/checkout.html", **context), 402
+
+        order = _build_order_from_cart(form_data, pickup_at, cart)
+        order.payment_reference = payment_attempt.reference
+        order.payment_status = payment_attempt.status
+        payment_attempt.order = order
+        payment_attempt.checkout_token = None
+        _finalize_successful_order(order)
         return redirect(url_for("orders.receipt", order=order.order_number))
 
+    if _build_cart_payload(_menu())["lines"]:
+        _checkout_token()
     return render_template("menu/checkout.html", **_get_checkout_context(entry_step="checkout"))
 
 
 @orders_bp.get("/payment")
 def payment() -> str:
+    if _build_cart_payload(_menu())["lines"]:
+        _checkout_token()
     return render_template("menu/checkout.html", **_get_checkout_context(entry_step="payment"))
 
 
 @orders_bp.get("/pickup-planner")
 def pickup_planner() -> str:
+    if _build_cart_payload(_menu())["lines"]:
+        _checkout_token()
     return render_template("menu/checkout.html", **_get_checkout_context(entry_step="pickup"))
 
 
