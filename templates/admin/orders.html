@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Queue | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .admin-queue {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .admin-panel {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .admin-hero__grid,
+  .admin-sections {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .admin-hero__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .admin-stat,
+  .admin-section,
+  .admin-order {
+    position: relative;
+    overflow: hidden;
+    border-radius: 26px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .admin-stat,
+  .admin-section,
+  .admin-order {
+    padding: 1.05rem 1.1rem;
+  }
+
+  .admin-stat strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.4rem;
+  }
+
+  .admin-stat span {
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .admin-section__header h2 {
+    margin: 0.24rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+  }
+
+  .admin-section__header p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+  }
+
+  .admin-orders {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 0.9rem;
+  }
+
+  .admin-order__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .admin-order__head h3 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .admin-order__head p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .admin-badge {
+    display: inline-flex;
+    padding: 0.58rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
+  .admin-order__meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+  }
+
+  .admin-order__meta-item {
+    padding: 0.85rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .admin-order__meta-item span {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.14em;
+    font-size: 0.88rem;
+    color: var(--brand-orange);
+  }
+
+  .admin-order__meta-item strong {
+    display: block;
+  }
+
+  .admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.85rem;
+  }
+
+  .admin-inline-status {
+    margin-top: 0.72rem;
+    color: var(--text-muted);
+    min-height: 1.15rem;
+  }
+
+  .admin-inline-status.is-error {
+    color: #b33040;
+    font-weight: 700;
+  }
+
+  .admin-empty {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-top: 0.7rem;
+  }
+
+  @media (max-width: 980px) {
+    .admin-hero__stats,
+    .admin-order__meta {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-queue">
+  <section class="admin-panel section-panel">
+    <div class="admin-hero__grid">
+      <div>
+        <p class="eyebrow">Operations console</p>
+        <h1 class="section-title">Live pickup queue management</h1>
+        <p class="section-copy">
+          Update order stages in real time for both instant and scheduled fulfillment. When an order reaches
+          <strong>Ready for Pickup</strong>, mock email and SMS notifications are recorded automatically.
+        </p>
+      </div>
+      <div class="admin-hero__stats">
+        <article class="admin-stat">
+          <strong>{{ instant_orders|length }}</strong>
+          <span>Active instant queue orders</span>
+        </article>
+        <article class="admin-stat">
+          <strong>{{ scheduled_orders|length }}</strong>
+          <span>Active scheduled pickup orders</span>
+        </article>
+        <article class="admin-stat">
+          <strong>{{ (instant_orders|length) + (scheduled_orders|length) }}</strong>
+          <span>Total active orders in prep pipeline</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="admin-panel section-panel admin-sections" data-admin-root>
+    <article class="admin-section">
+      <header class="admin-section__header">
+        <p class="eyebrow">Instant queue</p>
+        <h2>Counter pickup sequence</h2>
+        <p>Queue number determines service order. Update statuses as kitchen progresses.</p>
+      </header>
+      {% if not instant_orders %}
+        <p class="admin-empty">No active instant orders right now.</p>
+      {% else %}
+        <div class="admin-orders">
+          {% for order in instant_orders %}
+            <article class="admin-order" data-admin-order="{{ order.order_number }}">
+              <header class="admin-order__head">
+                <div>
+                  <h3>{{ order.order_number }} · {{ order.queue_display }}</h3>
+                  <p>{{ order.customer_name }} · {{ order.counter_label or "Front Pickup Counter" }}</p>
+                </div>
+                <span class="admin-badge" data-order-status>{{ order.order_status }}</span>
+              </header>
+              <div class="admin-order__meta">
+                <div class="admin-order__meta-item">
+                  <span>ETA</span>
+                  <strong>{{ order.pickup_label }}</strong>
+                </div>
+                <div class="admin-order__meta-item">
+                  <span>Total</span>
+                  <strong>{{ order.total_display }}</strong>
+                </div>
+                <div class="admin-order__meta-item">
+                  <span>Notes</span>
+                  <strong>{{ order.kitchen_notes or "No notes" }}</strong>
+                </div>
+              </div>
+              <div class="admin-actions">
+                {% for status in order.next_statuses %}
+                  <button
+                    type="button"
+                    class="button button--secondary admin-status-action"
+                    data-order-number="{{ order.order_number }}"
+                    data-next-status="{{ status }}"
+                  >
+                    Mark {{ status }}
+                  </button>
+                {% endfor %}
+                <a href="{{ url_for('orders.order_detail', order_number=order.order_number) }}" class="button button--primary">Open detail</a>
+              </div>
+              <p class="admin-inline-status" data-inline-status></p>
+            </article>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="admin-section">
+      <header class="admin-section__header">
+        <p class="eyebrow">Scheduled pickup</p>
+        <h2>Timed pickup slots</h2>
+        <p>Keep scheduled orders in sync with kitchen progress.</p>
+      </header>
+      {% if not scheduled_orders %}
+        <p class="admin-empty">No active scheduled orders right now.</p>
+      {% else %}
+        <div class="admin-orders">
+          {% for order in scheduled_orders %}
+            <article class="admin-order" data-admin-order="{{ order.order_number }}">
+              <header class="admin-order__head">
+                <div>
+                  <h3>{{ order.order_number }}</h3>
+                  <p>{{ order.customer_name }} · scheduled pickup</p>
+                </div>
+                <span class="admin-badge" data-order-status>{{ order.order_status }}</span>
+              </header>
+              <div class="admin-order__meta">
+                <div class="admin-order__meta-item">
+                  <span>Pickup</span>
+                  <strong>{{ order.pickup_label }}</strong>
+                </div>
+                <div class="admin-order__meta-item">
+                  <span>Total</span>
+                  <strong>{{ order.total_display }}</strong>
+                </div>
+                <div class="admin-order__meta-item">
+                  <span>Notes</span>
+                  <strong>{{ order.kitchen_notes or "No notes" }}</strong>
+                </div>
+              </div>
+              <div class="admin-actions">
+                {% for status in order.next_statuses %}
+                  <button
+                    type="button"
+                    class="button button--secondary admin-status-action"
+                    data-order-number="{{ order.order_number }}"
+                    data-next-status="{{ status }}"
+                  >
+                    Mark {{ status }}
+                  </button>
+                {% endfor %}
+                <a href="{{ url_for('orders.order_detail', order_number=order.order_number) }}" class="button button--primary">Open detail</a>
+              </div>
+              <p class="admin-inline-status" data-inline-status></p>
+            </article>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </article>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

@@ -35,6 +35,7 @@
           <a href="/cart" class="{% if request.path.startswith('/cart') %}is-active{% endif %}">Cart</a>
           <a href="/shared-meals" class="{% if request.path.startswith('/shared-meals') %}is-active{% endif %}">Shared Meals</a>
           <a href="/orders" class="{% if request.path.startswith('/orders') %}is-active{% endif %}">Orders</a>
+          <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin') %}is-active{% endif %}">Admin Queue</a>
           <a href="/profile" class="{% if request.path.startswith('/profile') %}is-active{% endif %}">Profile</a>
           <a href="/support" class="{% if request.path.startswith('/support') %}is-active{% endif %}">Support</a>
         </nav>
