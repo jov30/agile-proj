@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Order History | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .orders-shell {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .orders-hero,
+  .orders-empty,
+  .orders-list {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .orders-hero__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+    gap: 1.35rem;
+    align-items: start;
+  }
+
+  .orders-hero__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .orders-stat {
+    padding: 1rem;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.06);
+  }
+
+  .orders-stat strong {
+    display: block;
+    margin-bottom: 0.26rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.35rem;
+  }
+
+  .orders-stat span {
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .orders-highlight {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .orders-highlight__card {
+    padding: 1.15rem 1.2rem;
+    border-radius: 28px;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.96), rgba(23, 19, 21, 0.94)),
+      rgba(32, 23, 19, 0.92);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .orders-highlight__card p {
+    margin: 0;
+    line-height: 1.7;
+    color: rgba(255, 247, 239, 0.82);
+  }
+
+  .orders-highlight__card strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.35rem, 2vw, 1.9rem);
+    color: var(--text-inverse);
+  }
+
+  .orders-stream {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .order-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .order-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 24%),
+      radial-gradient(circle at 88% 10%, rgba(255, 216, 115, 0.12), transparent 12rem);
+  }
+
+  .order-card__content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .order-card__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .order-card__header h2 {
+    margin: 0.26rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.35rem, 2vw, 1.85rem);
+  }
+
+  .order-card__header p {
+    margin: 0.3rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .order-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    gap: 0.55rem;
+  }
+
+  .order-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.62rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
+  .order-badge--teal {
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+  }
+
+  .order-card__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+    gap: 1rem;
+  }
+
+  .order-lines {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .order-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .order-line:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .order-line__title {
+    margin: 0;
+    font-weight: 800;
+  }
+
+  .order-line__meta {
+    margin: 0.26rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.92rem;
+  }
+
+  .order-line__price {
+    font-weight: 800;
+    color: var(--brand-red);
+    text-align: right;
+  }
+
+  .order-side {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .order-side__card {
+    padding: 1rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .order-side__card span {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.94rem;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+  }
+
+  .order-side__card strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.05rem;
+  }
+
+  .order-side__card p {
+    margin: 0.36rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .order-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.2rem;
+  }
+
+  .inline-form {
+    display: inline;
+  }
+
+  .button--inline {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .orders-empty {
+    text-align: center;
+  }
+
+  .orders-empty h1 {
+    margin: 0.35rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.9rem, 3vw, 2.7rem);
+  }
+
+  .orders-empty p {
+    max-width: 54ch;
+    margin: 0.8rem auto 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .orders-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 1.3rem;
+  }
+
+  @media (max-width: 1040px) {
+    .orders-hero__grid,
+    .order-card__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .orders-hero__stats {
+      grid-template-columns: 1fr;
+    }
+
+    .order-card__header {
+      flex-direction: column;
+    }
+
+    .order-card__badges {
+      justify-content: start;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-shell">
+  {% if not orders %}
+    <section class="orders-empty section-panel">
+      <p class="eyebrow">Order archive</p>
+      <h1>No pickup orders have been placed in this browser session yet.</h1>
+      <p>
+        Once checkout is completed, the order record will be written to SQLite, the receipt becomes available,
+        and the entry will appear here for quick reordering or receipt download.
+      </p>
+      <div class="orders-empty__actions">
+        <a href="{{ url_for('public.menu') }}" class="button button--primary">Browse menu</a>
+        <a href="{{ url_for('orders.checkout') }}" class="button button--secondary">Open checkout</a>
+      </div>
+    </section>
+  {% else %}
+    <section class="orders-hero section-panel">
+      <div class="orders-hero__grid">
+        <div>
+          <p class="eyebrow">Customer order history</p>
+          <h1 class="section-title">Every confirmed pickup stays traceable.</h1>
+          <p class="section-copy">
+            The cards below are driven by real database rows created during checkout, including line items,
+            simulated payment details, pickup timing, and receipt access.
+          </p>
+          <div class="pill-row">
+            <span class="pill"><strong>{{ order_count }}</strong> confirmed orders retained in the current session history.</span>
+            <span class="pill"><strong>{{ total_spend_display }}</strong> total spend across all stored orders shown below.</span>
+            <span class="pill"><strong>{{ latest_order.pickup_day }}</strong> latest scheduled pickup currently on record.</span>
+          </div>
+        </div>
+        <div class="orders-highlight">
+          <div class="orders-hero__stats">
+            <div class="orders-stat">
+              <strong>{{ order_count }}</strong>
+              <span>Total orders created through the new checkout flow.</span>
+            </div>
+            <div class="orders-stat">
+              <strong>{{ total_spend_display }}</strong>
+              <span>Combined spend from the confirmed orders in this session.</span>
+            </div>
+          </div>
+          <div class="orders-highlight__card">
+            <strong>{{ latest_order.order_number }}</strong>
+            <p>
+              Most recent order placed on {{ latest_order.created_at }} for pickup at {{ latest_order.pickup_time }}.
+              The receipt and PDF download remain attached to this order.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="orders-list section-panel">
+      <div class="orders-stream">
+        {% for order in orders %}
+          <article class="order-card">
+            <div class="order-card__content">
+              <header class="order-card__header">
+                <div>
+                  <p class="eyebrow">Order record</p>
+                  <h2>{{ order.order_number }}</h2>
+                  <p>Placed {{ order.created_at }} · Confirmation code {{ order.confirmation_code }}</p>
+                </div>
+                <div class="order-card__badges">
+                  <span class="order-badge">{{ order.order_status }}</span>
+                  <span class="order-badge order-badge--teal">{{ order.payment_status }}</span>
+                  <span class="order-badge">{{ order.total_display }}</span>
+                </div>
+              </header>
+
+              <div class="order-card__grid">
+                <div class="order-lines">
+                  {% for line in order.lines %}
+                    <div class="order-line">
+                      <div>
+                        <p class="order-line__title">{{ line.name }}</p>
+                        <p class="order-line__meta">{{ line.quantity }} x {{ line.unit_price_display }} · {{ line.category }}</p>
+                      </div>
+                      <div class="order-line__price">{{ line.line_total_display }}</div>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <aside class="order-side">
+                  <div class="order-side__card">
+                    <span>Pickup slot</span>
+                    <strong>{{ order.pickup_at }}</strong>
+                    <p>{{ order.kitchen_notes }}</p>
+                  </div>
+                  <div class="order-side__card">
+                    <span>Payment</span>
+                    <strong>{{ order.payment_method }}</strong>
+                    <p>
+                      {{ order.payment_reference }}
+                      {% if order.card_last4 %}
+                        · ending in {{ order.card_last4 }}
+                      {% endif %}
+                    </p>
+                  </div>
+                  <div class="order-side__card">
+                    <span>Pickup contact</span>
+                    <strong>{{ order.customer_name }}</strong>
+                    <p>{{ order.customer_email }} · {{ order.customer_phone }}</p>
+                  </div>
+                </aside>
+              </div>
+
+              <div class="order-card__actions">
+                <a href="{{ url_for('orders.receipt', order=order.order_number) }}" class="button button--primary">Open receipt</a>
+                <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--secondary">Download PDF</a>
+                <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
+                  <button type="submit" class="button button--secondary button--inline">Order again</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

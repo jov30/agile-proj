@@ -1,0 +1,521 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .receipt-shell {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .receipt-hero,
+  .receipt-layout,
+  .receipt-empty {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .receipt-hero__grid,
+  .receipt-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.04fr) minmax(320px, 0.96fr);
+    gap: 1.35rem;
+  }
+
+  .receipt-ticket {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    padding: 1.2rem;
+    border-radius: 28px;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.96), rgba(23, 19, 21, 0.94)),
+      rgba(32, 23, 19, 0.92);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .receipt-ticket__label {
+    margin: 0;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.16em;
+    color: var(--brand-gold);
+  }
+
+  .receipt-ticket h2 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+  }
+
+  .receipt-ticket p {
+    margin: 0;
+    line-height: 1.65;
+    color: rgba(255, 247, 239, 0.82);
+  }
+
+  .receipt-ticket__meta {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .receipt-ticket__meta div {
+    padding: 0.95rem 1rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .receipt-ticket__meta span {
+    display: block;
+    margin-bottom: 0.26rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.92rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 216, 115, 0.86);
+  }
+
+  .receipt-ticket__meta strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.08rem;
+  }
+
+  .receipt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.2rem;
+  }
+
+  .receipt-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .receipt-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 24%),
+      radial-gradient(circle at 88% 10%, rgba(255, 216, 115, 0.12), transparent 12rem);
+  }
+
+  .receipt-card__content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .receipt-card__header h2 {
+    margin: 0.25rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.35rem, 2vw, 1.9rem);
+  }
+
+  .receipt-card__header p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .receipt-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .receipt-lines {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .receipt-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .receipt-line:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .receipt-line__title {
+    margin: 0;
+    font-weight: 800;
+  }
+
+  .receipt-line__meta {
+    margin: 0.28rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.92rem;
+  }
+
+  .receipt-line__price {
+    font-weight: 800;
+    color: var(--brand-red);
+    text-align: right;
+  }
+
+  .receipt-totals {
+    display: grid;
+    gap: 0.7rem;
+    margin-top: 0.5rem;
+  }
+
+  .receipt-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .receipt-total strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.12rem;
+    color: var(--text-main);
+  }
+
+  .receipt-meta {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .receipt-meta__item {
+    padding: 1rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .receipt-meta__item span {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+  }
+
+  .receipt-meta__item strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.05rem;
+  }
+
+  .receipt-meta__item p {
+    margin: 0.38rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .receipt-timeline {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .receipt-timeline__step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.95rem 1rem;
+    border-radius: 22px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .receipt-timeline__step.is-active {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-color: transparent;
+  }
+
+  .receipt-timeline__step strong {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    font-family: "Bebas Neue", sans-serif;
+    color: #2a160b;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+  }
+
+  .receipt-timeline__step p {
+    margin: 0.2rem 0 0;
+    line-height: 1.55;
+    color: inherit;
+  }
+
+  .receipt-note {
+    padding: 1rem;
+    border-radius: 22px;
+    background: rgba(0, 111, 116, 0.08);
+    border: 1px solid rgba(0, 111, 116, 0.14);
+    color: var(--text-main);
+  }
+
+  .receipt-note strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .receipt-note p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .receipt-empty {
+    text-align: center;
+  }
+
+  .receipt-empty h1 {
+    margin: 0.35rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.9rem, 3vw, 2.7rem);
+  }
+
+  .receipt-empty p {
+    max-width: 54ch;
+    margin: 0.8rem auto 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .receipt-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 1.3rem;
+  }
+
+  .inline-form {
+    display: inline;
+  }
+
+  .button--inline {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  @media (max-width: 1040px) {
+    .receipt-hero__grid,
+    .receipt-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="receipt-shell">
+  {% if not order %}
+    <section class="receipt-empty section-panel">
+      <p class="eyebrow">Receipt lookup</p>
+      <h1>No confirmed order is selected yet.</h1>
+      <p>
+        Finish checkout first or open an existing order from order history to view the confirmation and download the PDF receipt.
+      </p>
+      <div class="receipt-empty__actions">
+        <a href="{{ url_for('orders.checkout') }}" class="button button--primary">Go to checkout</a>
+        <a href="{{ url_for('orders.orders') }}" class="button button--secondary">Open order history</a>
+      </div>
+    </section>
+  {% else %}
+    <section class="receipt-hero section-panel">
+      <div class="receipt-hero__grid">
+        <div>
+          <p class="eyebrow">Order confirmed</p>
+          <h1 class="section-title">Pickup booked for {{ order.pickup_day }}.</h1>
+          <p class="section-copy">
+            The payment simulation has been approved, the order record is stored in the database,
+            and the receipt below is ready for download or review at any time.
+          </p>
+          <div class="pill-row">
+            <span class="pill"><strong>{{ order.order_number }}</strong> unique order reference for staff verification.</span>
+            <span class="pill"><strong>{{ order.payment_reference }}</strong> simulated payment confirmation saved to the order.</span>
+            <span class="pill"><strong>{{ order.total_display }}</strong> total charged including the pickup service fee.</span>
+          </div>
+          <div class="receipt-actions">
+            <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--primary">Download PDF receipt</a>
+            <a href="{{ url_for('orders.orders') }}" class="button button--secondary">View order history</a>
+            <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
+              <button type="submit" class="button button--secondary button--inline">Order again</button>
+            </form>
+          </div>
+        </div>
+        <aside class="receipt-ticket">
+          <p class="receipt-ticket__label">Pickup ticket</p>
+          <h2>{{ order.pickup_time }}</h2>
+          <p>Arrive a few minutes early with your order number ready. Staff can verify using the confirmation code below.</p>
+          <div class="receipt-ticket__meta">
+            <div>
+              <span>Confirmation code</span>
+              <strong>{{ order.confirmation_code }}</strong>
+            </div>
+            <div>
+              <span>Pickup contact</span>
+              <strong>{{ order.customer_name }}</strong>
+            </div>
+            <div>
+              <span>Payment status</span>
+              <strong>{{ order.payment_status }}</strong>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="receipt-layout">
+      <div class="receipt-grid">
+        <article class="receipt-card">
+          <div class="receipt-card__content">
+            <div class="receipt-card__header">
+              <div>
+                <p class="eyebrow">Receipt detail</p>
+                <h2>Items and totals</h2>
+                <p>The line items below are the exact values saved with the confirmed order.</p>
+              </div>
+            </div>
+            <div class="receipt-lines">
+              {% for line in order.lines %}
+                <div class="receipt-line">
+                  <div>
+                    <p class="receipt-line__title">{{ line.name }}</p>
+                    <p class="receipt-line__meta">{{ line.quantity }} x {{ line.unit_price_display }} · {{ line.category }}</p>
+                  </div>
+                  <div class="receipt-line__price">{{ line.line_total_display }}</div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="receipt-totals">
+              <div class="receipt-total">
+                <span>Food subtotal</span>
+                <span>{{ order.subtotal_display }}</span>
+              </div>
+              <div class="receipt-total">
+                <span>Pickup service fee</span>
+                <span>{{ order.service_fee_display }}</span>
+              </div>
+              <div class="receipt-total">
+                <strong>Total paid</strong>
+                <strong>{{ order.total_display }}</strong>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="receipt-card">
+          <div class="receipt-card__content">
+            <div class="receipt-card__header">
+              <div>
+                <p class="eyebrow">Customer details</p>
+                <h2>Pickup record</h2>
+                <p>Everything below comes directly from the stored database record for this order.</p>
+              </div>
+            </div>
+            <div class="receipt-meta">
+              <div class="receipt-meta__item">
+                <span>Placed at</span>
+                <strong>{{ order.created_at }}</strong>
+                <p>Order created and saved to the database at this time.</p>
+              </div>
+              <div class="receipt-meta__item">
+                <span>Pickup slot</span>
+                <strong>{{ order.pickup_at }}</strong>
+                <p>{{ order.kitchen_notes }}</p>
+              </div>
+              <div class="receipt-meta__item">
+                <span>Contact</span>
+                <strong>{{ order.customer_name }}</strong>
+                <p>{{ order.customer_email }} · {{ order.customer_phone }}</p>
+              </div>
+              <div class="receipt-meta__item">
+                <span>Payment method</span>
+                <strong>{{ order.payment_method }}</strong>
+                <p>
+                  {{ order.payment_status }}
+                  {% if order.card_last4 %}
+                    · ending in {{ order.card_last4 }}
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <aside class="receipt-grid">
+        <article class="receipt-card">
+          <div class="receipt-card__content">
+            <div class="receipt-card__header">
+              <div>
+                <p class="eyebrow">Pickup timeline</p>
+                <h2>Order progression</h2>
+                <p>The customer flow now runs from checkout into confirmation and history without placeholders.</p>
+              </div>
+            </div>
+            <div class="receipt-timeline">
+              <div class="receipt-timeline__step is-active">
+                <strong>1</strong>
+                <div>
+                  <strong>Checkout submitted</strong>
+                  <p>Customer details, payment method, pickup slot, and line items were validated and saved.</p>
+                </div>
+              </div>
+              <div class="receipt-timeline__step is-active">
+                <strong>2</strong>
+                <div>
+                  <strong>Receipt generated</strong>
+                  <p>The order confirmation page is live and the PDF file can be downloaded any time.</p>
+                </div>
+              </div>
+              <div class="receipt-timeline__step">
+                <strong>3</strong>
+                <div>
+                  <strong>Pickup ready</strong>
+                  <p>Kitchen staff can prepare the order ahead of the selected collection time.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="receipt-card">
+          <div class="receipt-card__content">
+            <div class="receipt-note">
+              <strong>Special instructions</strong>
+              <p>{{ order.special_instructions or "No extra kitchen or pickup instructions were included for this order." }}</p>
+            </div>
+            <div class="receipt-note">
+              <strong>Need to place the same order again?</strong>
+              <p>Use the “Order again” action above to rebuild the cart with the same items and quantities.</p>
+            </div>
+          </div>
+        </article>
+      </aside>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

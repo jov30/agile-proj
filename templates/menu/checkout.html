@@ -1,0 +1,914 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .checkout-shell {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .checkout-hero,
+  .checkout-layout,
+  .checkout-empty {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .checkout-hero__grid,
+  .checkout-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.03fr) minmax(320px, 0.97fr);
+    gap: 1.35rem;
+  }
+
+  .checkout-hero__title {
+    font-size: clamp(2.2rem, 4vw, 4rem);
+  }
+
+  .checkout-hero__copy {
+    max-width: 60ch;
+  }
+
+  .checkout-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.2rem;
+  }
+
+  .checkout-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.78rem 0.95rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 700;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 14px 24px rgba(53, 30, 20, 0.06);
+  }
+
+  .checkout-step strong {
+    display: inline-grid;
+    place-items: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+  }
+
+  .checkout-step.is-active {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, rgba(35, 24, 20, 0.96), rgba(23, 19, 21, 0.92));
+    border-color: rgba(255, 216, 115, 0.14);
+  }
+
+  .checkout-step.is-active strong {
+    color: #2a160b;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+  }
+
+  .checkout-hero__panel {
+    display: grid;
+    gap: 0.95rem;
+  }
+
+  .checkout-hero__card {
+    padding: 1.15rem 1.2rem;
+    border-radius: 28px;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.96), rgba(23, 19, 21, 0.94)),
+      rgba(32, 23, 19, 0.92);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .checkout-hero__kicker {
+    margin: 0 0 0.4rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.16em;
+    color: var(--brand-gold);
+  }
+
+  .checkout-hero__card h2 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+  }
+
+  .checkout-hero__card p {
+    margin: 0.7rem 0 0;
+    line-height: 1.7;
+    color: rgba(255, 247, 239, 0.8);
+  }
+
+  .checkout-hero__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .checkout-stat {
+    padding: 1rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.06);
+  }
+
+  .checkout-stat strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.3rem;
+  }
+
+  .checkout-stat span {
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .checkout-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .checkout-main {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .checkout-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .checkout-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 24%),
+      radial-gradient(circle at 88% 10%, rgba(255, 216, 115, 0.12), transparent 12rem);
+  }
+
+  .checkout-card__content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .checkout-card__header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .checkout-card__header h2 {
+    margin: 0.22rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+  }
+
+  .checkout-card__header p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .checkout-anchor {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    color: var(--brand-orange);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+
+  .field-grid--single {
+    grid-template-columns: 1fr;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .field label {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    border-radius: 18px;
+    padding: 0.92rem 0.98rem;
+    font: inherit;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.78);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  .field textarea {
+    min-height: 112px;
+    resize: vertical;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: 0;
+    border-color: rgba(255, 106, 19, 0.38);
+    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.12);
+    background: #fff;
+  }
+
+  .field small {
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .checkout-alert {
+    padding: 1rem 1.1rem;
+    border-radius: 24px;
+    border: 1px solid rgba(217, 76, 121, 0.2);
+    color: #7f2040;
+    background: linear-gradient(135deg, rgba(217, 76, 121, 0.12), rgba(255, 255, 255, 0.9));
+  }
+
+  .checkout-alert strong {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .checkout-alert ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    line-height: 1.7;
+  }
+
+  .payment-methods {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .payment-method {
+    position: relative;
+  }
+
+  .payment-method input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .payment-method__card {
+    display: grid;
+    gap: 0.55rem;
+    padding: 1rem;
+    border-radius: 22px;
+    cursor: pointer;
+    min-height: 100%;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.05);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .payment-method__card span {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    color: var(--brand-orange);
+  }
+
+  .payment-method__card strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.05rem;
+  }
+
+  .payment-method__card p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.92rem;
+  }
+
+  .payment-method input:checked + .payment-method__card {
+    transform: translateY(-2px);
+    color: var(--text-inverse);
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    box-shadow: 0 18px 28px rgba(255, 106, 19, 0.22);
+  }
+
+  .payment-method input:checked + .payment-method__card span,
+  .payment-method input:checked + .payment-method__card p {
+    color: rgba(255, 247, 239, 0.9);
+  }
+
+  .checkout-card-fields {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .checkout-card-fields[hidden] {
+    display: none;
+  }
+
+  .checkout-pickup-banner {
+    margin-bottom: 1rem;
+    padding: 1rem 1.05rem;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(255, 180, 54, 0.14), rgba(255, 106, 19, 0.08));
+    border: 1px solid rgba(255, 180, 54, 0.18);
+  }
+
+  .checkout-pickup-banner strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .checkout-pickup-banner p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .checkout-aside {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    position: sticky;
+    top: 1rem;
+  }
+
+  .checkout-summary__list {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .checkout-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 1rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .checkout-line:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .checkout-line__title {
+    margin: 0;
+    font-weight: 800;
+  }
+
+  .checkout-line__meta {
+    margin: 0.24rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.9rem;
+  }
+
+  .checkout-line__price {
+    font-weight: 800;
+    color: var(--brand-red);
+    text-align: right;
+  }
+
+  .checkout-totals {
+    display: grid;
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+
+  .checkout-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .checkout-total strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.12rem;
+    color: var(--text-main);
+  }
+
+  .checkout-aside__actions {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.05rem;
+  }
+
+  .checkout-submit {
+    width: 100%;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    padding-block: 1rem;
+  }
+
+  .checkout-mini-grid {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .checkout-mini {
+    padding: 1rem;
+    border-radius: 22px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .checkout-mini span {
+    display: block;
+    margin-bottom: 0.32rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+  }
+
+  .checkout-mini strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.08rem;
+  }
+
+  .checkout-mini p {
+    margin: 0.38rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.92rem;
+  }
+
+  .checkout-policy {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .checkout-policy__item {
+    display: grid;
+    gap: 0.28rem;
+    padding: 0.95rem 1rem;
+    border-radius: 22px;
+    color: rgba(255, 247, 239, 0.92);
+    background: linear-gradient(180deg, rgba(35, 24, 20, 0.94), rgba(23, 19, 21, 0.92));
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .checkout-policy__item strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .checkout-policy__item p {
+    margin: 0;
+    line-height: 1.55;
+    color: rgba(255, 247, 239, 0.78);
+    font-size: 0.92rem;
+  }
+
+  .checkout-empty {
+    text-align: center;
+  }
+
+  .checkout-empty h2 {
+    margin: 0.4rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+  }
+
+  .checkout-empty p {
+    max-width: 54ch;
+    margin: 0.8rem auto 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .checkout-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 1.3rem;
+  }
+
+  @media (max-width: 1040px) {
+    .checkout-hero__grid,
+    .checkout-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .checkout-aside {
+      position: static;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .field-grid,
+    .payment-methods,
+    .checkout-hero__stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-shell" data-checkout-root data-entry-step="{{ entry_step }}">
+  <section class="checkout-hero section-panel">
+    <div class="checkout-hero__grid">
+      <div class="checkout-hero__copy">
+        <p class="eyebrow">Scheduled pickup checkout</p>
+        <h1 class="section-title checkout-hero__title">Review, pay, and lock in your pickup time.</h1>
+        <p class="section-copy">
+          This flow ties the MCQ menu to a real order record in the database, creates a confirmation receipt,
+          and keeps the full pickup journey consistent with the storefront styling of the rest of the site.
+        </p>
+        <div class="checkout-steps">
+          <a href="{{ url_for('orders.checkout') }}" class="checkout-step {% if entry_step == 'checkout' %}is-active{% endif %}">
+            <strong>1</strong> Review
+          </a>
+          <a href="{{ url_for('orders.payment') }}" class="checkout-step {% if entry_step == 'payment' %}is-active{% endif %}">
+            <strong>2</strong> Payment
+          </a>
+          <a href="{{ url_for('orders.pickup_planner') }}" class="checkout-step {% if entry_step == 'pickup' %}is-active{% endif %}">
+            <strong>3</strong> Pickup
+          </a>
+          <a href="{{ url_for('orders.receipt') }}" class="checkout-step">
+            <strong>4</strong> Receipt
+          </a>
+        </div>
+        <div class="pill-row">
+          <span class="pill"><strong>Simulated payment</strong> secure demo confirmation with no live gateway.</span>
+          <span class="pill"><strong>Kitchen-ready data</strong> order lines, totals, pickup slot, and notes are stored in SQLite.</span>
+          <span class="pill"><strong>Post-checkout proof</strong> receipt page and PDF export are available immediately.</span>
+        </div>
+      </div>
+      <div class="checkout-hero__panel">
+        <article class="checkout-hero__card">
+          <p class="checkout-hero__kicker">Pickup flow status</p>
+          <h2>{{ cart.lines|length }} items ready for confirmation</h2>
+          <p>
+            The current basket total is <strong>{{ grand_total_display }}</strong>, including the
+            {{ service_fee_display }} pickup service fee. After confirmation, the cart is cleared and the order
+            is written to the order history timeline.
+          </p>
+        </article>
+        <div class="checkout-hero__stats">
+          <div class="checkout-stat">
+            <strong>{{ cart.total_display }}</strong>
+            <span>Food subtotal pulled directly from the session-backed cart.</span>
+          </div>
+          <div class="checkout-stat">
+            <strong>{{ pickup_lead_minutes }} min</strong>
+            <span>Minimum lead time before the pickup window becomes available.</span>
+          </div>
+          <div class="checkout-stat">
+            <strong>PDF receipt</strong>
+            <span>Generated on demand once the order has been confirmed.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if not cart.lines %}
+    <section class="checkout-empty section-panel">
+      {% if errors %}
+        <div class="checkout-alert" role="alert" style="margin-bottom: 1rem; text-align: left">
+          <strong>Checkout could not continue.</strong>
+          <ul>
+            {% for error in errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <p class="eyebrow">Cart needed</p>
+      <h2>No items are waiting in checkout.</h2>
+      <p>
+        Add dishes from the menu first, then come back here to complete payment, choose a pickup slot,
+        and generate a receipt.
+      </p>
+      <div class="checkout-empty__actions">
+        <a href="{{ url_for('public.menu') }}" class="button button--primary">Browse menu</a>
+        <a href="{{ url_for('orders.cart') }}" class="button button--secondary">Open cart</a>
+      </div>
+    </section>
+  {% else %}
+    <section class="checkout-layout">
+      <form method="post" action="{{ url_for('orders.checkout') }}" class="checkout-form" id="checkout-form" novalidate>
+        <div class="checkout-main">
+          {% if errors %}
+            <div class="checkout-alert" role="alert">
+              <strong>Checkout needs a few fixes before the order can be confirmed.</strong>
+              <ul>
+                {% for error in errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <section class="checkout-card" id="checkout-contact">
+            <div class="checkout-card__content">
+              <div class="checkout-card__header">
+                <div>
+                  <p class="eyebrow">Contact details</p>
+                  <h2>Pickup contact</h2>
+                  <p>These details are stored with the order record so staff can verify the pickup cleanly.</p>
+                </div>
+                <span class="checkout-anchor">01</span>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="customer_name">Full name</label>
+                  <input id="customer_name" name="customer_name" type="text" value="{{ form_data.customer_name }}" autocomplete="name" />
+                </div>
+                <div class="field">
+                  <label for="customer_phone">Phone number</label>
+                  <input
+                    id="customer_phone"
+                    name="customer_phone"
+                    type="tel"
+                    value="{{ form_data.customer_phone }}"
+                    autocomplete="tel"
+                    placeholder="04xx xxx xxx"
+                  />
+                </div>
+                <div class="field field-grid--single" style="grid-column: 1 / -1">
+                  <label for="customer_email">Email</label>
+                  <input id="customer_email" name="customer_email" type="email" value="{{ form_data.customer_email }}" autocomplete="email" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="checkout-card" id="checkout-payment">
+            <div class="checkout-card__content">
+              <div class="checkout-card__header">
+                <div>
+                  <p class="eyebrow">Payment</p>
+                  <h2>Simulated payment approval</h2>
+                  <p>Pick a checkout method and the system will store a simulated payment reference with the order.</p>
+                </div>
+                <span class="checkout-anchor">02</span>
+              </div>
+
+              <div class="payment-methods" id="payment-methods">
+                {% for option in payment_options %}
+                  <label class="payment-method">
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      value="{{ option.key }}"
+                      data-payment-label="{{ option.label }}"
+                      data-requires-card="{{ 'true' if option.requires_card else 'false' }}"
+                      {% if form_data.payment_method == option.key %}checked{% endif %}
+                    />
+                    <span class="payment-method__card">
+                      <span>Method</span>
+                      <strong>{{ option.label }}</strong>
+                      <p>{{ option.description }}</p>
+                    </span>
+                  </label>
+                {% endfor %}
+              </div>
+
+              <div class="checkout-card-fields" id="card-fields">
+                <div class="field-grid">
+                  <div class="field field-grid--single" style="grid-column: 1 / -1">
+                    <label for="card_name">Cardholder name</label>
+                    <input id="card_name" name="card_name" type="text" value="{{ form_data.card_name }}" autocomplete="cc-name" />
+                  </div>
+                  <div class="field field-grid--single" style="grid-column: 1 / -1">
+                    <label for="card_number">Card number</label>
+                    <input
+                      id="card_number"
+                      name="card_number"
+                      type="text"
+                      inputmode="numeric"
+                      value="{{ form_data.card_number }}"
+                      autocomplete="cc-number"
+                      placeholder="4242 4242 4242 4242"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="card_expiry">Expiry</label>
+                    <input
+                      id="card_expiry"
+                      name="card_expiry"
+                      type="text"
+                      inputmode="numeric"
+                      value="{{ form_data.card_expiry }}"
+                      autocomplete="cc-exp"
+                      placeholder="MM/YY"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="card_cvv">Security code</label>
+                    <input
+                      id="card_cvv"
+                      name="card_cvv"
+                      type="text"
+                      inputmode="numeric"
+                      value="{{ form_data.card_cvv }}"
+                      autocomplete="cc-csc"
+                      placeholder="123"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="checkout-card" id="checkout-pickup">
+            <div class="checkout-card__content">
+              <div class="checkout-card__header">
+                <div>
+                  <p class="eyebrow">Pickup planning</p>
+                  <h2>Choose the collection slot</h2>
+                  <p>The available times are generated from the store schedule and minimum lead time.</p>
+                </div>
+                <span class="checkout-anchor">03</span>
+              </div>
+
+              <div class="checkout-pickup-banner">
+                <strong>Pickup guidance</strong>
+                <p>
+                  Slots open in 30-minute blocks. The earliest available time always respects the
+                  {{ pickup_lead_minutes }} minute kitchen lead time, and the contact number below can be used
+                  if you need to update the order after it has been placed: {{ restaurant_phone }}.
+                </p>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="pickup_date">Pickup date</label>
+                  <select id="pickup_date" name="pickup_date">
+                    {% for window in pickup_windows %}
+                      <option value="{{ window.date }}" {% if form_data.pickup_date == window.date %}selected{% endif %}>
+                        {{ window.label }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="pickup_time">Pickup time</label>
+                  <select id="pickup_time" name="pickup_time">
+                    {% for slot in selected_slots %}
+                      <option value="{{ slot.value }}" {% if form_data.pickup_time == slot.value %}selected{% endif %}>
+                        {{ slot.label }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="field field-grid--single" style="grid-column: 1 / -1">
+                  <label for="special_instructions">Kitchen notes</label>
+                  <textarea
+                    id="special_instructions"
+                    name="special_instructions"
+                    placeholder="Optional: no peanuts, extra napkins, waiting outside, or other pickup notes."
+                  >{{ form_data.special_instructions }}</textarea>
+                  <small>Notes are stored with the order and appear on the receipt for reference.</small>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </form>
+
+      <aside class="checkout-aside">
+        <section class="checkout-card checkout-summary">
+          <div class="checkout-card__content">
+            <div class="checkout-card__header">
+              <div>
+                <p class="eyebrow">Order summary</p>
+                <h2>What will be prepared</h2>
+                <p>Session cart items are locked into the database exactly as shown here.</p>
+              </div>
+            </div>
+
+            <div class="checkout-summary__list">
+              {% for line in cart.lines %}
+                <div class="checkout-line">
+                  <div>
+                    <p class="checkout-line__title">{{ line.name }}</p>
+                    <p class="checkout-line__meta">{{ line.quantity }} x {{ line.price_display }} · {{ line.category_title }}</p>
+                  </div>
+                  <div class="checkout-line__price">{{ line.line_display }}</div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="checkout-totals">
+              <div class="checkout-total">
+                <span>Food subtotal</span>
+                <span>{{ cart.total_display }}</span>
+              </div>
+              <div class="checkout-total">
+                <span>Pickup service fee</span>
+                <span>{{ service_fee_display }}</span>
+              </div>
+              <div class="checkout-total">
+                <strong>Total charged</strong>
+                <strong>{{ grand_total_display }}</strong>
+              </div>
+            </div>
+
+            <div class="checkout-aside__actions">
+              <button class="button button--primary checkout-submit" type="submit" form="checkout-form">
+                Pay {{ grand_total_display }} & Confirm Pickup
+              </button>
+              <a href="{{ url_for('orders.cart') }}" class="button button--secondary">Edit cart</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="checkout-mini-grid">
+          <article class="checkout-mini">
+            <span>Pickup preview</span>
+            <strong id="pickup-preview-title">{{ form_data.pickup_date or "Choose a pickup day" }}</strong>
+            <p id="pickup-preview-copy">Selected pickup time: {{ form_data.pickup_time or "Choose a time" }}</p>
+          </article>
+          <article class="checkout-mini">
+            <span>Payment preview</span>
+            <strong id="payment-preview-title">Secure card gateway</strong>
+            <p id="payment-preview-copy">A simulated approval reference is attached to the order after confirmation.</p>
+          </article>
+        </section>
+
+        <section class="checkout-policy">
+          <div class="checkout-policy__item">
+            <strong>Receipt and PDF</strong>
+            <p>Once the order is submitted, the confirmation page exposes a printable PDF receipt immediately.</p>
+          </div>
+          <div class="checkout-policy__item">
+            <strong>Persistent order record</strong>
+            <p>Customer details, order lines, totals, and pickup timing are all written to the SQLite database.</p>
+          </div>
+          <div class="checkout-policy__item">
+            <strong>Order history</strong>
+            <p>Placed orders remain visible in this browser session through the customer order history screen.</p>
+          </div>
+        </section>
+      </aside>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {% if cart.lines %}
+    <script id="pickup-windows-data" type="application/json">{{ pickup_windows | tojson }}</script>
+    <script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+  {% endif %}
+{% endblock %}

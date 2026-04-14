@@ -77,10 +77,10 @@
         </div>
         <div class="support-dock__body">
           <div class="support-message support-message--assistant">
-            Visit our Customer Support for assistance or call us at <a href="tel:+61892485623">08 9248 5623</a>.
+            Visit our Customer Support for assistance or call us at <a href="tel:+61892485623">{{ restaurant_phone }}</a>.
           </div>
           <div class="support-message support-message--assistant">
-            I can help with menu browsing, scheduled pickup, payment, receipts, favourites, shared meals, and checkout questions.
+            I can help with menu browsing, checkout, simulated payment, scheduled pickup, receipts, and order history questions.
           </div>
           <div class="support-chat-log" id="support-chat-log"></div>
           <div class="support-dock__prompts">
@@ -107,17 +107,17 @@
         const prompts = document.querySelectorAll('.support-prompt');
         const answers = {
           pickup:
-            'Scheduled pickup is part of the project core flow. The future checkout will let customers choose a pickup date and time before confirming the order.',
+            'Checkout now lets customers choose a pickup date and time, and the selected slot is saved with the order record and receipt.',
           payment:
-            'Payment is now exposed as its own planned feature page. It will sit between checkout and pickup confirmation in the customer journey.',
+            'Payment is simulated inside the live checkout flow. The order stores a simulated approval reference and the chosen payment method.',
           receipt:
-            'The receipt page is the post-checkout confirmation point where customers can review the order summary and eventually download proof of purchase.',
+            'After checkout, the receipt page shows the confirmed order summary immediately and offers a downloadable PDF receipt.',
           menu:
-            'You can browse categories now. Later customers will also be able to save favourites, review ingredients, and add items to cart directly from the menu experience.',
+            'You can browse categories, open item detail pages, add dishes to the cart, and continue directly into the live checkout flow.',
           account:
-            'User-side features from the project include register, login, profile updates, order history, favourites, payment, pickup planning, and shared meals.',
+            'User-side features currently include menu browsing, cart management, checkout, simulated payment, pickup planning, receipt generation, and order history.',
           support:
-            'For direct help, visit Customer Support or call 08 9248 5623. This floating chatbox is ready to become an online assistance entry point.',
+            'For direct help, visit Customer Support or call 08 9248 5623. The team can assist with pickup timing, payment questions, and receipt lookups.',
         };
 
         function setOpenState(isOpen) {
