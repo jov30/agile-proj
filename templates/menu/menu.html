@@ -52,78 +52,118 @@
 
   .menu-hero__visual {
     position: relative;
-    min-height: 500px;
+    min-height: 540px;
   }
 
-  .menu-hero__market {
+  .menu-hero__scene {
     position: absolute;
-    inset: 0 0 auto auto;
-    width: min(92%, 440px);
-    filter: drop-shadow(0 28px 42px rgba(32, 18, 12, 0.18));
-    border-radius: 28px;
-  }
-
-  .menu-hero__feature {
-    position: absolute;
-    left: 0;
-    right: 3.2rem;
-    bottom: 0;
+    inset: 0;
     overflow: hidden;
-    border-radius: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 34px;
+    border: 1px solid rgba(112, 85, 66, 0.14);
     background:
-      linear-gradient(180deg, rgba(35, 24, 20, 0.92), rgba(23, 19, 21, 0.92)),
-      rgba(32, 23, 19, 0.92);
+      linear-gradient(180deg, rgba(26, 18, 14, 0.14), rgba(26, 18, 14, 0.82)),
+      url("{{ url_for('static', filename='images/inspiration/menu-floating-market.jpg') }}");
+    background-size: cover;
+    background-position: center;
     box-shadow: var(--shadow-strong);
   }
 
-  .menu-hero__street-card {
+  .menu-hero__scene::before {
+    content: "";
     position: absolute;
-    top: 2rem;
-    left: 1.2rem;
-    width: 190px;
-    height: 240px;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(255, 216, 115, 0.18), transparent 28%),
+      radial-gradient(circle at 78% 22%, rgba(255, 255, 255, 0.18), transparent 18rem);
+  }
+
+  .menu-hero__visual-copy,
+  .menu-hero__preview,
+  .menu-hero__signal {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .menu-hero__visual-copy {
+    top: 1.35rem;
+    left: 1.35rem;
+    max-width: 24rem;
+    padding: 1.1rem 1.15rem;
+    border-radius: 26px;
+    color: var(--text-inverse);
+    background: rgba(27, 18, 15, 0.72);
+    border: 1px solid rgba(255, 216, 115, 0.14);
+    backdrop-filter: blur(10px);
+  }
+
+  .menu-hero__visual-copy span,
+  .menu-hero__preview-copy span,
+  .menu-hero__signal span {
+    display: block;
+    margin-bottom: 0.24rem;
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.15em;
+    font-size: 0.96rem;
+    color: rgba(255, 216, 115, 0.92);
+  }
+
+  .menu-hero__visual-copy strong,
+  .menu-hero__preview-copy strong,
+  .menu-hero__signal strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.28rem, 2vw, 1.85rem);
+  }
+
+  .menu-hero__visual-copy p,
+  .menu-hero__preview-copy p,
+  .menu-hero__signal p {
+    margin: 0.45rem 0 0;
+    line-height: 1.58;
+    color: rgba(255, 247, 239, 0.84);
+  }
+
+  .menu-hero__signal {
+    right: 1.35rem;
+    top: 1.35rem;
+    width: min(220px, calc(100% - 2.7rem));
+    padding: 1rem 1.05rem;
+    border-radius: 24px;
+    color: var(--text-inverse);
+    background: rgba(27, 18, 15, 0.72);
+    border: 1px solid rgba(255, 216, 115, 0.14);
+    backdrop-filter: blur(10px);
+  }
+
+  .menu-hero__preview {
+    right: 1.35rem;
+    bottom: 1.35rem;
+    width: min(360px, calc(100% - 2.7rem));
     overflow: hidden;
-    border-radius: 28px;
+    border-radius: 30px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.24);
-    transform: rotate(-4deg);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.94), rgba(23, 19, 21, 0.92)),
+      rgba(32, 23, 19, 0.92);
+    box-shadow: 0 28px 44px rgba(21, 11, 7, 0.28);
   }
 
-  .menu-hero__street-card img {
+  .menu-hero__preview img {
     width: 100%;
-    height: 100%;
+    height: 220px;
     object-fit: cover;
     display: block;
   }
 
-  .menu-hero__feature img {
-    width: 100%;
-    height: 320px;
-    object-fit: cover;
-    display: block;
-  }
-
-  .menu-hero__feature-copy {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.2rem 1.2rem;
+  .menu-hero__preview-copy {
+    padding: 1rem 1.15rem 1.15rem;
     color: var(--text-inverse);
   }
 
-  .menu-hero__feature-copy span {
-    font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 0.16em;
-    color: rgba(255, 216, 115, 0.88);
-  }
-
-  .menu-hero__feature-copy strong {
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: 1.2rem;
-    text-align: right;
+  .menu-hero__preview-copy strong {
+    font-size: 1.28rem;
   }
 
   .menu-utility {
@@ -713,36 +753,29 @@
     }
 
     .menu-hero__visual {
-      min-height: 420px;
+      min-height: 520px;
     }
 
-    .menu-hero__market {
-      width: 100%;
+    .menu-hero__visual-copy,
+    .menu-hero__signal {
+      position: relative;
+      top: auto;
+      left: auto;
+      right: auto;
+      width: auto;
       max-width: none;
+      margin: 1rem;
     }
 
-    .menu-hero__street-card {
-      width: 120px;
-      height: 150px;
-      top: 1rem;
-      left: 0.8rem;
+    .menu-hero__preview {
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      width: auto;
     }
 
-    .menu-hero__feature {
-      right: 0;
-    }
-
-    .menu-hero__feature img {
-      height: 260px;
-    }
-
-    .menu-hero__feature-copy {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .menu-hero__feature-copy strong {
-      text-align: left;
+    .menu-hero__preview img {
+      height: 190px;
     }
 
     .menu-browser__header {
@@ -811,22 +844,26 @@
   </div>
 
   <div class="menu-hero__visual">
-    <div class="menu-hero__street-card">
-      <img
-        src="{{ url_for('static', filename='images/inspiration/saigon-market-night.jpg') }}"
-        alt="Saigon night market inspiration"
-      />
-    </div>
-    <img
-      class="menu-hero__market"
-      src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}"
-      alt="Ben Thanh Market inspired artwork"
-    />
-    <div class="menu-hero__feature">
-      <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
-      <div class="menu-hero__feature-copy">
-        <span>Featured lane</span>
-        <strong id="menu-active-category">Pho Noodle Soup</strong>
+    <div class="menu-hero__scene">
+      <div class="menu-hero__visual-copy">
+        <span>Floating market mood</span>
+        <strong>Fresh ingredients and moving lanes make the menu feel more like a real market hall.</strong>
+        <p>
+          This hero now leans on one stronger image, while the active category still updates in the preview card below.
+        </p>
+      </div>
+      <div class="menu-hero__signal">
+        <span>Pickup-led browsing</span>
+        <strong>Choose fast</strong>
+        <p>Move between pho, rice, grill, drinks, and desserts without losing the next ordering step.</p>
+      </div>
+      <div class="menu-hero__preview">
+        <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
+        <div class="menu-hero__preview-copy">
+          <span>Featured lane</span>
+          <strong id="menu-active-category">Pho Noodle Soup</strong>
+          <p>Category preview changes live as you switch lanes across the menu browser.</p>
+        </div>
       </div>
     </div>
   </div>
