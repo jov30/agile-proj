@@ -151,6 +151,17 @@
     border: 1px solid rgba(255, 180, 54, 0.16);
   }
 
+  .member-balance__grid,
+  .member-wallet {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .member-balance__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.76fr);
+    align-items: start;
+  }
+
   .member-balance span,
   .member-visual span,
   .member-order__meta span {
@@ -193,6 +204,127 @@
     gap: 1rem;
     color: var(--text-muted);
     font-size: 0.92rem;
+  }
+
+  .member-wallet {
+    padding: 0.95rem 1rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .member-wallet strong,
+  .member-cardface__name,
+  .member-cardface__points strong,
+  .member-cardface__voucher strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .member-wallet strong {
+    font-size: 1.18rem;
+  }
+
+  .member-cardface {
+    display: grid;
+    gap: 1rem;
+    padding: 1.15rem;
+    border-radius: 28px;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(135deg, rgba(255, 180, 54, 0.16), rgba(255, 106, 19, 0.16)),
+      linear-gradient(180deg, rgba(34, 23, 19, 0.9), rgba(18, 14, 16, 0.95)),
+      rgba(23, 19, 21, 0.96);
+    border: 1px solid rgba(255, 216, 115, 0.18);
+    box-shadow: 0 22px 36px rgba(21, 11, 7, 0.18);
+  }
+
+  .member-cardface__top,
+  .member-cardface__chips,
+  .member-cardface__numbers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .member-cardface__eyebrow,
+  .member-cardface__meta,
+  .member-cardface__scan-note {
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.15em;
+  }
+
+  .member-cardface__eyebrow {
+    font-size: 0.95rem;
+    color: rgba(255, 216, 115, 0.92);
+  }
+
+  .member-cardface__tier {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 0.82rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #2b170d;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+  }
+
+  .member-cardface__name {
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+  }
+
+  .member-cardface__meta {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.88rem;
+    color: rgba(255, 247, 239, 0.76);
+  }
+
+  .member-cardface__numbers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .member-cardface__points,
+  .member-cardface__voucher {
+    padding: 0.9rem 0.95rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .member-cardface__points span,
+  .member-cardface__voucher span {
+    display: block;
+    font-size: 0.82rem;
+    color: rgba(255, 247, 239, 0.8);
+  }
+
+  .member-cardface__points strong,
+  .member-cardface__voucher strong {
+    margin-top: 0.22rem;
+    font-size: 1.45rem;
+  }
+
+  .member-cardface__barcode {
+    padding: 0.85rem;
+    border-radius: 22px;
+    background: rgba(255, 250, 245, 0.98);
+  }
+
+  .member-cardface__barcode img {
+    width: 100%;
+    display: block;
+  }
+
+  .member-cardface__scan-note {
+    text-align: center;
+    font-size: 0.82rem;
+    color: rgba(255, 247, 239, 0.82);
   }
 
   .member-actions {
@@ -300,6 +432,10 @@
     .member-benefits {
       grid-template-columns: 1fr;
     }
+
+    .member-balance__grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 720px) {
@@ -314,6 +450,10 @@
     .member-order__meta {
       justify-items: start;
       text-align: left;
+    }
+
+    .member-cardface__numbers {
+      grid-template-columns: 1fr;
     }
   }
 </style>
@@ -336,20 +476,42 @@
           <span class="member-pill member-pill--muted">{{ membership.member_email }}</span>
         </div>
         <div class="member-balance">
-          <span>Points wallet</span>
-          <strong>{{ membership.points_display }}</strong>
-          <p>Preview balance based on current order history and ready to connect to a real MCQ loyalty ledger.</p>
-          <div class="member-progress">
-            <div class="member-progress__track" aria-hidden="true">
-              <div class="member-progress__bar" style="width: {{ membership.progress_percent }}%;"></div>
+          <div class="member-balance__grid">
+            <div>
+              <span>Points wallet</span>
+              <strong>{{ membership.points_display }}</strong>
+              <p>Live loyalty preview based on current order history and ready to connect to a real MCQ membership ledger.</p>
+              <div class="member-progress">
+                <div class="member-progress__track" aria-hidden="true">
+                  <div class="member-progress__bar" style="width: {{ membership.progress_percent }}%;"></div>
+                </div>
+                <div class="member-progress__copy">
+                  <span>{{ membership.current_tier.name }}</span>
+                  {% if membership.next_tier %}
+                    <span>{{ membership.points_to_next }} points to {{ membership.next_tier.name }}</span>
+                  {% else %}
+                    <span>Top tier unlocked</span>
+                  {% endif %}
+                </div>
+              </div>
             </div>
-            <div class="member-progress__copy">
-              <span>{{ membership.current_tier.name }}</span>
-              {% if membership.next_tier %}
-                <span>{{ membership.points_to_next }} points to {{ membership.next_tier.name }}</span>
-              {% else %}
-                <span>Top tier unlocked</span>
-              {% endif %}
+            <div class="member-wallet">
+              <span>Redeem rule</span>
+              <strong>{{ membership.voucher_rule_display }}</strong>
+              <p>{{ membership.available_vouchers }} voucher{% if membership.available_vouchers != 1 %}s{% endif %} ready · {{ membership.voucher_value_display }} redeemable value.</p>
+              <div class="member-progress">
+                <div class="member-progress__track" aria-hidden="true">
+                  <div class="member-progress__bar" style="width: {{ membership.voucher_progress_percent }}%;"></div>
+                </div>
+                <div class="member-progress__copy">
+                  <span>Voucher ladder</span>
+                  {% if membership.available_vouchers > 0 and membership.voucher_progress_percent == 100 %}
+                    <span>Voucher ready to redeem now</span>
+                  {% else %}
+                    <span>{{ membership.points_to_next_voucher }} points to next {{ membership.voucher_unit_display }} voucher</span>
+                  {% endif %}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -362,17 +524,34 @@
 
       <aside class="member-visual">
         <div class="member-visual__stack">
-          <div>
-            <p class="eyebrow">Member scene</p>
-            <h2>Membership now feels like part of the restaurant brand, not a detached account utility.</h2>
-            <p>
-              Tiers, points, and perks live beside the ordering flow so repeat customers can move from profile to saved meals to community sharing.
-            </p>
-          </div>
+          <article class="member-cardface">
+            <div class="member-cardface__top">
+              <div>
+                <span class="member-cardface__eyebrow">MCQ Digital Member Card</span>
+                <strong class="member-cardface__name">{{ membership.member_name }}</strong>
+                <span class="member-cardface__meta">{{ membership.member_code }}</span>
+              </div>
+              <span class="member-cardface__tier">{{ membership.current_tier.name }}</span>
+            </div>
+            <div class="member-cardface__numbers">
+              <div class="member-cardface__points">
+                <span>Points</span>
+                <strong>{{ membership.points_display }}</strong>
+              </div>
+              <div class="member-cardface__voucher">
+                <span>Redeemable voucher</span>
+                <strong>{{ membership.voucher_value_display }}</strong>
+              </div>
+            </div>
+            <div class="member-cardface__barcode">
+              <img src="{{ url_for('user.membership_barcode') }}" alt="Membership barcode for {{ membership.member_code }}" />
+            </div>
+            <div class="member-cardface__scan-note">Scan at counter · {{ membership.voucher_rule_display }} · Distinction unlocks at 1000 points</div>
+          </article>
           <div class="member-visual__card">
-            <span>Next build connector</span>
-            <strong>Points, rewards, and vouchers</strong>
-            <p>{{ membership.preview_note }}</p>
+            <span>Voucher ladder</span>
+            <strong>Distinction at 1000 points</strong>
+            <p>Once a member reaches 1000 points, the profile surfaces a $10 redeemable voucher wallet while keeping the card scan-ready.</p>
           </div>
           <div class="member-visual__card">
             <span>Community access</span>

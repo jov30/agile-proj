@@ -41,7 +41,7 @@ class TestSupportChat(unittest.TestCase):
                 "role": "customer",
             }
 
-    def _seed_member_order(self) -> None:
+    def _seed_member_order(self, *, total_cents: int = 3350, quantity: int = 2) -> None:
         with self.app.app_context():
             order = Order(
                 order_number="MCQ-TEST-1001",
@@ -61,18 +61,18 @@ class TestSupportChat(unittest.TestCase):
                 order_status="Ready for Pickup",
                 kitchen_notes="",
                 special_instructions="",
-                subtotal_cents=3200,
+                subtotal_cents=total_cents - 150,
                 service_fee_cents=150,
-                total_cents=3350,
+                total_cents=total_cents,
             )
             order.line_items.append(
                 OrderLineItem(
                     item_id="pho-noodle-soup__raw-beef-pho",
                     item_name="Raw Beef Pho",
                     category_title="Pho Noodle Soup",
-                    unit_price_cents=1600,
-                    quantity=2,
-                    line_total_cents=3200,
+                    unit_price_cents=(total_cents - 150) // max(1, quantity),
+                    quantity=quantity,
+                    line_total_cents=total_cents - 150,
                 )
             )
             db.session.add(order)
@@ -103,7 +103,7 @@ class TestSupportChat(unittest.TestCase):
 
     def test_profile_page_renders_membership_dashboard(self):
         self._login_customer()
-        self._seed_member_order()
+        self._seed_member_order(total_cents=100000, quantity=5)
 
         response = self.client.get("/profile")
         self.assertEqual(response.status_code, 200)
@@ -112,6 +112,14 @@ class TestSupportChat(unittest.TestCase):
         self.assertIn("Lantern Member", html)
         self.assertIn("Points wallet", html)
         self.assertIn("MCQ Community", html)
+        self.assertIn("1000 points = $10 voucher", html)
+        self.assertIn("/membership/barcode.svg", html)
+        self.assertIn("Distinction Member", html)
+
+        barcode = self.client.get("/membership/barcode.svg")
+        self.assertEqual(barcode.status_code, 200)
+        self.assertEqual(barcode.mimetype, "image/svg+xml")
+        self.assertIn("MCQ-", barcode.get_data(as_text=True))
 
     def test_saved_meals_and_community_pages_render_new_scaffolds(self):
         self._login_customer()

@@ -6,7 +6,7 @@ from collections import Counter
 from pathlib import Path
 
 import requests
-from flask import Blueprint, current_app, jsonify, render_template, request, session
+from flask import Blueprint, Response, current_app, jsonify, render_template, request, session
 
 from menu_catalog import format_aud, load_enriched_menu
 from models import Order
@@ -21,10 +21,58 @@ _ROOT_DIR = Path(__file__).resolve().parent.parent
 
 _MEMBERSHIP_TIERS = (
     {"name": "Lantern Starter", "min_points": 0, "accent": "amber"},
-    {"name": "Market Regular", "min_points": 120, "accent": "teal"},
-    {"name": "Golden Chopsticks", "min_points": 260, "accent": "gold"},
-    {"name": "Chef's Circle", "min_points": 480, "accent": "plum"},
+    {"name": "Market Regular", "min_points": 250, "accent": "teal"},
+    {"name": "Golden Chopsticks", "min_points": 600, "accent": "gold"},
+    {"name": "Distinction Member", "min_points": 1000, "accent": "plum"},
 )
+_VOUCHER_REDEEM_POINTS = 1000
+_VOUCHER_REDEEM_VALUE_CENTS = 1000
+_CODE39_MAP = {
+    "0": "nnnwwnwnn",
+    "1": "wnnwnnnnw",
+    "2": "nnwwnnnnw",
+    "3": "wnwwnnnnn",
+    "4": "nnnwwnnnw",
+    "5": "wnnwwnnnn",
+    "6": "nnwwwnnnn",
+    "7": "nnnwnnwnw",
+    "8": "wnnwnnwnn",
+    "9": "nnwwnnwnn",
+    "A": "wnnnnwnnw",
+    "B": "nnwnnwnnw",
+    "C": "wnwnnwnnn",
+    "D": "nnnnwwnnw",
+    "E": "wnnnwwnnn",
+    "F": "nnwnwwnnn",
+    "G": "nnnnnwwnw",
+    "H": "wnnnnwwnn",
+    "I": "nnwnnwwnn",
+    "J": "nnnnwwwnn",
+    "K": "wnnnnnnww",
+    "L": "nnwnnnnww",
+    "M": "wnwnnnnwn",
+    "N": "nnnnwnnww",
+    "O": "wnnnwnnwn",
+    "P": "nnwnwnnwn",
+    "Q": "nnnnnnwww",
+    "R": "wnnnnnwwn",
+    "S": "nnwnnnwwn",
+    "T": "nnnnwnwwn",
+    "U": "wwnnnnnnw",
+    "V": "nwwnnnnnw",
+    "W": "wwwnnnnnn",
+    "X": "nwnnwnnnw",
+    "Y": "wwnnwnnnn",
+    "Z": "nwwnwnnnn",
+    "-": "nwnnnnwnw",
+    ".": "wwnnnnwnn",
+    " ": "nwwnnnwnn",
+    "$": "nwnwnwnnn",
+    "/": "nwnwnnnwn",
+    "+": "nwnnnwnwn",
+    "%": "nnnwnwnwn",
+    "*": "nwnnwnwnn",
+}
 
 
 def _support_history() -> list[dict[str, str]]:
@@ -88,6 +136,48 @@ def _member_code(seed_text: str) -> str:
     return f"MCQ-{digest[:4]}-{digest[4:]}"
 
 
+def _code39_payload(value: str) -> str:
+    cleaned = "".join(char for char in value.upper() if char in _CODE39_MAP and char != "*")
+    return f"*{cleaned or 'MCQ-MEMBER'}*"
+
+
+def _membership_barcode_svg(value: str) -> str:
+    payload = _code39_payload(value)
+    narrow = 3
+    wide = 7
+    quiet = 24
+    bar_height = 88
+    text_y = bar_height + 24
+    x = quiet
+    bars: list[str] = []
+
+    for index, char in enumerate(payload):
+        pattern = _CODE39_MAP[char]
+        is_bar = True
+        for token in pattern:
+            width = wide if token == "w" else narrow
+            if is_bar:
+                bars.append(
+                    f'<rect x="{x}" y="10" width="{width}" height="{bar_height}" rx="1" fill="#1a120e" />'
+                )
+            x += width
+            is_bar = not is_bar
+        if index < len(payload) - 1:
+            x += narrow
+
+    total_width = x + quiet
+    label = value.upper()
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{total_width}" height="{bar_height + 34}" '
+        f'viewBox="0 0 {total_width} {bar_height + 34}" role="img" aria-label="Membership barcode for {label}">'
+        f'<rect width="{total_width}" height="{bar_height + 34}" rx="16" fill="#fffaf5"/>'
+        + "".join(bars)
+        + f'<text x="{total_width / 2}" y="{text_y}" text-anchor="middle" '
+        f'font-family="Menlo, Monaco, monospace" font-size="16" letter-spacing="3" fill="#1a120e">{label}</text>'
+        + "</svg>"
+    )
+
+
 def _membership_summary(orders: list[Order]) -> dict:
     user = current_user()
     seed_source = user["email"] if user else "guest-member-preview"
@@ -107,6 +197,12 @@ def _membership_summary(orders: list[Order]) -> dict:
     progress_span = max(1, progress_target - progress_base)
     progress_value = min(progress_span, max(0, points_balance - progress_base))
     progress_percent = 100 if not next_tier else round((progress_value / progress_span) * 100)
+    available_vouchers = points_balance // _VOUCHER_REDEEM_POINTS
+    voucher_redeem_value_cents = available_vouchers * _VOUCHER_REDEEM_VALUE_CENTS
+    voucher_cycle_points = points_balance % _VOUCHER_REDEEM_POINTS
+    voucher_progress_percent = round((voucher_cycle_points / _VOUCHER_REDEEM_POINTS) * 100) if points_balance else 0
+    if available_vouchers and voucher_cycle_points == 0:
+        voucher_progress_percent = 100
     return {
         "member_name": user["name"] if user else "Guest preview member",
         "member_email": user["email"] if user else "Join to save your points ledger",
@@ -121,12 +217,22 @@ def _membership_summary(orders: list[Order]) -> dict:
         "next_tier": next_tier,
         "progress_percent": progress_percent,
         "points_to_next": 0 if not next_tier else max(0, next_tier["min_points"] - points_balance),
+        "voucher_rule_points": _VOUCHER_REDEEM_POINTS,
+        "voucher_rule_display": f"{_VOUCHER_REDEEM_POINTS} points = {format_aud(_VOUCHER_REDEEM_VALUE_CENTS)} voucher",
+        "available_vouchers": available_vouchers,
+        "voucher_value_display": format_aud(voucher_redeem_value_cents),
+        "voucher_unit_display": format_aud(_VOUCHER_REDEEM_VALUE_CENTS),
+        "points_to_next_voucher": (
+            _VOUCHER_REDEEM_POINTS if available_vouchers and voucher_cycle_points == 0
+            else max(0, _VOUCHER_REDEEM_POINTS - voucher_cycle_points)
+        ),
+        "voucher_progress_percent": voucher_progress_percent,
         "preview_note": (
             "This loyalty card is a polished UI scaffold. A future membership service can plug a real points ledger into the same layout."
         ),
         "benefits": [
             {"title": "Member-only point wallet", "text": "Track dine-and-pickup spend in one place and convert every dollar into rewards-ready points."},
-            {"title": "Priority reorder tray", "text": "Bring favourite meals and past combos back into the cart faster for repeat visits."},
+            {"title": "Voucher redemption ladder", "text": "Every 1000 points unlocks a $10 redeemable voucher inside the digital membership wallet."},
             {"title": "Community identity", "text": "Use the same member profile to share meal boards, street-food stories, and seasonal picks with other customers."},
         ],
     }
@@ -401,6 +507,16 @@ def profile() -> str:
         membership=membership,
         recent_orders=recent_orders,
         is_member=bool(current_user()),
+    )
+
+
+@user_bp.get("/membership/barcode.svg")
+def membership_barcode() -> Response:
+    membership = _membership_summary(_active_customer_orders())
+    return Response(
+        _membership_barcode_svg(membership["member_code"]),
+        mimetype="image/svg+xml",
+        headers={"Cache-Control": "no-store"},
     )
 
 
