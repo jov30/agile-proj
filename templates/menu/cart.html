@@ -5,22 +5,143 @@
 {% block head %}
 <style>
   .cart-page {
+    display: grid;
+    gap: 1.4rem;
     width: min(var(--page-width), 100%);
     margin: 0 auto;
+  }
+
+  .cart-hero,
+  .cart-shell {
     padding: clamp(1.2rem, 3vw, 2rem);
   }
-  .cart-page__header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+
+  .cart-hero__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+    gap: 1.35rem;
   }
+
+  .cart-page__header {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+
   .cart-page__header h1 {
     margin: 0.2rem 0 0;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: clamp(1.8rem, 3vw, 2.35rem);
+    font-size: clamp(2rem, 3vw, 2.9rem);
+  }
+
+  .cart-page__header p {
+    margin-bottom: 0.25rem;
+  }
+
+  .cart-page__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .cart-hero__visuals {
+    display: grid;
+    grid-template-columns: minmax(0, 1.16fr) minmax(180px, 0.84fr);
+    gap: 0.85rem;
+  }
+
+  .cart-hero__photo,
+  .cart-hero__note {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .cart-hero__photo {
+    min-height: 290px;
+    padding: 1.2rem;
+    display: grid;
+    align-items: end;
+    color: var(--text-inverse);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .cart-hero__photo::before,
+  .cart-hero__note::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .cart-hero__photo::before {
+    background:
+      linear-gradient(180deg, rgba(30, 18, 15, 0.06), rgba(30, 18, 15, 0.74)),
+      radial-gradient(circle at 18% 18%, rgba(255, 216, 115, 0.26), transparent 14rem);
+  }
+
+  .cart-hero__photo > *,
+  .cart-hero__note > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cart-hero__photo--market {
+    background-image:
+      linear-gradient(180deg, rgba(36, 24, 20, 0.18), rgba(36, 24, 20, 0.18)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-market-night.jpg') }}");
+  }
+
+  .cart-hero__stack {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .cart-hero__photo--skyline {
+    min-height: 136px;
+    background-image:
+      linear-gradient(180deg, rgba(36, 24, 20, 0.14), rgba(36, 24, 20, 0.5)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-neon-chill.jpg') }}");
+  }
+
+  .cart-hero__photo span,
+  .cart-hero__note span {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.96rem;
+    letter-spacing: 0.14em;
+  }
+
+  .cart-hero__photo strong,
+  .cart-hero__note strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.15rem, 2vw, 1.7rem);
+  }
+
+  .cart-hero__photo p,
+  .cart-hero__note p {
+    margin: 0.45rem 0 0;
+    line-height: 1.55;
+  }
+
+  .cart-hero__note {
+    padding: 1rem 1.05rem;
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+  }
+
+  .cart-hero__note::before {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 24%),
+      radial-gradient(circle at 88% 10%, rgba(255, 216, 115, 0.12), transparent 12rem);
   }
 
   .cart-lines {
@@ -112,6 +233,18 @@
     font-size: 1.35rem;
     font-weight: 800;
   }
+  .cart-summary__stack {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .cart-summary__meta {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--text-muted);
+  }
+  .cart-summary__meta strong {
+    color: var(--text-main);
+  }
   .cart-summary__actions {
     display: flex;
     flex-wrap: wrap;
@@ -130,7 +263,17 @@
     font-weight: 700;
   }
 
+  @media (max-width: 1040px) {
+    .cart-hero__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
   @media (max-width: 640px) {
+    .cart-hero__visuals {
+      grid-template-columns: 1fr;
+    }
+
     .cart-line {
       grid-template-columns: 1fr;
     }
@@ -142,25 +285,68 @@
 {% endblock %}
 
 {% block content %}
-<div class="cart-page section-panel">
-  <div class="cart-page__header">
-    <div>
-      <p class="eyebrow">Your order</p>
-      <h1>Cart</h1>
+<div class="cart-page">
+  <section class="cart-hero section-panel">
+    <div class="cart-hero__grid">
+      <div class="cart-page__header">
+        <div>
+          <p class="eyebrow">
+            Your order · {% if preferred_fulfillment == 'scheduled' %}Scheduled pickup path{% else %}Instant queue path{% endif %}
+          </p>
+          <h1>Review the basket before you move into pickup checkout.</h1>
+          <p class="section-copy">
+            Keep the flow simple: add dishes, confirm the fulfillment mode, then continue into checkout with the same
+            items, totals, and pickup path already carried forward.
+          </p>
+        </div>
+        <div class="pill-row">
+          <span class="pill"><strong>{% if preferred_fulfillment == 'scheduled' %}Scheduled pickup{% else %}Instant queue{% endif %}</strong> remains selected until you switch it at checkout.</span>
+          <span class="pill"><strong>Live cart totals</strong> update immediately as quantities change.</span>
+        </div>
+        <div class="cart-page__actions">
+          <a class="button button--primary" href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">Browse menu</a>
+          <a class="button button--secondary" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">Jump to checkout</a>
+        </div>
+      </div>
+      <div class="cart-hero__visuals">
+        <article class="cart-hero__photo cart-hero__photo--market">
+          <div>
+            <span>Order moodboard</span>
+            <strong>Street-food energy, ready for a fast pickup handoff.</strong>
+            <p>Cart, checkout, receipt, and tracking now follow the same branded path instead of feeling like disconnected forms.</p>
+          </div>
+        </article>
+        <div class="cart-hero__stack">
+          <article class="cart-hero__photo cart-hero__photo--skyline">
+            <div>
+              <span>Pickup context</span>
+              <strong>Saigon-style city flow</strong>
+            </div>
+          </article>
+          <article class="cart-hero__note">
+            <div>
+              <span>Next step</span>
+              <strong>{% if preferred_fulfillment == 'scheduled' %}Reserve the right pickup slot{% else %}Lock in a queue number at the counter{% endif %}</strong>
+              <p>{% if preferred_fulfillment == 'scheduled' %}Checkout will show the next available slot and enforce capacity rules before confirmation.{% else %}Checkout will quote the live wait time and assign the next queue number when payment succeeds.{% endif %}</p>
+            </div>
+          </article>
+        </div>
+      </div>
     </div>
-    <a class="button button--secondary" href="{{ url_for('public.menu') }}">Browse menu</a>
-  </div>
+  </section>
 
-  <div id="cart-root" class="cart-lines" aria-live="polite"></div>
+  <section class="cart-shell section-panel">
+    <div id="cart-root" class="cart-lines" aria-live="polite"></div>
 
-  <div id="cart-summary" class="cart-summary" hidden></div>
+    <div id="cart-summary" class="cart-summary" hidden></div>
 
-  <div id="cart-empty" class="cart-empty" hidden>
-    <p>Your cart is empty.</p>
-    <p><a href="{{ url_for('public.menu') }}">Explore the menu</a> to add dishes.</p>
-  </div>
+    <div id="cart-empty" class="cart-empty" hidden>
+      <p>Your cart is empty.</p>
+      <p><a href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">Explore the menu</a> to add dishes.</p>
+    </div>
 
-  <p id="cart-error" class="menu-error" style="margin-top: 1rem; display: none" role="alert"></p>
+    <p id="cart-error" class="menu-error" style="margin-top: 1rem; display: none" role="alert"></p>
+  </section>
 </div>
 {% endblock %}
 
@@ -168,10 +354,19 @@
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script>
   (() => {
+    const preferredFulfillment = {{ preferred_fulfillment | tojson }};
     const root = document.getElementById("cart-root");
     const summaryEl = document.getElementById("cart-summary");
     const emptyEl = document.getElementById("cart-empty");
     const errEl = document.getElementById("cart-error");
+
+    function modeLabel(mode) {
+      return mode === "scheduled" ? "Scheduled Pickup" : "Instant Queue";
+    }
+
+    function checkoutLabel(mode) {
+      return mode === "scheduled" ? "Continue to Scheduled Checkout" : "Continue to Instant Checkout";
+    }
 
     function showError(msg) {
       errEl.style.display = msg ? "block" : "none";
@@ -217,13 +412,36 @@
       }
       root.appendChild(frag);
 
+      const mode = data.preferred_fulfillment || preferredFulfillment;
+      const alternateMode = data.alternate_fulfillment || (mode === "scheduled" ? "instant" : "scheduled");
       summaryEl.innerHTML = `
-        <p class="cart-summary__total">Total: ${data.total_display}</p>
+        <div class="cart-summary__stack">
+          <p class="cart-summary__total">${data.item_count} item(s) · ${data.total_display}</p>
+          <div class="cart-summary__meta">
+            <span><strong>Subtotal:</strong> ${data.total_display}</span>
+            <span><strong>Pickup fee at checkout:</strong> ${data.service_fee_display}</span>
+            <span><strong>Estimated checkout total:</strong> ${data.checkout_total_display}</span>
+            <span><strong>Current path:</strong> ${modeLabel(mode)}. You can still switch before placing the order.</span>
+          </div>
+        </div>
         <div class="cart-summary__actions">
-          <a class="button button--primary" href="/checkout">Checkout</a>
-          <a class="button button--secondary" href="/menu">Add more items</a>
+          <a class="button button--primary" href="/checkout?fulfillment=${encodeURIComponent(mode)}">${checkoutLabel(mode)}</a>
+          <a class="button button--secondary" href="/checkout?fulfillment=${encodeURIComponent(alternateMode)}">Switch to ${modeLabel(alternateMode)}</a>
+          <a class="button button--secondary" href="/menu?fulfillment=${encodeURIComponent(mode)}">Add more items</a>
+          <button type="button" class="button button--secondary button--inline" id="clear-cart-button">Clear cart</button>
         </div>
       `;
+
+      const clearButton = document.getElementById("clear-cart-button");
+      clearButton?.addEventListener("click", async () => {
+        try {
+          await window.McqCart.clear();
+          const fresh = await window.McqCart.get();
+          render(fresh);
+        } catch (e) {
+          showError(e.message || "Could not clear cart.");
+        }
+      });
 
       root.querySelectorAll(".cart-line").forEach((lineEl) => {
         const itemId = lineEl.dataset.itemId;
@@ -278,4 +496,3 @@
   })();
 </script>
 {% endblock %}
-

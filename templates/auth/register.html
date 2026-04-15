@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .auth-shell {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .auth-panel {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .auth-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.96fr);
+    gap: 1.2rem;
+  }
+
+  .auth-card,
+  .auth-side {
+    position: relative;
+    overflow: hidden;
+    padding: 1.2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .auth-card::before,
+  .auth-side::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 24%),
+      radial-gradient(circle at 88% 10%, rgba(255, 216, 115, 0.12), transparent 12rem);
+  }
+
+  .auth-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .auth-copy h1 {
+    margin: 0.2rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(2rem, 3vw, 3rem);
+  }
+
+  .auth-copy p {
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .auth-form {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.42rem;
+  }
+
+  .field label {
+    font-weight: 700;
+  }
+
+  .field input {
+    width: 100%;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    border-radius: 18px;
+    padding: 0.92rem 0.98rem;
+    font: inherit;
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .field input:focus {
+    outline: 0;
+    border-color: rgba(255, 106, 19, 0.38);
+    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.12);
+    background: #fff;
+  }
+
+  .auth-alert,
+  .auth-side__card {
+    padding: 1rem 1.05rem;
+    border-radius: 22px;
+  }
+
+  .auth-alert {
+    border: 1px solid rgba(179, 48, 64, 0.2);
+    background: rgba(179, 48, 64, 0.08);
+    color: #7f2040;
+  }
+
+  .auth-alert ul {
+    margin: 0;
+    padding-left: 1.15rem;
+    line-height: 1.65;
+  }
+
+  .auth-side {
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(23, 17, 15, 0.68), rgba(19, 14, 16, 0.9)),
+      url("{{ url_for('static', filename='images/inspiration/neon-lantern-street.jpg') }}"),
+      rgba(32, 23, 19, 0.92);
+    background-size: cover;
+    background-position: center;
+    border-color: rgba(255, 216, 115, 0.12);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .auth-side::before {
+    background:
+      radial-gradient(circle at 82% 18%, rgba(255, 216, 115, 0.18), transparent 14rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 24%);
+  }
+
+  .auth-side__card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .auth-side__scene {
+    min-height: 250px;
+    padding: 1.05rem;
+    border-radius: 24px;
+    display: grid;
+    align-items: end;
+    background:
+      linear-gradient(180deg, rgba(22, 16, 14, 0.1), rgba(22, 16, 14, 0.8)),
+      url("{{ url_for('static', filename='images/inspiration/neon-lantern-street.jpg') }}");
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .auth-side__scene span {
+    display: block;
+    margin-bottom: 0.24rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    color: rgba(255, 216, 115, 0.9);
+  }
+
+  .auth-side__scene strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.25rem, 2vw, 1.8rem);
+  }
+
+  .auth-side__scene p {
+    margin: 0.45rem 0 0;
+    color: rgba(255, 247, 239, 0.84);
+    line-height: 1.55;
+  }
+
+  .auth-side__card strong {
+    display: block;
+    margin-bottom: 0.22rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .auth-side__card p {
+    margin: 0;
+    color: rgba(255, 247, 239, 0.82);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 980px) {
+    .auth-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+  <section class="auth-panel section-panel">
+    <div class="auth-grid">
+      <article class="auth-card">
+        <div class="auth-content">
+          <div class="auth-copy">
+            <p class="eyebrow">{{ eyebrow }}</p>
+            <h1>{{ title }}</h1>
+            <p>{{ intro }}</p>
+          </div>
+          {% if errors %}
+            <div class="auth-alert" role="alert">
+              <ul>
+                {% for error in errors %}
+                  <li>{{ error }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          <form method="post" class="auth-form" novalidate>
+            <input type="hidden" name="next" value="{{ next_url }}" />
+            <div class="field">
+              <label for="name">Full name</label>
+              <input id="name" name="name" type="text" value="{{ form_data.name }}" autocomplete="name" required />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" value="{{ form_data.email }}" autocomplete="email" required />
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input id="password" name="password" type="password" value="{{ form_data.password }}" autocomplete="new-password" required />
+            </div>
+            <button type="submit" class="button button--primary">{{ submit_label }}</button>
+            <a href="{{ alternate_href }}" class="button button--secondary">{{ alternate_label }}</a>
+          </form>
+        </div>
+      </article>
+
+      <aside class="auth-side">
+        <div class="auth-content">
+          <article class="auth-side__scene">
+            <div>
+              <span>Night pickup city</span>
+              <strong>Registration now opens inside a vivid street scene instead of a plain dark column.</strong>
+              <p>The page feels closer to the restaurant brand and the instant or scheduled pickup journey customers are about to use.</p>
+            </div>
+          </article>
+          <div>
+            <p class="eyebrow">What this unlocks</p>
+            <h2>Checkout and tracking move faster.</h2>
+            <p>Registration creates a customer session so pickup alerts, receipt access, and order tracking are visible across the site.</p>
+          </div>
+          <div class="auth-side__card">
+            <strong>Customer session</strong>
+            <p>Stores your name and email for checkout, order detail, receipt lookup, and ready notifications.</p>
+          </div>
+          <div class="auth-side__card">
+            <strong>Admin stays separate</strong>
+            <p>Queue operations remain protected by the admin login and do not use the customer registration flow.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+{% endblock %}

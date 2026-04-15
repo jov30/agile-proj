@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}{{ order.order_number }} | MCQ Order Detail{% endblock %}
+
+{% block head %}
+<style>
+  .order-detail {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .order-detail__hero,
+  .order-detail__layout {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .order-detail__hero-grid,
+  .order-detail__layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.03fr) minmax(320px, 0.97fr);
+    gap: 1.35rem;
+  }
+
+  .order-detail__hero-aside {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+
+  .order-detail__ticket,
+  .order-detail__card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .order-detail__ticket {
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.96), rgba(23, 19, 21, 0.94)),
+      rgba(32, 23, 19, 0.92);
+    border-color: rgba(255, 216, 115, 0.12);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .order-detail__card {
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .order-detail__card h2,
+  .order-detail__ticket h2 {
+    margin: 0.25rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.35rem, 2vw, 1.95rem);
+  }
+
+  .order-detail__ticket p,
+  .order-detail__card p {
+    line-height: 1.6;
+  }
+
+  .order-detail__ticket-grid,
+  .order-detail__meta,
+  .order-detail__timeline,
+  .order-detail__attempts,
+  .order-detail__lines {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .order-detail__ticket-item,
+  .order-detail__meta-item,
+  .order-detail__timeline-item,
+  .order-detail__attempt-item {
+    padding: 1rem;
+    border-radius: 22px;
+  }
+
+  .order-detail__ticket-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .order-detail__meta-item,
+  .order-detail__timeline-item,
+  .order-detail__attempt-item {
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .order-detail__ticket-item span,
+  .order-detail__meta-item span,
+  .order-detail__timeline-item span,
+  .order-detail__attempt-item span {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.94rem;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+  }
+
+  .order-detail__ticket-item strong,
+  .order-detail__meta-item strong,
+  .order-detail__timeline-item strong,
+  .order-detail__attempt-item strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .order-detail__line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.4rem 1rem;
+    padding: 0.92rem 0;
+    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .order-detail__line:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .order-detail__line-title {
+    margin: 0;
+    font-weight: 800;
+  }
+
+  .order-detail__line-meta {
+    margin: 0.25rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.55;
+    font-size: 0.92rem;
+  }
+
+  .order-detail__line-price {
+    font-weight: 800;
+    color: var(--brand-red);
+  }
+
+  .order-detail__totals {
+    display: grid;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+  }
+
+  .order-detail__total {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .order-detail__total strong {
+    color: var(--text-main);
+  }
+
+  .order-detail__timeline-item.is-active {
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
+    border-color: transparent;
+  }
+
+  .order-detail__timeline-item.is-active span,
+  .order-detail__timeline-item.is-active p {
+    color: rgba(255, 247, 239, 0.9);
+  }
+
+  .order-detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .order-detail__media {
+    position: relative;
+    overflow: hidden;
+    min-height: 224px;
+    padding: 1.15rem;
+    border-radius: 28px;
+    display: grid;
+    align-items: end;
+    color: var(--text-inverse);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+    background:
+      linear-gradient(180deg, rgba(35, 24, 20, 0.14), rgba(23, 19, 21, 0.78)),
+      url("{{ url_for('static', filename='images/inspiration/night-street-performance.jpg') }}");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .order-detail__media::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 42%;
+    height: 48%;
+    opacity: 0.25;
+    background:
+      linear-gradient(180deg, rgba(250, 244, 236, 0), rgba(250, 244, 236, 0)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-vibrant-illustration.png') }}");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: bottom right;
+    pointer-events: none;
+  }
+
+  .order-detail__media > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .order-detail__media span {
+    display: block;
+    margin-bottom: 0.28rem;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    color: rgba(255, 216, 115, 0.9);
+  }
+
+  .order-detail__media strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+  }
+
+  .order-detail__media p {
+    margin: 0.45rem 0 0;
+    line-height: 1.58;
+    color: rgba(255, 247, 239, 0.84);
+  }
+
+  .order-detail__live-banner {
+    padding: 0.95rem 1rem;
+    border-radius: 22px;
+    border: 1px solid rgba(0, 111, 116, 0.18);
+    background: rgba(0, 111, 116, 0.08);
+    color: var(--text-main);
+  }
+
+  .order-detail__live-banner[hidden] {
+    display: none;
+  }
+
+  .order-detail__live-banner.is-delayed {
+    border-color: rgba(179, 48, 64, 0.22);
+    background: rgba(179, 48, 64, 0.08);
+  }
+
+  .inline-form {
+    display: inline;
+  }
+
+  .button--inline {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .order-detail__qr {
+    width: 168px;
+    height: 168px;
+    display: block;
+    margin: 0 auto;
+    padding: 0.4rem;
+    border-radius: 18px;
+    background: #fff;
+  }
+
+  @media (max-width: 1040px) {
+    .order-detail__hero-grid,
+    .order-detail__layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div
+  class="order-detail"
+  data-order-detail-root
+  data-order-api="{{ url_for('orders.api_order_detail', order_number=order.order_number) }}"
+  data-order-status="{{ order.order_status }}"
+  data-order-updated-at="{{ order.updated_at_iso }}"
+  data-order-notification-count="{{ order.notification_count }}"
+  data-order-current-eta="{{ order.current_eta_time or '' }}"
+>
+  <div class="order-detail__live-banner {% if order.is_eta_delayed %}is-delayed{% endif %}" data-live-banner {% if not order.is_eta_delayed %}hidden{% endif %}>
+    {% if order.is_instant and order.is_eta_delayed %}
+      Live queue alert: updated ETA is {{ order.current_eta_time }}, around {{ order.eta_delay_minutes }} minutes later than the original quote.
+    {% endif %}
+  </div>
+  <section class="order-detail__hero section-panel">
+    <div class="order-detail__hero-grid">
+      <div>
+        <p class="eyebrow">Order detail</p>
+        <h1 class="section-title">{{ order.order_number }}</h1>
+        <p class="section-copy">
+          This view breaks down the full fulfillment record, payment attempt history, live status progression,
+          website notifications, and saved instructions for one confirmed order.
+        </p>
+        <div class="pill-row">
+          <span class="pill"><strong>{{ order.order_status }}</strong> current kitchen stage for this order.</span>
+          <span class="pill"><strong>{{ order.payment_reference }}</strong> stored payment reference attached to the order.</span>
+          <span class="pill"><strong>{{ order.fulfillment_label }}</strong> fulfillment mode recorded at checkout.</span>
+          <span class="pill"><strong>{{ order.total_display }}</strong> total paid including pickup fee.</span>
+          {% if order.is_instant %}
+            <span class="pill">
+              <strong>{% if order.is_eta_delayed %}{{ order.current_eta_time }}{% else %}{{ order.pickup_time }}{% endif %}</strong>
+              {% if order.is_eta_delayed %}live ETA after kitchen delay.{% else %}original ready target.{% endif %}
+            </span>
+          {% endif %}
+        </div>
+        <div class="order-detail__actions">
+          <a href="{{ url_for('orders.receipt', order=order.order_number) }}" class="button button--primary">Open receipt</a>
+          <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--secondary">Download PDF</a>
+          <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
+            <button type="submit" class="button button--secondary button--inline">Order again</button>
+          </form>
+        </div>
+      </div>
+      <div class="order-detail__hero-aside">
+        <aside class="order-detail__ticket">
+          <p class="eyebrow">{% if order.is_instant %}Queue verification{% else %}Pickup verification{% endif %}</p>
+          <h2>
+            {% if order.is_instant %}
+              {{ order.queue_display }} · {% if order.is_eta_delayed %}updated ETA {{ order.current_eta_time }}{% else %}ready around {{ order.pickup_time }}{% endif %}
+            {% else %}
+              {{ order.pickup_day }} at {{ order.pickup_time }}
+            {% endif %}
+          </h2>
+          <div class="order-detail__ticket-grid">
+            <div class="order-detail__ticket-item">
+              <span>Confirmation code</span>
+              <strong>{{ order.confirmation_code }}</strong>
+            </div>
+            <div class="order-detail__ticket-item">
+              <span>{% if order.is_instant %}Counter{% else %}Pickup contact{% endif %}</span>
+              <strong>{% if order.is_instant %}{{ order.counter_label }}{% else %}{{ order.customer_name }}{% endif %}</strong>
+            </div>
+            <div class="order-detail__ticket-item">
+              <span>QR verification</span>
+              <img class="order-detail__qr" src="{{ url_for('orders.receipt_qr', order_number=order.order_number) }}" alt="QR for {{ order.order_number }}" />
+              <p class="order-detail__line-meta">Scan to reopen this live order page on another device.</p>
+            </div>
+          </div>
+        </aside>
+        <article class="order-detail__media">
+          <div>
+            <span>Pickup story</span>
+            <strong>Order detail now keeps the same branded visual language as landing, cart, and checkout.</strong>
+            <p>Customers can verify the order, track live ETA movement, and still feel like they are inside the same restaurant experience instead of a plain tracking utility.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="order-detail__layout">
+    <div class="order-detail__card">
+      <p class="eyebrow">Items</p>
+      <h2>Order summary</h2>
+      <div class="order-detail__lines">
+        {% for line in order.lines %}
+          <div class="order-detail__line">
+            <div>
+              <p class="order-detail__line-title">{{ line.name }}</p>
+              <p class="order-detail__line-meta">{{ line.quantity }} x {{ line.unit_price_display }} · {{ line.category }}</p>
+            </div>
+            <div class="order-detail__line-price">{{ line.line_total_display }}</div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="order-detail__totals">
+        <div class="order-detail__total">
+          <span>Food subtotal</span>
+          <span>{{ order.subtotal_display }}</span>
+        </div>
+        <div class="order-detail__total">
+          <span>Pickup service fee</span>
+          <span>{{ order.service_fee_display }}</span>
+        </div>
+        <div class="order-detail__total">
+          <strong>Total paid</strong>
+          <strong>{{ order.total_display }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <aside class="order-detail__meta">
+      <div class="order-detail__card">
+        <p class="eyebrow">Customer record</p>
+        <h2>Saved order metadata</h2>
+        <div class="order-detail__meta">
+          <div class="order-detail__meta-item">
+            <span>Placed</span>
+            <strong>{{ order.created_at }}</strong>
+            <p>Last updated {{ order.updated_at }}</p>
+          </div>
+          <div class="order-detail__meta-item">
+            <span>Contact</span>
+            <strong>{{ order.customer_name }}</strong>
+            <p>{{ order.customer_email }} · {{ order.customer_phone }}</p>
+          </div>
+          <div class="order-detail__meta-item">
+            <span>{% if order.is_instant %}Queue notes{% else %}Kitchen notes{% endif %}</span>
+            <strong>{{ order.kitchen_notes }}</strong>
+            <p>{{ order.special_instructions or "No extra customer instructions were saved." }}</p>
+          </div>
+          {% if order.is_instant %}
+            <div class="order-detail__meta-item">
+              <span>Live ETA monitor</span>
+              <strong>{% if order.is_eta_delayed %}{{ order.current_eta_time }}{% else %}{{ order.pickup_time }}{% endif %}</strong>
+              <p>
+                {{ order.eta_status_message }}
+                {% if order.queue_backlog_count %}
+                  {{ order.queue_backlog_count }} queue ticket(s) are still ahead of this order.
+                {% endif %}
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="order-detail__card">
+        <p class="eyebrow">Status progression</p>
+        <h2>Order timeline</h2>
+        <div class="order-detail__timeline">
+          {% for step in order.status_timeline %}
+            <div class="order-detail__timeline-item {% if step.is_active %}is-active{% endif %}">
+              <span>{{ loop.index }} · {{ step.label }}</span>
+              <strong>{{ "Current stage" if step.is_current else "Progress stage" }}</strong>
+              <p>{{ step.description }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="order-detail__card">
+        <p class="eyebrow">Payment attempts</p>
+        <h2>Transaction log</h2>
+        <div class="order-detail__attempts">
+          {% for attempt in order.payment_attempts %}
+            <div class="order-detail__attempt-item">
+              <span>{{ attempt.status }} · attempt {{ attempt.attempt_number }}</span>
+              <strong>{{ attempt.reference }}</strong>
+              <p>
+                {{ attempt.payment_method }} · {{ attempt.amount_display }}
+                {% if attempt.card_last4 %}
+                  · ending in {{ attempt.card_last4 }}
+                {% endif %}
+                {% if attempt.failure_message %}
+                  · {{ attempt.failure_message }}
+                {% endif %}
+              </p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="order-detail__card">
+        <p class="eyebrow">Notification timeline</p>
+        <h2>Website, email, and SMS updates</h2>
+        <div class="order-detail__attempts">
+          {% if not order.notifications %}
+            <div class="order-detail__attempt-item">
+              <span>No notification sent yet</span>
+              <strong>Order is not in ready state</strong>
+              <p>Once status changes to Ready for Pickup, the site alert strip plus mock email and SMS logs appear here.</p>
+            </div>
+          {% else %}
+            {% for note in order.notifications %}
+              <div class="order-detail__attempt-item">
+                <span>{{ note.delivery_status }} · {{ note.channel_label }} · {{ note.created_at }}</span>
+                <strong>{{ note.event_label }}</strong>
+                <p>{{ note.message }}</p>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </aside>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const root = document.querySelector('[data-order-detail-root]');
+    if (!root) return;
+
+    const banner = root.querySelector('[data-live-banner]');
+    const apiUrl = root.dataset.orderApi;
+    let currentStatus = root.dataset.orderStatus || '';
+    let currentUpdatedAt = root.dataset.orderUpdatedAt || '';
+    let currentNotificationCount = root.dataset.orderNotificationCount || '0';
+    let currentEta = root.dataset.orderCurrentEta || '';
+
+    async function pollOrderDetail() {
+      if (document.visibilityState === 'hidden') return;
+      try {
+        const response = await fetch(apiUrl, { headers: { Accept: 'application/json' } });
+        if (!response.ok) return;
+        const payload = await response.json();
+        const statusChanged = payload.order_status !== currentStatus;
+        const updatedChanged = payload.updated_at_iso !== currentUpdatedAt;
+        const notificationChanged = String(payload.notification_count) !== currentNotificationCount;
+        const etaChanged = (payload.current_eta_time || '') !== currentEta;
+        if (!statusChanged && !updatedChanged && !notificationChanged && !etaChanged) {
+          return;
+        }
+
+        const parts = [`Live update: ${payload.order_status}.`];
+        if (payload.is_instant && payload.current_eta_time) {
+          parts.push(`Current ETA ${payload.current_eta_time}.`);
+        }
+        if (payload.latest_ready_notification) {
+          parts.push(`Latest notification via ${payload.latest_ready_notification.channel_label}.`);
+        }
+        banner.textContent = `${parts.join(' ')} Refreshing order detail...`;
+        banner.hidden = false;
+        banner.classList.toggle('is-delayed', Boolean(payload.is_eta_delayed));
+
+        currentStatus = payload.order_status;
+        currentUpdatedAt = payload.updated_at_iso;
+        currentNotificationCount = String(payload.notification_count);
+        currentEta = payload.current_eta_time || '';
+
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 900);
+      } catch (error) {
+        // Keep the last rendered data on screen if polling fails.
+      }
+    }
+
+    window.setInterval(pollOrderDetail, 15000);
+  })();
+</script>
+{% endblock %}

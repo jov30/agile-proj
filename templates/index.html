@@ -158,6 +158,99 @@
     padding: clamp(1.4rem, 3vw, 2.2rem);
   }
 
+  .live-ops {
+    padding: clamp(1.4rem, 3vw, 2.2rem);
+  }
+
+  .live-ops__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+    gap: 1rem;
+  }
+
+  .live-ops__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .live-ops__card,
+  .tracker-card,
+  .tracker-note {
+    position: relative;
+    overflow: hidden;
+    padding: 1.15rem 1.2rem;
+    border-radius: 26px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .live-ops__card strong,
+  .tracker-note strong {
+    display: block;
+    margin-bottom: 0.24rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.25rem;
+  }
+
+  .live-ops__card span,
+  .tracker-note p {
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .tracker-card__stack {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .tracker-form {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .tracker-field {
+    display: grid;
+    gap: 0.42rem;
+  }
+
+  .tracker-field label {
+    font-weight: 700;
+  }
+
+  .tracker-field input,
+  .tracker-field select {
+    width: 100%;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    border-radius: 18px;
+    padding: 0.92rem 0.98rem;
+    font: inherit;
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .tracker-field input:focus,
+  .tracker-field select:focus {
+    outline: 0;
+    border-color: rgba(255, 106, 19, 0.38);
+    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.12);
+    background: #fff;
+  }
+
+  .tracker-error {
+    padding: 0.92rem 1rem;
+    border-radius: 18px;
+    color: #7f2040;
+    border: 1px solid rgba(179, 48, 64, 0.2);
+    background: rgba(179, 48, 64, 0.08);
+  }
+
   .launchpad__header {
     display: flex;
     justify-content: space-between;
@@ -430,6 +523,7 @@
 
   @media (max-width: 1080px) {
     .landing-hero,
+    .live-ops__grid,
     .support-story,
     .launchpad__header,
     .street-gallery__header {
@@ -441,6 +535,7 @@
 
   @media (max-width: 720px) {
     .landing-hero,
+    .live-ops,
     .launchpad,
     .street-gallery,
     .support-story {
@@ -490,6 +585,10 @@
       grid-template-columns: 1fr;
     }
 
+    .live-ops__stats {
+      grid-template-columns: 1fr;
+    }
+
     .street-gallery__controls {
       width: 100%;
       justify-content: space-between;
@@ -506,21 +605,21 @@
 <section class="landing-hero section-panel">
   <div class="landing-hero__content">
     <p class="eyebrow">Vietnam street food online</p>
-    <h1 class="section-title">Scheduled pickup, favourites, and shared meals wrapped in a real Saigon street-food mood.</h1>
+    <h1 class="section-title">Instant queue or scheduled pickup, with live order tracking from the homepage.</h1>
     <p class="section-copy">
-      This concept now leans harder into Vietnamese street-food energy: Ben Thanh character, market-life visuals,
-      warm night-stall colours, and a clearer path into the full user-side feature set described in the project README.
+      The storefront now splits the two real ordering journeys clearly: order now for a live counter queue, or book a
+      scheduled pickup slot. Tracking, notifications, receipts, and history all connect back to the same order data.
     </p>
     <div class="button-row">
-      <a href="/menu" class="button button--primary">Browse Menu</a>
-      <a href="/register" class="button button--secondary">Create Account</a>
-      <a href="/pickup-planner" class="button button--secondary">Plan Pickup</a>
-      <a href="/support" class="button button--secondary">Customer Support</a>
+      <a href="/menu?fulfillment=instant" class="button button--primary">Start Instant Order</a>
+      <a href="/menu?fulfillment=scheduled" class="button button--secondary">Build Scheduled Order</a>
+      <a href="/orders" class="button button--secondary">Track Existing Order</a>
+      <a href="/login" class="button button--secondary">Login</a>
     </div>
     <div class="pill-row">
-      <span class="pill"><strong>Project-ready</strong> built around scheduled pickup and meal sharing</span>
-      <span class="pill"><strong>Street food visuals</strong> Ben Thanh, floating markets, grills, fresh rolls, and bowls</span>
-      <span class="pill"><strong>Feature buttons</strong> register, payment, pickup planner, receipt, and support</span>
+      <span class="pill"><strong>Instant queue</strong> start from the menu, add dishes, then check out into the live pickup line.</span>
+      <span class="pill"><strong>Scheduled pickup</strong> build the cart first, then reserve the best available pickup slot.</span>
+      <span class="pill"><strong>Track order</strong> jump straight to detail or receipt from the homepage.</span>
     </div>
   </div>
 
@@ -528,27 +627,27 @@
     <div class="hero-stage">
       <div class="hero-stage__sign">SAIGON STREETFOOD</div>
       <div class="hero-stage__ticket">
-        Real project direction: browse menu, build cart, schedule pickup, save favourites, and share meals with others.
+        Live routing: instant queue, scheduled pickup, admin queue controls, receipt history, and website notifications now run on the same order data.
       </div>
       <div class="hero-stage__panel hero-stage__panel--market">
         <img src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}" alt="Ben Thanh Market illustration" />
       </div>
       <div class="hero-stage__panel hero-stage__panel--street">
         <img
-          src="{{ url_for('static', filename='images/inspiration/streetfood-6.jpg') }}"
-          alt="Vietnamese late-night grill inspiration"
+          src="{{ url_for('static', filename='images/inspiration/hero-new-world-gourmet.avif') }}"
+          alt="MCQ gourmet storefront inspiration"
         />
       </div>
       <div class="hero-stage__panel hero-stage__panel--noodle">
         <img
-          src="{{ url_for('static', filename='images/inspiration/noodle-bowl-unsplash.jpg') }}"
-          alt="Vietnamese noodle bowl inspiration"
+          src="{{ url_for('static', filename='images/inspiration/saigon-street-food-scene-detail.jpg') }}"
+          alt="Saigon street food scene detail"
         />
       </div>
       <div class="hero-stage__panel hero-stage__panel--city">
         <img
-          src="{{ url_for('static', filename='images/inspiration/streetfood-4.jpg') }}"
-          alt="Vietnamese floating market inspiration"
+          src="{{ url_for('static', filename='images/inspiration/saigon-skyline.webp') }}"
+          alt="Ho Chi Minh City skyline illustration"
         />
       </div>
       <div class="hero-stage__label">
@@ -556,6 +655,82 @@
         <strong>From market inspiration to practical ordering flow for real customer use.</strong>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="live-ops section-panel" id="live-ordering">
+  <div class="live-ops__grid">
+    <div>
+      <p class="eyebrow">Live ordering status</p>
+      <h2 class="section-title">Realtime queue and pickup availability</h2>
+      <p class="section-copy">
+        These widgets reflect the current queue load and scheduled pickup planner, so customers know whether to order now
+        or move to a booked slot before they reach checkout.
+      </p>
+      <div class="live-ops__stats">
+        <article class="live-ops__card">
+          <strong>{{ ordering_snapshot.instant_queue.active_count }}/{{ ordering_snapshot.instant_queue.max_active_orders }}</strong>
+          <span>
+            Active instant orders at {{ ordering_snapshot.instant_queue.counter_label }}.
+            Next live ticket is #{{ "%03d"|format(ordering_snapshot.instant_queue.next_queue_number) }}.
+          </span>
+        </article>
+        <article class="live-ops__card">
+          <strong>{{ ordering_snapshot.instant_queue.quoted_wait_minutes }} min</strong>
+          <span>
+            Current instant ETA baseline from {{ ordering_snapshot.instant_queue.kitchen_active_count }} kitchen-active order(s)
+            {% if ordering_snapshot.instant_queue.can_accept %}, ready around {{ ordering_snapshot.instant_queue.estimated_ready_label }}{% endif %}.
+          </span>
+        </article>
+        <article class="live-ops__card">
+          <strong>
+            {% if ordering_snapshot.next_available_pickup %}
+              {{ ordering_snapshot.next_available_pickup.time_label }}
+            {% else %}
+              Unavailable
+            {% endif %}
+          </strong>
+          <span>
+            {% if ordering_snapshot.next_available_pickup %}
+              Next scheduled slot on {{ ordering_snapshot.next_available_pickup.date_label }}.
+            {% else %}
+              No scheduled slots are currently open.
+            {% endif %}
+          </span>
+        </article>
+      </div>
+    </div>
+
+    <aside class="tracker-card">
+      <div class="tracker-card__stack">
+        <div>
+          <p class="eyebrow">Track order</p>
+          <h2>Open detail or receipt directly</h2>
+          <p class="section-copy">Enter the order number from the receipt to jump straight into live tracking.</p>
+        </div>
+        {% if track_error %}
+          <div class="tracker-error">{{ track_error }}</div>
+        {% endif %}
+        <form method="post" action="{{ url_for('public.track_order') }}" class="tracker-form">
+          <div class="tracker-field">
+            <label for="order_number">Order number</label>
+            <input id="order_number" name="order_number" type="text" value="{{ track_value }}" placeholder="MCQ-20260414-AB12" />
+          </div>
+          <div class="tracker-field">
+            <label for="destination">Open</label>
+            <select id="destination" name="destination">
+              <option value="detail">Order detail</option>
+              <option value="receipt">Receipt</option>
+            </select>
+          </div>
+          <button type="submit" class="button button--primary">Track Order</button>
+        </form>
+        <div class="tracker-note">
+          <strong>{{ ordering_snapshot.ready_count }} ready now</strong>
+          <p>Orders already marked ready for pickup are surfaced across the site through in-app notifications.</p>
+        </div>
+      </div>
+    </aside>
   </div>
 </section>
 
@@ -567,56 +742,54 @@
     </div>
     <p>
       The homepage now exposes the planned customer journey more clearly: account setup, menu browsing, cart,
-      checkout, payment, pickup scheduling, receipt, order history, favourites, shared meals, and support.
+      instant ordering, scheduled pickup, checkout, receipt, live order tracking, and support.
     </p>
   </div>
   <div class="launchpad__grid">
     <article class="launch-card">
       <p class="launch-card__kicker">Account</p>
       <h3>Get customers in fast</h3>
-      <p>Registration, login, and profile access now have visible entry points instead of being hidden future tasks.</p>
+      <p>Keep account entry simple so returning customers can sign in quickly before placing or tracking an order.</p>
       <div class="launch-card__actions">
         <a class="feature-button feature-button--accent" href="/register">Register</a>
         <a class="feature-button" href="/login">Login</a>
-        <a class="feature-button" href="/profile">Profile</a>
       </div>
     </article>
     <article class="launch-card">
       <p class="launch-card__kicker">Ordering</p>
-      <h3>Support the pickup flow</h3>
-      <p>These buttons map directly to the ordering path described in the project: menu, cart, checkout, and history.</p>
+      <h3>Cover both ordering paths</h3>
+      <p>These buttons map directly to the two real customer journeys and both start in the menu, where customers choose dishes first.</p>
       <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/menu">Browse Menu</a>
-        <a class="feature-button" href="/cart">Cart</a>
-        <a class="feature-button" href="/checkout">Checkout</a>
+        <a class="feature-button feature-button--accent" href="/menu?fulfillment=instant">Instant Menu</a>
+        <a class="feature-button" href="/menu?fulfillment=scheduled">Scheduled Menu</a>
+        <a class="feature-button" href="/cart?fulfillment=instant">Cart</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Checkout Flow</p>
+      <h3>Keep the next step obvious</h3>
+      <p>Once dishes are in the cart, customers can move into instant checkout, scheduled pickup planning, or order history without detours.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/checkout?fulfillment=instant">Instant Checkout</a>
+        <a class="feature-button" href="/pickup-planner?fulfillment=scheduled">Scheduled Pickup</a>
         <a class="feature-button" href="/orders">Order History</a>
       </div>
     </article>
     <article class="launch-card">
-      <p class="launch-card__kicker">Payment and Pickup</p>
-      <h3>Cover the missing core steps</h3>
-      <p>Payment, scheduled pickup planning, and receipt confirmation are all called out in the README and now have dedicated entry points.</p>
+      <p class="launch-card__kicker">Tracking</p>
+      <h3>Receipts and live updates</h3>
+      <p>Customers can jump back into tracking, receipt lookup, and live pickup notifications from one clear section.</p>
       <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/payment">Payment</a>
-        <a class="feature-button" href="/pickup-planner">Pickup Planner</a>
-        <a class="feature-button" href="/receipt">Receipt</a>
-      </div>
-    </article>
-    <article class="launch-card">
-      <p class="launch-card__kicker">Community</p>
-      <h3>Keep meal sharing visible</h3>
-      <p>Meal sharing is part of the project identity, so favourites and shared meals are now surfaced as first-class actions.</p>
-      <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/favorites">Favourites</a>
-        <a class="feature-button" href="/shared-meals">Shared Meals</a>
+        <a class="feature-button feature-button--accent" href="/orders">Open Orders</a>
+        <a class="feature-button" href="#live-ordering">Track by Order Number</a>
       </div>
     </article>
     <article class="launch-card">
       <p class="launch-card__kicker">Support</p>
       <h3>Help is always nearby</h3>
-      <p>The floating chatbox is backed by a visible support route and phone contact so customers always have a help path.</p>
+      <p>The floating chatbox and phone contact keep help visible without interrupting the main ordering path.</p>
       <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/support">Customer Support</a>
+        <a class="feature-button feature-button--accent" href="tel:+61892485623">Call 08 9248 5623</a>
         <a class="feature-button" href="tel:+61892485623">08 9248 5623</a>
       </div>
     </article>
@@ -788,20 +961,20 @@
       the bottom of the website so customers always have a visible support entry point while browsing.
     </p>
     <div class="button-row">
-      <a href="/support" class="button button--primary">Visit Customer Support</a>
-      <a href="/payment" class="button button--secondary">Payment Flow</a>
-      <a href="/pickup-planner" class="button button--secondary">Pickup Planner</a>
-      <a href="tel:+61892485623" class="button button--secondary">Call 08 9248 5623</a>
+      <a href="tel:+61892485623" class="button button--primary">Call 08 9248 5623</a>
+      <a href="#live-ordering" class="button button--secondary">Track Order</a>
+      <a href="/menu?fulfillment=instant" class="button button--secondary">Browse Menu</a>
+      <a href="/orders" class="button button--secondary">Order History</a>
     </div>
   </div>
   <div class="support-story__panel">
     <div class="support-card">
       <strong>Built around the project brief</strong>
-      <span>User registration, login, menu browsing, cart, checkout, payment, scheduled pickup, receipt, order history, favourites, and shared meals are all represented in the new layout.</span>
+      <span>User registration, login, menu browsing, cart, instant ordering, scheduled pickup, receipt, order history, and support are all represented in the new layout.</span>
     </div>
     <div class="support-card">
       <strong>Chat support entry point</strong>
-      <span>The always-on bottom chatbox is designed as a future customer assistance surface for menu, payment, pickup, and order questions.</span>
+      <span>The always-on bottom chatbox is designed as a future customer assistance surface for instant queue, payment, pickup, and order questions.</span>
     </div>
     <div class="support-card">
       <strong>Stronger Vietnam street-food identity</strong>

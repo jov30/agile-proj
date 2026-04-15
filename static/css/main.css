@@ -524,6 +524,24 @@ img {
   gap: 0.55rem;
 }
 
+.support-dock__status {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 0.42rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #2a160b;
+  background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+}
+
+.support-dock__status.is-offline {
+  color: rgba(255, 247, 239, 0.92);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 214, 140, 0.12);
+}
+
 .support-prompt {
   border: 1px solid rgba(255, 214, 140, 0.16);
   border-radius: 999px;
@@ -534,6 +552,52 @@ img {
   color: rgba(255, 247, 239, 0.92);
   background: rgba(255, 255, 255, 0.06);
   cursor: pointer;
+}
+
+.support-chat-form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.support-chat-form__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+}
+
+.support-chat-form textarea {
+  min-height: 88px;
+  resize: vertical;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 214, 140, 0.14);
+  font: inherit;
+  color: rgba(255, 247, 239, 0.94);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.support-chat-form textarea::placeholder {
+  color: rgba(255, 247, 239, 0.48);
+}
+
+.support-chat-form textarea:focus {
+  outline: 2px solid rgba(255, 180, 54, 0.32);
+  outline-offset: 2px;
+}
+
+.support-chat-form button {
+  align-self: end;
+}
+
+.support-chat-form__note {
+  color: rgba(255, 247, 239, 0.66);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.support-chat-form__note.is-error {
+  color: #ffd8c2;
 }
 
 .support-dock__actions {

@@ -1,11 +1,13 @@
-# MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform
+# MCQ Vietnamese Street Food Ordering Platform
 
 ![MCQ Vietnamese Street Food Logo](static/images/mcq-logo.jpg)
-## Description
 
-The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a web application designed for a Vietnamese restaurant. It allows users to create accounts, browse the menu, place food orders for **scheduled pickup**, and share their favourite meals with other users.
+## Overview
 
-This project is based on a realistic restaurant scenario where customers want a more convenient way to order food online before arriving at the restaurant. The platform is designed as a **client-server web application** and focuses on providing a user-friendly ordering experience while also supporting social interaction through meal sharing.
+MCQ is a Flask-based client-server web application for Vietnamese street-food ordering, pickup coordination, and customer account features.  
+The final project scope covers customer authentication, profile, community-member and favourite-meal features, menu and cart management, checkout and receipt workflows, and restaurant-side admin operations.
+
+In addition to the core assignment requirements, the current branch also includes richer delivery of those flows through **instant counter pickup**, **scheduled pickup**, **QR-coded receipts**, **PDF receipts**, **live order tracking**, **admin queue operations**, and a **support chat experience with AI fallback handling**.
 
 ## Team Members
 
@@ -16,247 +18,185 @@ This project is based on a realistic restaurant scenario where customers want a 
 | 24220908 | Samuel Ou | slimoftheshady |
 | 24181084 | Thomas Zeng | zxx457 |
 
-The application is intended to satisfy the project requirements by including:
+## Final Project Feature Scope
 
-- a client-server architecture
-- user registration, login, and logout
-- persistent user data stored in a database
-- the ability for users to view data shared by other users
+The project is designed around four main functional areas.
 
-## Purpose of the Application
+### 1. Authentication, Profile, and Favourite Meals
 
-The purpose of this application is to solve a real business need by providing an online scheduled pickup ordering system for a restaurant that currently does not have one. It also adds a community element by allowing users to share favourite meals, which makes the platform more interactive and helps satisfy the requirement that users can view data from other users.
-
-The application is designed to be:
-
-- **Engaging** through a clean and appealing restaurant-style interface
-- **Effective** by making food ordering more convenient for users
-- **Intuitive** through a simple workflow for browsing, ordering, and sharing meals
-
-## System Roles
-
-The platform contains two main sides:
-
-- **User Side** for customers
-- **Admin Side** for restaurant administrators
-
-## User Side Features
-
-### User Account Features
-Users are able to:
-- register a new account
-- log in and log out
-- view and update profile information
-
-### Ordering Features
-Users are able to:
-- browse the restaurant menu
-- view meal details, including description, price, and ingredients
-- add meals to cart
-- update meal quantities in cart
-- view cart contents and order summary information
-- view the total price of their order before checkout
-- proceed to checkout
-- make a payment through the system
-- place an online order
-- choose a scheduled pickup date and time
-- receive an online PDF receipt and order confirmation after successful checkout
-- view previous orders in order history
-
-
-### Meal Sharing Features
-Users are able to:
+- user registration
+- account creation to become a community member
+- user login and logout
+- profile view and update
+- membership-style account scope for repeat customers
 - save favourite meals
 - share favourite meals with other users
 - view favourite meals shared by other users
+- authentication and profile forms with validation
+- user-related backend routes
+- user and favourite-meal data handling in the database
+- connection of login, register, profile, and shared-favourite pages to backend logic
+- basic tests for authentication, profile, and favourite-meal flows
 
-## Admin Side Features
+### 2. Menu and Cart
 
-Administrators are able to:
-- view registered customer accounts
-- manage customer account records
-- view customer profile information
-- monitor newly registered users
-- add new menu items
-- edit existing menu items
-- remove menu items
-- update prices, descriptions, ingredients, categories, and availability status
+- menu browsing with category-based navigation
+- filter menu bar and keyword search support
+- menu item detail flow
+- add items to cart
+- update cart quantities
+- view cart summary and total price
+- cart-related backend routes
+- menu and cart data handling
+- connection of menu and cart pages to backend logic
+- basic tests for menu and cart features
+
+### 3. Checkout, Orders, and Receipts
+
+- checkout flow
+- simulated payment flow
+- scheduled pickup date and time selection
+- order confirmation
+- store order records in the database
+- PDF receipt generation
+- order history
+- order-related backend routes
+- order model and database setup
+- connection of checkout, payment, receipt, and order pages to backend logic
+- basic tests for checkout and order features
+
+### 4. Admin and Reporting
+
+- admin login and access flow
+- view and manage customer accounts
+- view customer profiles
+- add, edit, and remove menu items
+- update prices, descriptions, ingredients, categories, and availability
 - view customer orders
-- track scheduled pickup times
-- monitor order history
-- update order status such as Pending, Confirmed, Preparing, Ready for Pickup, and Completed
+- track pickup times
+- update order status
 - view sales and income records
-- display monthly income using simple charts for business monitoring
+- monthly income chart and reporting
+- admin-related backend routes
+- basic tests for admin features
 
-## Example User Workflow
+## Current Branch Enhancements
 
-A typical user workflow is as follows:
+Beyond the base project scope above, the current branch includes several upgraded flows and presentation features:
 
-1. Register an account or log in
-2. Browse the menu
-3. View meal details
-4. Add items to cart
-5. Review cart contents, order summary, and total price
-6. Proceed to checkout
-7. Select a payment method and complete the simulated payment process
-8. Choose a scheduled pickup date and time
-9. Confirm the order
-10. Receive an online receipt and order confirmation
-11. View the order in order history
-12. Save and share favourite meals
-13. Browse favourite meals shared by other users
+- **Instant counter pickup** with live queue numbering and quoted wait time
+- **Scheduled pickup slot capacity handling** and validation
+- **branded HTML and PDF receipts**
+- **QR codes** on receipts that open live order tracking
+- **order history, order detail, and reorder flow**
+- **admin queue operations** for active pickup management
+- **live order-status presentation** and ready notifications inside the website
+- **membership profile UI** with loyalty points, tier progress, and repeat-customer identity
+- **saved meals UI** prepared for favourite collections and share actions
+- **MCQ Community hub UI** prepared for meal sharing, story sharing, and future social posting flows
+- **support chatbox** with OpenAI integration and automatic fallback mode
+- **enhanced landing, menu, cart, checkout, and receipt design**
 
-## Example Admin Workflow
+## System Roles
 
-A typical admin workflow is as follows:
+- **Customer Side** for ordering, account access, favourites, and order tracking
+- **Admin Side** for restaurant operations, queue handling, order updates, and reporting
 
-1. Log in as an administrator
-2. View newly registered users
-3. Manage customer account records
-4. Update menu items and availability
-5. View incoming customer orders
-6. Track scheduled pickup times
-7. Update order status
-8. Review monthly income using charts
+## Example User Flow
 
-## Example Menu Categories
+1. Register an account and create customer details to join the MCQ member community.
+2. Log in as a returning member or continue into the ordering flow.
+3. Open the landing page and choose `Order Now` or `Schedule Pickup`.
+4. Browse the menu and add dishes to the cart.
+5. Review the cart summary.
+6. Go to checkout.
+7. Choose instant pickup or scheduled pickup.
+8. Complete the simulated payment.
+9. Receive an order confirmation and receipt.
+10. Track the order from the receipt, QR code, or order history.
+11. Save favourite meals, share them with other users, and return later as a repeat member.
 
-The menu is based on a Vietnamese restaurant and may include items such as:
+## Example Admin Flow
 
-- **Banh Mi**
-- **Bun Bo Hue**
-- **Pho**
-- **Rice Paper Rolls**
-- **Rice Dishes**
-- **Drinks**
+1. Log in with the admin demo account.
+2. Open the admin area to review customer accounts and profiles.
+3. View and update customer information where needed.
+4. Manage menu items, pricing, descriptions, categories, ingredients, and availability.
+5. Review active instant and scheduled orders.
+6. Track pickup timing and move orders through the allowed status sequence.
+7. Review sales records, income summaries, and monthly reporting insights.
 
-Each menu item may contain:
-- item name
-- category
-- price
-- ingredients
-- short description
-- availability status
+## User Features
 
-## Application Design
+The customer-facing side of the project includes:
 
-The application follows a traditional web architecture using technologies approved for the unit.
+- registration, login, logout, and member account access
+- community-member onboarding and repeat-customer account scope
+- profile-related account access
+- membership-style customer identity for ongoing use of the platform
+- loyalty-style points and tier dashboard experience
+- favourite meal saving and sharing
+- saved meal boards and collection-style UI
+- viewing favourite meals shared by other users
+- community hub for shared meals, stories, and future member posting flows
+- menu browsing and item detail views
+- keyword and category-based discovery
+- cart add, update, and summary flow
+- instant and scheduled pickup selection
+- simulated checkout and payment confirmation
+- PDF receipt generation
+- QR-based receipt tracking
+- order history and order detail pages
 
-### Client Side
-The client side is responsible for displaying web pages, handling user interactions, and sending requests to the server.
+## Admin Features
 
-### Server Side
-The server side handles authentication, ordering logic, profile management, meal sharing, admin management, and sales tracking.
+The admin-facing side of the project includes:
 
-### Database
-The database stores persistent data such as:
+- admin login and protected access
+- viewing and managing customer accounts
+- viewing customer profiles
+- editing customer information when required
+- viewing customer orders
+- monitoring pickup timing
+- updating order status
+- queue operations for pickup handling
+- adding, editing, and removing menu items
+- updating prices, descriptions, ingredients, categories, and availability
+- reviewing sales and income records
+- monthly income analysis and reporting
 
-- user accounts
-- login details
-- profile information
-- menu items
-- orders
-- favourite meals
-- shared meal posts
-- sales records
-
-## Branding and Layout Notes
-
-- The MCQ Vietnamese Street Food logo asset lives at `static/images/mcq-logo.jpg`.
-- When creating or updating layouts, reference it with Jinja so any template can render the logo:
-
-```html
-<img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ Vietnamese Street Food Logo" class="h-12 w-auto" />
-```
-- The `class` attribute above is an example Tailwind utility combination—adjust sizing or spacing per page while keeping the same `url_for` call.
-- The shared `templates/base.html` layout already renders the logo inside the header; extend this template from pages such as `index.html` so all customer- and admin-facing screens inherit the same branding automatically.
-
-## Technologies Used
-
-This project uses only technologies allowed in the unit specification.
-
-### Frontend
-- HTML
-- CSS
-- JavaScript
-- Tailwind CSS
+## Tech Stack
 
 ### Backend
+
 - Flask
-
-### Database
+- Flask-SQLAlchemy
 - SQLite
-- SQLAlchemy
 
-### Additional Tools
+### Frontend
+
 - Jinja templates
-- Flask plugins introduced in the unit
-- AJAX where needed
-- a chart library for income visualisation
+- HTML
+- CSS
+- Vanilla JavaScript
 
-### Version Control
-- Git
-- GitHub
+### Supporting Libraries
 
-## Installation
+- `requests` for AI chat API calls
+- `Pillow` for receipt/QR image handling
+- `qrcode` for receipt QR generation
 
-### 1. Clone the repository
+## Core Data and Backend Scope
 
-```bash
-git clone https://github.com/jov30/agile-proj.git
-cd agile-proj
-git checkout main
-```
+The application is structured around the following backend responsibilities:
 
-### 2. Create and activate a virtual environment
-
-#### macOS / Linux
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-python3 -m pip install -r requirements.txt
-```
-
-#### Windows
-
-```powershell
-py -m venv venv
-venv\Scripts\activate
-py -m pip install -r requirements.txt
-```
-
-### 3. Run the application
-
-#### macOS / Linux
-
-```bash
-python3 -m flask --app app run --host 127.0.0.1 --port 5000
-```
-
-#### Windows
-
-```powershell
-py -m flask --app app run --host 127.0.0.1 --port 5000
-```
-
-Then open your browser and go to:
-
-```text
-http://127.0.0.1:5000
-```
-
-### 4. Environment variables
-
-No extra environment variables are required for the current public-site build.
-
-## Running the Application
-
-If your virtual environment is already activated, use the same Flask command above for your operating system.
-
-## Running the Tests
-
-Test files are currently placeholders and the automated test suite is not fully set up yet.
+- user-related routes and session handling
+- menu and cart APIs
+- order creation, payment simulation, receipt generation, and order history
+- admin queue and status management
+- customer-account and profile management scope
+- admin reporting and income-analysis scope
+- database-backed order, line-item, payment-attempt, notification, and queue-counter records
 
 ## Project Structure
 
@@ -264,12 +204,13 @@ Test files are currently placeholders and the automated test suite is not fully 
 project-root/
 │
 ├── app.py
+├── config.py
 ├── feature_pages.py
+├── menu_catalog.py
+├── models.py
+├── receipt_pdf.py
 ├── requirements.txt
 ├── README.md
-├── config.py
-├── models.py
-├── forms.py
 ├── data/
 │   ├── menu-image-sources.json
 │   ├── menu-prices.json
@@ -279,6 +220,7 @@ project-root/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── auth.py
+│   ├── cart_api.py
 │   ├── helpers.py
 │   ├── menu.py
 │   ├── orders.py
@@ -286,126 +228,180 @@ project-root/
 ├── scripts/
 │   ├── build_menu_json.py
 │   └── download_menu_images.py
+├── static/
+│   ├── css/
+│   │   └── main.css
+│   ├── data/
+│   │   └── menu.json
+│   ├── images/
+│   │   ├── brand/
+│   │   ├── inspiration/
+│   │   ├── menu/
+│   │   ├── mcq-logo.jpg
+│   │   └── .gitkeep
+│   └── js/
+│       ├── admin.js
+│       ├── cart.js
+│       └── checkout.js
 ├── templates/
-│   ├── base.html
-│   ├── feature-page.html
-│   ├── index.html
 │   ├── admin/
-│   │   ├── dashboard.html
-│   │   ├── income.html
-│   │   ├── menu.html
-│   │   ├── orders.html
-│   │   └── users.html
+│   │   └── orders.html
 │   ├── auth/
 │   │   ├── login.html
 │   │   └── register.html
 │   ├── menu/
 │   │   ├── cart.html
 │   │   ├── checkout.html
-│   │   └── menu.html
-│   └── user/
-│       ├── orders.html
-│       ├── profile.html
-│       └── shared_meals.html
-├── static/
-│   ├── css/
-│   │   ├── main.css
-│   │   └── style.css
-│   ├── data/
-│   │   └── menu.json
-│   ├── js/
-│   │   ├── admin.js
-│   │   ├── cart.js
-│   │   └── checkout.js
-│   └── images/
-│       ├── brand/
-│       ├── inspiration/
-│       ├── menu/
-│       ├── mcq-logo.jpg
-│       └── .gitkeep
+│   │   ├── item_detail.html
+│   │   ├── menu.html
+│   │   └── receipt.html
+│   ├── user/
+│   │   ├── community.html
+│   │   ├── favorites.html
+│   │   ├── order_detail.html
+│   │   ├── orders.html
+│   │   └── profile.html
+│   ├── base.html
+│   ├── feature-page.html
+│   └── index.html
 ├── instance/
 │   └── app.db
 └── tests/
     ├── test_admin.py
     ├── test_auth.py
     ├── test_menu.py
-    └── test_orders.py
+    ├── test_orders.py
+    └── test_user.py
 ```
 
-## Menu Data & Assets
+## Setup
 
-- `data/menu-source.txt` contains the plain-text export of the menu document you shared so we can regenerate structured data without relying on external files.
-- `data/menu-prices.json` captures the price sheet we inferred from your photo references and the “Price setup” document; tweak numbers here to keep the UI synced with the restaurant boards.
-- `scripts/build_menu_json.py` parses that source and writes `static/data/menu.json`, which powers the interactive menu browser on the site.
-- New hero images live under `static/images/menu/` (sourced from Unsplash as illustrative placeholders) and are referenced per category.
-- Whenever the menu doc changes, run `python3 scripts/build_menu_json.py` to refresh the JSON feed before committing.
-
-## Notes on Scope
-
-This project focuses on **scheduled pickup ordering** rather than real-time queue management. This decision keeps the project manageable for a student development team while still meeting the core requirements of the unit.
-
-The payment process in this project is **simulated for demonstration purposes** and is not connected to a real payment gateway.
-
-The meal sharing feature was included to ensure that users can view data shared by other users in a meaningful and relevant way.
-
-The admin dashboard and monthly income chart were included to provide useful restaurant-side management features while remaining within the scope of a student web application project.
-
-## Troubleshooting
-
-### Database Issues
-
-The current public-site build does not require a database initialization step before startup.
-
-### Missing Dependencies
-
-Make sure all required packages are installed:
+### 1. Clone the repository
 
 ```bash
+git clone https://github.com/jov30/agile-proj.git
+cd agile-proj
+git checkout feature/Checkout-Orders-Receipts
+```
+
+### 2. Create and activate a virtual environment
+
+macOS / Linux:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-On Windows:
+Windows:
 
 ```powershell
+py -m venv venv
+venv\Scripts\activate
 py -m pip install -r requirements.txt
 ```
 
-### Application Startup Errors
+### 3. Run the application
 
-Check that:
-- your virtual environment is activated
-- dependencies were installed from `requirements.txt`
-- you are running the app from the project root
-- you are on the `main` branch if you want the default project version
+macOS / Linux:
 
-### General Errors
+```bash
+python3 -m flask --app app run --host 127.0.0.1 --port 5000
+```
 
-Check the Flask server logs for error messages and stack traces.
+Windows:
 
-## External Sources Used
+```powershell
+py -m flask --app app run --host 127.0.0.1 --port 5000
+```
 
-Possible external sources and libraries used in this project may include:
+Then open:
 
-- Tailwind CSS
-- Chart.js or another chart library
-- Google Fonts
-- Font Awesome or another icon library
-- Restaurant images or placeholder images used for UI design
+```text
+http://127.0.0.1:5000
+```
 
-This section should be updated to reflect the actual external resources used by the final project.
+## Configuration
 
-## Future Improvements
+The app works with defaults, but these environment variables are supported:
+
+- `FLASK_SECRET_KEY`
+- `DATABASE_URL`
+- `APP_ENV`
+- `APP_TIMEZONE`
+- `PUBLIC_BASE_URL`
+- `OPENAI_API_KEY`
+- `OPENAI_API_BASE`
+- `OPENAI_CHAT_MODEL`
+- `ADMIN_NAME`
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `ENABLE_INSTANT_ORDERING`
+- `DEMO_ALLOW_AFTER_HOURS_INSTANT_ORDERING`
+
+Pickup scheduling and instant queue timing can also be tuned through config values in `config.py`.
+
+## Database
+
+- SQLite is used by default.
+- The database file is created under `instance/app.db`.
+- Tables are initialized automatically when the app starts.
+- The current branch persists order-related records, line items, payment attempts, notifications, and queue counters.
+
+## Demo Admin Account
+
+Default admin credentials:
+
+- Email: `admin@mcq.local`
+- Password: `Admin@123`
+
+These can be overridden with environment variables.
+
+## Running Tests
+
+Run the full test suite with:
+
+```bash
+venv/bin/python -m unittest tests.test_auth tests.test_admin tests.test_menu tests.test_orders tests.test_user
+```
+
+The current test suite includes automated coverage for:
+
+- authentication
+- admin queue access and updates
+- menu and cart behavior
+- checkout, payment retries, and order creation
+- receipts, QR links, and order tracking
+- support chat and user-facing flows
+
+## Menu Data and Assets
+
+- `data/menu-source.txt` is the plain-text menu source used to regenerate structured menu data.
+- `data/menu-prices.json` stores price information used by the app.
+- `scripts/build_menu_json.py` regenerates `static/data/menu.json`.
+- branded and inspiration imagery lives under `static/images/`.
+
+If the menu source changes, regenerate the JSON feed before committing:
+
+```bash
+python3 scripts/build_menu_json.py
+```
+
+## Notes and Limitations
+
+- Payments are **simulated** for demo and assessment purposes.
+- The AI chatbox depends on a valid OpenAI API key and available quota; otherwise it falls back automatically.
+- Some project areas are broader in final scope than in the currently polished branch implementation, especially around extended profile, favourites, and reporting workflows.
+- The new membership, loyalty-points, and MCQ Community areas are intentionally designed as strong frontend scaffolds so future backend persistence and social features can plug into them without reworking the layout.
+
+## Future Extensions
 
 Possible future improvements include:
 
-- downloadable PDF receipts
-- add feature instant online order
-- email confirmation
-- recommendation features based on user preferences
-- more advanced restaurant analytics
-- role-based staff accounts with different permission levels
-- real-time queue management for instant pickup orders
-
-## Conclusion
-
-The **MCQ Restaurant Scheduled Pickup Ordering and Meal Sharing Platform** is a realistic and achievable web application project that combines restaurant ordering functionality with a small social sharing feature. It meets the key requirements of the unit by using a client-server architecture, supporting authentication, storing persistent user data, and allowing users to view content shared by others. In addition, it provides admin-side tools for customer management, order tracking, menu control, and monthly income monitoring.
+- real email or SMS notifications
+- richer customer accounts and profile editing
+- favourites persistence and real shared-meal data
+- menu management from the admin side
+- stronger analytics and reporting
+- real payment gateway integration

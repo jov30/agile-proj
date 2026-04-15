@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}MCQ Community | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .community-shell {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .community-hero,
+  .community-feed {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .community-hero__grid,
+  .community-feed__grid,
+  .community-feed__stream,
+  .community-sidebar {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .community-hero__grid,
+  .community-feed__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  }
+
+  .community-panel,
+  .community-visual,
+  .community-composer,
+  .community-story,
+  .community-sidecard {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .community-panel,
+  .community-composer,
+  .community-story,
+  .community-sidecard {
+    padding: 1.2rem;
+  }
+
+  .community-visual {
+    min-height: 100%;
+    padding: 1.2rem;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(24, 18, 16, 0.18), rgba(16, 14, 18, 0.88)),
+      url("{{ url_for('static', filename='images/inspiration/neon-lantern-street.jpg') }}");
+    background-size: cover;
+    background-position: center;
+    box-shadow: var(--shadow-strong);
+  }
+
+  .community-panel h1,
+  .community-feed h2,
+  .community-visual h2 {
+    margin: 0.18rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .community-panel h1 {
+    font-size: clamp(2rem, 3vw, 3rem);
+  }
+
+  .community-panel p,
+  .community-composer p,
+  .community-story p,
+  .community-sidecard p,
+  .community-visual p {
+    line-height: 1.65;
+    color: var(--text-muted);
+  }
+
+  .community-visual p {
+    color: rgba(255, 247, 239, 0.84);
+  }
+
+  .community-pills,
+  .community-composer__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
+  .community-pills {
+    margin-top: 1rem;
+  }
+
+  .community-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.64rem 0.88rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.84rem;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
+  .community-composer textarea {
+    width: 100%;
+    min-height: 132px;
+    padding: 1rem 1.05rem;
+    border-radius: 22px;
+    border: 1px solid rgba(112, 85, 66, 0.16);
+    font: inherit;
+    resize: vertical;
+    background: rgba(255, 255, 255, 0.84);
+  }
+
+  .community-composer__actions {
+    margin-top: 0.85rem;
+  }
+
+  .community-composer__hint {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .community-story {
+    display: grid;
+    grid-template-columns: 168px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .community-story__media {
+    border-radius: 22px;
+    overflow: hidden;
+    min-height: 180px;
+  }
+
+  .community-story__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .community-story__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin-bottom: 0.6rem;
+  }
+
+  .community-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.58rem 0.82rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+  }
+
+  .community-story__title {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.3rem;
+  }
+
+  .community-story__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 0.9rem;
+  }
+
+  .community-sidecard strong {
+    display: block;
+    margin-bottom: 0.24rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  @media (max-width: 1080px) {
+    .community-hero__grid,
+    .community-feed__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .community-story {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="community-shell">
+  <section class="community-hero section-panel">
+    <div class="community-hero__grid">
+      <article class="community-panel">
+        <p class="eyebrow">MCQ Community</p>
+        <h1>A customer community hub for meals, stories, and street-food rituals.</h1>
+        <p>
+          This interface gives the project a professional social layer right now, while staying deliberately ready for another teammate
+          to plug in posting, saving, comments, and moderation later.
+        </p>
+        <div class="community-pills">
+          <span class="community-pill">{{ membership.current_tier.name }}</span>
+          <span class="community-pill">{{ membership.points_display }} member points</span>
+          <span class="community-pill">{{ member_name }}</span>
+        </div>
+        <div class="button-row" style="margin-top: 1rem;">
+          <a href="/profile" class="button button--primary">Membership Profile</a>
+          <a href="/favorites" class="button button--secondary">Saved Meals</a>
+        </div>
+      </article>
+
+      <aside class="community-visual">
+        <p class="eyebrow">Community preview</p>
+        <h2>Share a meal board, post a pickup story, and build repeat-customer identity around MCQ.</h2>
+        <p>
+          The visuals and layout are in place for future post creation, likes, comments, and shared member collections without having
+          to redesign the whole user area later.
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="community-feed section-panel">
+    <div class="community-feed__grid">
+      <div class="community-feed__stream">
+        <article class="community-composer">
+          <p class="eyebrow">Story composer</p>
+          <h2>Design-ready post box for future backend wiring</h2>
+          <p>Use this as the visual anchor for share-meal and share-story features. Another teammate can attach posting logic here later.</p>
+          <textarea placeholder="Tell the MCQ community what you ordered, why you loved it, or which dishes belong on a shared tray..." aria-label="Community story composer"></textarea>
+          <div class="community-composer__actions">
+            <button type="button" class="button button--primary">Share Meal Story</button>
+            <button type="button" class="button button--secondary">Post Photo Board</button>
+            <button type="button" class="button button--secondary">Start Member Collection</button>
+          </div>
+          <p class="community-composer__hint">UI scaffold only: this card is ready for real create-post, tag, and moderation handlers.</p>
+        </article>
+
+        {% for story in stories %}
+          <article class="community-story">
+            <div class="community-story__media">
+              <img src="{{ url_for('static', filename=story.image) }}" alt="{{ story.meal }}" />
+            </div>
+            <div>
+              <div class="community-story__meta">
+                <span class="community-badge">{{ story.badge }}</span>
+                <span>{{ story.author }} · {{ story.handle }}</span>
+              </div>
+              <p class="eyebrow">{{ story.lane }}</p>
+              <h3 class="community-story__title">{{ story.title }}</h3>
+              <p>{{ story.body }}</p>
+              <p><strong>Featured meal:</strong> {{ story.meal }}</p>
+              <div class="community-story__actions">
+                <a href="/favorites" class="button button--secondary">Save Idea</a>
+                <a href="/menu" class="button button--secondary">Build Similar Order</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      <aside class="community-sidebar">
+        {% for card in community_cards %}
+          <article class="community-sidecard">
+            <strong>{{ card.title }}</strong>
+            <p>{{ card.text }}</p>
+          </article>
+        {% endfor %}
+        <article class="community-sidecard">
+          <strong>Why this matters</strong>
+          <p>
+            The project now has a visible MCQ community entry point in the customer journey, so the social/favourite extension no longer
+            feels hidden behind a placeholder page.
+          </p>
+        </article>
+      </aside>
+    </div>
+  </section>
+</div>
+{% endblock %}
