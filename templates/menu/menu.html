@@ -140,9 +140,12 @@
   .menu-hero__preview {
     right: 1.35rem;
     bottom: 1.35rem;
-    width: min(360px, calc(100% - 2.7rem));
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: stretch;
+    width: min(290px, calc(100% - 2.7rem));
     overflow: hidden;
-    border-radius: 30px;
+    border-radius: 26px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     background:
       linear-gradient(180deg, rgba(35, 24, 20, 0.94), rgba(23, 19, 21, 0.92)),
@@ -152,18 +155,19 @@
 
   .menu-hero__preview img {
     width: 100%;
-    height: 220px;
+    height: 100%;
+    min-height: 126px;
     object-fit: cover;
     display: block;
   }
 
   .menu-hero__preview-copy {
-    padding: 1rem 1.15rem 1.15rem;
+    padding: 0.95rem 1rem 1rem;
     color: var(--text-inverse);
   }
 
   .menu-hero__preview-copy strong {
-    font-size: 1.28rem;
+    font-size: 1.1rem;
   }
 
   .menu-utility {
@@ -772,10 +776,11 @@
       right: 1rem;
       bottom: 1rem;
       width: auto;
+      grid-template-columns: 96px minmax(0, 1fr);
     }
 
     .menu-hero__preview img {
-      height: 190px;
+      min-height: 108px;
     }
 
     .menu-browser__header {
@@ -849,7 +854,7 @@
         <span>Floating market mood</span>
         <strong>Fresh ingredients and moving lanes make the menu feel more like a real market hall.</strong>
         <p>
-          This hero now leans on one stronger image, while the active category still updates in the preview card below.
+          This hero now leans on one stronger image, while the active category still updates in the compact preview card.
         </p>
       </div>
       <div class="menu-hero__signal">
