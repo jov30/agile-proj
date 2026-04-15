@@ -209,6 +209,7 @@ def _membership_summary(orders: list[Order]) -> dict:
         "member_code": _member_code(seed_source),
         "points_balance": points_balance,
         "points_display": f"{points_balance:,}",
+        "points_rule_display": "$1 spent = 1 point",
         "total_spend_display": format_aud(total_spend_cents),
         "total_orders": total_orders,
         "instant_orders": instant_orders,
@@ -487,6 +488,7 @@ def _support_ai_reply(message: str, history: list[dict[str, str]]) -> tuple[str 
         return None, "request_failed"
 
 
+@user_bp.get("/membership")
 @user_bp.get("/profile")
 def profile() -> str:
     orders = _active_customer_orders()

@@ -100,18 +100,20 @@ class TestSupportChat(unittest.TestCase):
         self.assertNotIn('support-dock is-open', html)
         self.assertIn("Fallback Assistant", html)
         self.assertIn(">Community<", html)
+        self.assertIn(">Membership<", html)
 
     def test_profile_page_renders_membership_dashboard(self):
         self._login_customer()
         self._seed_member_order(total_cents=100000, quantity=5)
 
-        response = self.client.get("/profile")
+        response = self.client.get("/membership")
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
         self.assertIn("MCQ Membership", html)
         self.assertIn("Lantern Member", html)
         self.assertIn("Points wallet", html)
         self.assertIn("MCQ Community", html)
+        self.assertIn("$1 spent = 1 point", html)
         self.assertIn("1000 points = $10 voucher", html)
         self.assertIn("/membership/barcode.svg", html)
         self.assertIn("Distinction Member", html)

@@ -225,6 +225,12 @@
     font-size: 1.18rem;
   }
 
+  .member-wallet__rule {
+    margin-top: 0.3rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
   .member-cardface {
     display: grid;
     gap: 1rem;
@@ -481,6 +487,7 @@
               <span>Points wallet</span>
               <strong>{{ membership.points_display }}</strong>
               <p>Live loyalty preview based on current order history and ready to connect to a real MCQ membership ledger.</p>
+              <p class="member-wallet__rule">{{ membership.points_rule_display }}</p>
               <div class="member-progress">
                 <div class="member-progress__track" aria-hidden="true">
                   <div class="member-progress__bar" style="width: {{ membership.progress_percent }}%;"></div>
