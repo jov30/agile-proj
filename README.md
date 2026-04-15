@@ -112,10 +112,12 @@ Beyond the base project scope above, the current branch includes several upgrade
 ## Example Admin Flow
 
 1. Log in with the admin demo account.
-2. Open the admin ordering and queue management area.
-3. Review active instant and scheduled orders.
-4. Move orders through the allowed status sequence.
-5. Monitor pickup timing, order progress, and customer-side updates.
+2. Open the admin area to review customer accounts and profiles.
+3. View and update customer information where needed.
+4. Manage menu items, pricing, descriptions, categories, ingredients, and availability.
+5. Review active instant and scheduled orders.
+6. Track pickup timing and move orders through the allowed status sequence.
+7. Review sales records, income summaries, and monthly reporting insights.
 
 ## User Features
 
@@ -139,13 +141,17 @@ The customer-facing side of the project includes:
 The admin-facing side of the project includes:
 
 - admin login and protected access
+- viewing and managing customer accounts
+- viewing customer profiles
+- editing customer information when required
 - viewing customer orders
 - monitoring pickup timing
 - updating order status
 - queue operations for pickup handling
-- menu-management scope for adding, editing, and removing items
-- customer-account and profile management scope
-- reporting scope for sales and monthly income
+- adding, editing, and removing menu items
+- updating prices, descriptions, ingredients, categories, and availability
+- reviewing sales and income records
+- monthly income analysis and reporting
 
 ## Tech Stack
 
@@ -176,6 +182,8 @@ The application is structured around the following backend responsibilities:
 - menu and cart APIs
 - order creation, payment simulation, receipt generation, and order history
 - admin queue and status management
+- customer-account and profile management scope
+- admin reporting and income-analysis scope
 - database-backed order, line-item, payment-attempt, notification, and queue-counter records
 
 ## Project Structure
