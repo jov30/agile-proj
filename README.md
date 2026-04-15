@@ -91,6 +91,9 @@ Beyond the base project scope above, the current branch includes several upgrade
 - **order history, order detail, and reorder flow**
 - **admin queue operations** for active pickup management
 - **live order-status presentation** and ready notifications inside the website
+- **membership profile UI** with loyalty points, tier progress, and repeat-customer identity
+- **saved meals UI** prepared for favourite collections and share actions
+- **MCQ Community hub UI** prepared for meal sharing, story sharing, and future social posting flows
 - **support chatbox** with OpenAI integration and automatic fallback mode
 - **enhanced landing, menu, cart, checkout, and receipt design**
 
@@ -131,8 +134,11 @@ The customer-facing side of the project includes:
 - community-member onboarding and repeat-customer account scope
 - profile-related account access
 - membership-style customer identity for ongoing use of the platform
+- loyalty-style points and tier dashboard experience
 - favourite meal saving and sharing
+- saved meal boards and collection-style UI
 - viewing favourite meals shared by other users
+- community hub for shared meals, stories, and future member posting flows
 - menu browsing and item detail views
 - keyword and category-based discovery
 - cart add, update, and summary flow
@@ -250,8 +256,11 @@ project-root/
 │   │   ├── menu.html
 │   │   └── receipt.html
 │   ├── user/
+│   │   ├── community.html
+│   │   ├── favorites.html
 │   │   ├── order_detail.html
-│   │   └── orders.html
+│   │   ├── orders.html
+│   │   └── profile.html
 │   ├── base.html
 │   ├── feature-page.html
 │   └── index.html
@@ -384,6 +393,7 @@ python3 scripts/build_menu_json.py
 - Payments are **simulated** for demo and assessment purposes.
 - The AI chatbox depends on a valid OpenAI API key and available quota; otherwise it falls back automatically.
 - Some project areas are broader in final scope than in the currently polished branch implementation, especially around extended profile, favourites, and reporting workflows.
+- The new membership, loyalty-points, and MCQ Community areas are intentionally designed as strong frontend scaffolds so future backend persistence and social features can plug into them without reworking the layout.
 
 ## Future Extensions
 
