@@ -5,7 +5,7 @@
 ## Overview
 
 MCQ is a Flask-based client-server web application for Vietnamese street-food ordering, pickup coordination, and customer account features.  
-The final project scope covers customer authentication, profile and favourite-meal features, menu and cart management, checkout and receipt workflows, and restaurant-side admin operations.
+The final project scope covers customer authentication, profile, community-member and favourite-meal features, menu and cart management, checkout and receipt workflows, and restaurant-side admin operations.
 
 In addition to the core assignment requirements, the current branch also includes richer delivery of those flows through **instant counter pickup**, **scheduled pickup**, **QR-coded receipts**, **PDF receipts**, **live order tracking**, **admin queue operations**, and a **support chat experience with AI fallback handling**.
 
@@ -25,8 +25,10 @@ The project is designed around four main functional areas.
 ### 1. Authentication, Profile, and Favourite Meals
 
 - user registration
+- account creation to become a community member
 - user login and logout
 - profile view and update
+- membership-style account scope for repeat customers
 - save favourite meals
 - share favourite meals with other users
 - view favourite meals shared by other users
@@ -99,15 +101,17 @@ Beyond the base project scope above, the current branch includes several upgrade
 
 ## Example User Flow
 
-1. Open the landing page and choose `Order Now` or `Schedule Pickup`.
-2. Browse the menu and add dishes to the cart.
-3. Review the cart summary.
-4. Go to checkout.
-5. Choose instant pickup or scheduled pickup.
-6. Complete the simulated payment.
-7. Receive an order confirmation and receipt.
-8. Track the order from the receipt, QR code, or order history.
-9. Reorder later if needed.
+1. Register an account and create customer details to join the MCQ member community.
+2. Log in as a returning member or continue into the ordering flow.
+3. Open the landing page and choose `Order Now` or `Schedule Pickup`.
+4. Browse the menu and add dishes to the cart.
+5. Review the cart summary.
+6. Go to checkout.
+7. Choose instant pickup or scheduled pickup.
+8. Complete the simulated payment.
+9. Receive an order confirmation and receipt.
+10. Track the order from the receipt, QR code, or order history.
+11. Save favourite meals, share them with other users, and return later as a repeat member.
 
 ## Example Admin Flow
 
@@ -123,8 +127,10 @@ Beyond the base project scope above, the current branch includes several upgrade
 
 The customer-facing side of the project includes:
 
-- registration, login, and logout
+- registration, login, logout, and member account access
+- community-member onboarding and repeat-customer account scope
 - profile-related account access
+- membership-style customer identity for ongoing use of the platform
 - favourite meal saving and sharing
 - viewing favourite meals shared by other users
 - menu browsing and item detail views
