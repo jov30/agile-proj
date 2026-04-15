@@ -269,7 +269,6 @@ project-root/
 ├── README.md
 ├── config.py
 ├── models.py
-├── forms.py
 ├── data/
 │   ├── menu-image-sources.json
 │   ├── menu-prices.json
@@ -291,11 +290,7 @@ project-root/
 │   ├── feature-page.html
 │   ├── index.html
 │   ├── admin/
-│   │   ├── dashboard.html
-│   │   ├── income.html
-│   │   ├── menu.html
-│   │   ├── orders.html
-│   │   └── users.html
+│   │   └── orders.html
 │   ├── auth/
 │   │   ├── login.html
 │   │   └── register.html
@@ -304,13 +299,10 @@ project-root/
 │   │   ├── checkout.html
 │   │   └── menu.html
 │   └── user/
-│       ├── orders.html
-│       ├── profile.html
-│       └── shared_meals.html
+│       └── orders.html
 ├── static/
 │   ├── css/
-│   │   ├── main.css
-│   │   └── style.css
+│   │   └── main.css
 │   ├── data/
 │   │   └── menu.json
 │   ├── js/

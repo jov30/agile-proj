@@ -8,7 +8,6 @@ project-root/
 ├── README.md
 ├── config.py
 ├── models.py
-├── forms.py
 ├── routes/
 │   ├── auth.py
 │   ├── user.py
@@ -22,22 +21,17 @@ project-root/
 │   │   ├── login.html
 │   │   └── register.html
 │   ├── user/
-│   │   ├── profile.html
 │   │   ├── orders.html
-│   │   └── shared_meals.html
+│   │   └── order_detail.html
 │   ├── menu/
 │   │   ├── menu.html
 │   │   ├── cart.html
 │   │   └── checkout.html
 │   └── admin/
-│       ├── dashboard.html
-│       ├── users.html
-│       ├── menu.html
-│       ├── orders.html
-│       └── income.html
+│       └── orders.html
 ├── static/
 │   ├── css/
-│   │   └── style.css
+│   │   └── main.css
 │   ├── js/
 │   │   ├── cart.js
 │   │   ├── checkout.js
@@ -65,7 +59,7 @@ Main files:
 - templates/menu/menu.html
 - templates/menu/cart.html
 - templates/menu/checkout.html
-- static/css/style.css
+- static/css/main.css
 - static/js/cart.js
 - static/js/checkout.js
 - routes/menu.py
@@ -86,7 +80,6 @@ This role focuses on authentication and account access.
 Main files:
 - templates/auth/login.html
 - templates/auth/register.html
-- forms.py
 - routes/auth.py
 
 Main responsibilities:
@@ -102,9 +95,10 @@ Role 3: User Features and Social Features
 This role focuses on the main user-side features after login, including profile management, order history, and shared meal features.
 
 Main files:
-- templates/user/profile.html
 - templates/user/orders.html
-- templates/user/shared_meals.html
+- templates/user/order_detail.html
+- templates/feature-page.html
+- feature_pages.py
 - routes/user.py
 - routes/orders.py
 
@@ -122,11 +116,7 @@ Role 4: Admin Side, Testing, and Documentation
 This role focuses on the restaurant management side of the system, along with testing and project documentation.
 
 Main files:
-- templates/admin/dashboard.html
-- templates/admin/users.html
-- templates/admin/menu.html
 - templates/admin/orders.html
-- templates/admin/income.html
 - routes/admin.py
 - README.md
 - tests/
