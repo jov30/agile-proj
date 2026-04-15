@@ -192,6 +192,10 @@ def _instant_ordering_enabled() -> bool:
     return bool(current_app.config.get("ENABLE_INSTANT_ORDERING", False))
 
 
+def _instant_demo_override_enabled() -> bool:
+    return bool(current_app.config.get("DEMO_ALLOW_AFTER_HOURS_INSTANT_ORDERING", False))
+
+
 def _service_hours_for(day_value) -> tuple[datetime, datetime]:
     opening = datetime.combine(
         day_value,
@@ -344,13 +348,21 @@ def _instant_queue_snapshot(cart: dict | None = None) -> dict:
 
     next_queue_number = _current_instant_queue_counter(now.date()) + 1
 
-    is_open = opening <= now <= closing
-    kitchen_can_finish = estimated_ready <= closing
     enabled = _instant_ordering_enabled()
-    can_accept = enabled and is_open and kitchen_can_finish and remaining_capacity > 0
+    is_open = opening <= now <= closing
+    is_after_hours_demo = enabled and _instant_demo_override_enabled() and not is_open
+    kitchen_can_finish = estimated_ready <= closing
+    can_accept = enabled and remaining_capacity > 0 and ((is_open and kitchen_can_finish) or is_after_hours_demo)
+    opening_label = opening.strftime("%I:%M %p").lstrip("0")
+    closing_label = closing.strftime("%I:%M %p").lstrip("0")
 
     if not enabled:
         status_message = "Instant ordering is currently disabled."
+    elif is_after_hours_demo:
+        status_message = (
+            f"Demo mode keeps instant ordering open outside the normal {opening_label} to {closing_label} window. "
+            f"Queue #{next_queue_number} is estimated ready in about {quoted_wait} minutes."
+        )
     elif not is_open:
         status_message = "Instant ordering opens during trading hours only."
     elif remaining_capacity < 1:
@@ -372,6 +384,8 @@ def _instant_queue_snapshot(cart: dict | None = None) -> dict:
         "estimated_ready_at": estimated_ready,
         "estimated_ready_label": estimated_ready.strftime("%I:%M %p").lstrip("0"),
         "is_open": is_open,
+        "is_after_hours_demo": is_after_hours_demo,
+        "service_window_label": f"{opening_label} to {closing_label}",
         "can_accept": can_accept,
         "status_message": status_message,
     }

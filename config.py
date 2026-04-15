@@ -32,6 +32,7 @@ class Config:
     OPENAI_CHAT_MODEL = os.environ.get("OPENAI_CHAT_MODEL", "gpt-5-mini")
     SUPPORT_CHAT_TIMEOUT_SECONDS = float(os.environ.get("SUPPORT_CHAT_TIMEOUT_SECONDS", "20"))
     SUPPORT_CHAT_MAX_HISTORY_MESSAGES = int(os.environ.get("SUPPORT_CHAT_MAX_HISTORY_MESSAGES", "10"))
+    APP_ENV = os.environ.get("APP_ENV", "development")
 
     APP_TIMEZONE = os.environ.get("APP_TIMEZONE", "Australia/Perth")
     PICKUP_OPEN_HOUR = int(os.environ.get("PICKUP_OPEN_HOUR", "10"))
@@ -43,6 +44,10 @@ class Config:
     PICKUP_MAX_DAYS_AHEAD = int(os.environ.get("PICKUP_MAX_DAYS_AHEAD", "7"))
     PICKUP_SLOT_CAPACITY = int(os.environ.get("PICKUP_SLOT_CAPACITY", "4"))
     ENABLE_INSTANT_ORDERING = _bool_env("ENABLE_INSTANT_ORDERING", True)
+    DEMO_ALLOW_AFTER_HOURS_INSTANT_ORDERING = _bool_env(
+        "DEMO_ALLOW_AFTER_HOURS_INSTANT_ORDERING",
+        APP_ENV != "production",
+    )
     INSTANT_ORDERING_COUNTER_LABEL = os.environ.get("INSTANT_ORDERING_COUNTER_LABEL", "Front Pickup Counter")
     INSTANT_ORDERING_BASE_PREP_MINUTES = int(os.environ.get("INSTANT_ORDERING_BASE_PREP_MINUTES", "12"))
     INSTANT_ORDERING_PER_ACTIVE_ORDER_MINUTES = int(

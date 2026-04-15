@@ -302,6 +302,56 @@ class TestCheckoutAndOrders(unittest.TestCase):
         self.assertEqual(payload["queue_display"], "#001")
         self.assertIn("Instant counter pickup", payload["fulfillment_label"])
 
+    def test_instant_order_allows_after_hours_in_demo_mode(self):
+        self.app.config.update(
+            {
+                "PICKUP_OPEN_HOUR": 10,
+                "PICKUP_OPEN_MINUTE": 30,
+                "PICKUP_CLOSE_HOUR": 20,
+                "PICKUP_CLOSE_MINUTE": 30,
+                "DEMO_ALLOW_AFTER_HOURS_INSTANT_ORDERING": True,
+            }
+        )
+        late_night = self.base_now.replace(hour=23, minute=47)
+
+        with patch("routes.orders._now_local", return_value=late_night):
+            order_number = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
+            self._seed_cart()
+            checkout = self.client.get("/checkout?fulfillment=instant")
+
+        self.assertEqual(checkout.status_code, 200)
+        html = checkout.get_data(as_text=True)
+        self.assertIn("Demo override", html)
+        self.assertIn("Queue #002", html)
+
+        with self.app.app_context():
+            order = Order.query.filter_by(order_number=order_number).first()
+            self.assertIsNotNone(order)
+            self.assertEqual(order.queue_number, 1)
+
+    def test_instant_order_blocks_after_hours_when_demo_override_disabled(self):
+        self.app.config.update(
+            {
+                "PICKUP_OPEN_HOUR": 10,
+                "PICKUP_OPEN_MINUTE": 30,
+                "PICKUP_CLOSE_HOUR": 20,
+                "PICKUP_CLOSE_MINUTE": 30,
+                "DEMO_ALLOW_AFTER_HOURS_INSTANT_ORDERING": False,
+            }
+        )
+        late_night = self.base_now.replace(hour=23, minute=47)
+        self._seed_cart()
+
+        with patch("routes.orders._now_local", return_value=late_night):
+            response = self.client.post(
+                "/checkout",
+                data=self._valid_checkout_form(fulfillment_type="instant"),
+                follow_redirects=False,
+            )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Instant ordering opens during trading hours only.", response.get_data(as_text=True))
+
     def test_instant_queue_number_increments_by_order(self):
         first = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))
         second = self._place_order(self._valid_checkout_form(fulfillment_type="instant"))

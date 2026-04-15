@@ -821,6 +821,9 @@
           <span class="pill"><strong>Instant queue</strong> order now, then collect at {{ instant_queue.counter_label }} when ready.</span>
           <span class="pill"><strong>Scheduled planner</strong> reserve a pickup slot with lead-time and capacity checks.</span>
           <span class="pill"><strong>Stored records</strong> payment log, fulfillment mode, and receipt data are all written to SQLite.</span>
+          {% if instant_queue.is_after_hours_demo %}
+            <span class="pill"><strong>Demo override</strong> instant queue is temporarily allowed outside the normal {{ instant_queue.service_window_label }} window for local testing.</span>
+          {% endif %}
           {% if next_available_pickup %}
             <span class="pill">
               <strong>Next scheduled slot</strong>
@@ -1109,6 +1112,9 @@
                   {% if instant_queue.can_accept %}
                     Queue #{{ "%03d"|format(instant_queue.next_queue_number) }} at {{ instant_queue.counter_label }}
                     with an estimated {{ instant_queue.quoted_wait_minutes }} minute wait (ready around {{ instant_queue.estimated_ready_label }}).
+                    {% if instant_queue.is_after_hours_demo %}
+                      Demo mode is active because the current time sits outside the normal {{ instant_queue.service_window_label }} service window.
+                    {% endif %}
                   {% else %}
                     {{ instant_queue.status_message }}
                   {% endif %}
