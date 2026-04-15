@@ -52,12 +52,14 @@
 
   .menu-hero__visual {
     position: relative;
-    min-height: 540px;
+    display: grid;
+    gap: 1rem;
+    align-content: start;
   }
 
   .menu-hero__scene {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    min-height: 432px;
     overflow: hidden;
     border-radius: 34px;
     border: 1px solid rgba(112, 85, 66, 0.14);
@@ -82,8 +84,12 @@
   .menu-hero__visual-copy,
   .menu-hero__preview,
   .menu-hero__signal {
-    position: absolute;
     z-index: 1;
+  }
+
+  .menu-hero__visual-copy,
+  .menu-hero__signal {
+    position: absolute;
   }
 
   .menu-hero__visual-copy {
@@ -138,19 +144,18 @@
   }
 
   .menu-hero__preview {
-    right: 1.35rem;
-    bottom: 1.35rem;
     display: grid;
     grid-template-columns: 112px minmax(0, 1fr);
     align-items: stretch;
-    width: min(290px, calc(100% - 2.7rem));
+    width: min(360px, 100%);
+    margin-left: auto;
     overflow: hidden;
     border-radius: 26px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(112, 85, 66, 0.14);
     background:
-      linear-gradient(180deg, rgba(35, 24, 20, 0.94), rgba(23, 19, 21, 0.92)),
+      linear-gradient(180deg, rgba(42, 28, 22, 0.96), rgba(31, 22, 18, 0.94)),
       rgba(32, 23, 19, 0.92);
-    box-shadow: 0 28px 44px rgba(21, 11, 7, 0.28);
+    box-shadow: 0 18px 30px rgba(21, 11, 7, 0.14);
   }
 
   .menu-hero__preview img {
@@ -756,10 +761,6 @@
       padding: 1.2rem;
     }
 
-    .menu-hero__visual {
-      min-height: 520px;
-    }
-
     .menu-hero__visual-copy,
     .menu-hero__signal {
       position: relative;
@@ -772,10 +773,8 @@
     }
 
     .menu-hero__preview {
-      left: 1rem;
-      right: 1rem;
-      bottom: 1rem;
       width: auto;
+      margin-left: 0;
       grid-template-columns: 96px minmax(0, 1fr);
     }
 
@@ -854,7 +853,7 @@
         <span>Floating market mood</span>
         <strong>Fresh ingredients and moving lanes make the menu feel more like a real market hall.</strong>
         <p>
-          This hero now leans on one stronger image, while the active category still updates in the compact preview card.
+          This hero now leans on one stronger image, while the active category updates in a separate featured lane card.
         </p>
       </div>
       <div class="menu-hero__signal">
@@ -862,13 +861,13 @@
         <strong>Choose fast</strong>
         <p>Move between pho, rice, grill, drinks, and desserts without losing the next ordering step.</p>
       </div>
-      <div class="menu-hero__preview">
-        <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
-        <div class="menu-hero__preview-copy">
-          <span>Featured lane</span>
-          <strong id="menu-active-category">Pho Noodle Soup</strong>
-          <p>Category preview changes live as you switch lanes across the menu browser.</p>
-        </div>
+    </div>
+    <div class="menu-hero__preview">
+      <img id="menu-hero-image" src="{{ url_for('static', filename='images/menu/pho-classic.jpg') }}" alt="MCQ menu hero" />
+      <div class="menu-hero__preview-copy">
+        <span>Featured lane</span>
+        <strong id="menu-active-category">Pho Noodle Soup</strong>
+        <p>Category preview changes live as you switch lanes across the menu browser.</p>
       </div>
     </div>
   </div>
