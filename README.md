@@ -4,10 +4,10 @@
 
 ## Overview
 
-MCQ is a Flask-based client-server web application for Vietnamese street-food pickup ordering.  
-The current build focuses on a complete customer ordering journey, from menu browsing to receipt download, with both **scheduled pickup** and **instant counter pickup** supported.
+MCQ is a Flask-based client-server web application for Vietnamese street-food ordering, pickup coordination, and customer account features.  
+The final project scope covers customer authentication, profile and favourite-meal features, menu and cart management, checkout and receipt workflows, and restaurant-side admin operations.
 
-This branch also includes restaurant-side queue operations, order tracking, branded receipts, and a support chat experience with AI fallback handling.
+In addition to the core assignment requirements, the current branch also includes richer delivery of those flows through **instant counter pickup**, **scheduled pickup**, **QR-coded receipts**, **PDF receipts**, **live order tracking**, **admin queue operations**, and a **support chat experience with AI fallback handling**.
 
 ## Team Members
 
@@ -18,57 +18,84 @@ This branch also includes restaurant-side queue operations, order tracking, bran
 | 24220908 | Samuel Ou | slimoftheshady |
 | 24181084 | Thomas Zeng | zxx457 |
 
-## Guaranteed Features In This Build
+## Final Project Feature Scope
 
-These are the features the current project build is designed to include.
+The project is designed around four main functional areas.
 
-### Customer Ordering
+### 1. Authentication, Profile, and Favourite Meals
 
-- register, log in, and log out
-- browse the full menu and view item detail pages
-- add items to cart and update quantities
-- see cart totals, service fee, and fulfillment-aware checkout hints
-- choose between:
-  - **Instant counter pickup** with queue number and quoted wait time
-  - **Scheduled pickup** with date and time slot selection
-- complete a **simulated payment** flow
-- create persistent orders in SQLite
-- receive a branded HTML receipt and downloadable PDF receipt
-- scan a QR code that opens live order tracking
-- view order history and order detail pages
-- reorder a previous order back into the cart
-- receive in-site ready notifications for pickup updates
+- user registration
+- user login and logout
+- profile view and update
+- save favourite meals
+- share favourite meals with other users
+- view favourite meals shared by other users
+- authentication and profile forms with validation
+- user-related backend routes
+- user and favourite-meal data handling in the database
+- connection of login, register, profile, and shared-favourite pages to backend logic
+- basic tests for authentication, profile, and favourite-meal flows
 
-### Order Tracking and Operations
+### 2. Menu and Cart
 
-- live order detail view with current status
-- sequential status updates:
-  - `Confirmed`
-  - `Preparing`
-  - `Ready for Pickup`
-  - `Completed`
-- admin-only queue management screen for pickup operations
-- instant queue numbering with safer database-backed assignment
-- receipt and order pages showing notification timeline information
+- menu browsing with category-based navigation
+- filter menu bar and keyword search support
+- menu item detail flow
+- add items to cart
+- update cart quantities
+- view cart summary and total price
+- cart-related backend routes
+- menu and cart data handling
+- connection of menu and cart pages to backend logic
+- basic tests for menu and cart features
 
-### Support and UX
+### 3. Checkout, Orders, and Receipts
 
-- branded landing page and menu experience
-- improved cart, checkout, receipt, and order page layouts
-- support chatbox with:
-  - OpenAI-backed replies when an API key is configured and available
-  - automatic fallback assistant replies when AI is unavailable
+- checkout flow
+- simulated payment flow
+- scheduled pickup date and time selection
+- order confirmation
+- store order records in the database
+- PDF receipt generation
+- order history
+- order-related backend routes
+- order model and database setup
+- connection of checkout, payment, receipt, and order pages to backend logic
+- basic tests for checkout and order features
 
-## Supporting Scope
+### 4. Admin and Reporting
 
-The project also keeps lightweight supporting pages for:
+- admin login and access flow
+- view and manage customer accounts
+- view customer profiles
+- add, edit, and remove menu items
+- update prices, descriptions, ingredients, categories, and availability
+- view customer orders
+- track pickup times
+- update order status
+- view sales and income records
+- monthly income chart and reporting
+- admin-related backend routes
+- basic tests for admin features
 
-- profile
-- favourites
-- shared meals
-- support information
+## Current Branch Enhancements
 
-These pages help cover broader project scope and future extension points, but the most complete and production-ready flows in this build are the **menu, cart, checkout, order, receipt, and admin queue** journeys.
+Beyond the base project scope above, the current branch includes several upgraded flows and presentation features:
+
+- **Instant counter pickup** with live queue numbering and quoted wait time
+- **Scheduled pickup slot capacity handling** and validation
+- **branded HTML and PDF receipts**
+- **QR codes** on receipts that open live order tracking
+- **order history, order detail, and reorder flow**
+- **admin queue operations** for active pickup management
+- **live order-status presentation** and ready notifications inside the website
+- **support chatbox** with OpenAI integration and automatic fallback mode
+- **enhanced landing, menu, cart, checkout, and receipt design**
+
+## System Roles
+
+- **Customer Side** for ordering, account access, favourites, and order tracking
+- **Admin Side** for restaurant operations, queue handling, order updates, and reporting
 
 ## Example User Flow
 
@@ -85,10 +112,40 @@ These pages help cover broader project scope and future extension points, but th
 ## Example Admin Flow
 
 1. Log in with the admin demo account.
-2. Open `/admin/orders/queue`.
+2. Open the admin ordering and queue management area.
 3. Review active instant and scheduled orders.
 4. Move orders through the allowed status sequence.
-5. Trigger ready-for-pickup notifications shown on the customer side.
+5. Monitor pickup timing, order progress, and customer-side updates.
+
+## User Features
+
+The customer-facing side of the project includes:
+
+- registration, login, and logout
+- profile-related account access
+- favourite meal saving and sharing
+- viewing favourite meals shared by other users
+- menu browsing and item detail views
+- keyword and category-based discovery
+- cart add, update, and summary flow
+- instant and scheduled pickup selection
+- simulated checkout and payment confirmation
+- PDF receipt generation
+- QR-based receipt tracking
+- order history and order detail pages
+
+## Admin Features
+
+The admin-facing side of the project includes:
+
+- admin login and protected access
+- viewing customer orders
+- monitoring pickup timing
+- updating order status
+- queue operations for pickup handling
+- menu-management scope for adding, editing, and removing items
+- customer-account and profile management scope
+- reporting scope for sales and monthly income
 
 ## Tech Stack
 
@@ -110,6 +167,16 @@ These pages help cover broader project scope and future extension points, but th
 - `requests` for AI chat API calls
 - `Pillow` for receipt/QR image handling
 - `qrcode` for receipt QR generation
+
+## Core Data and Backend Scope
+
+The application is structured around the following backend responsibilities:
+
+- user-related routes and session handling
+- menu and cart APIs
+- order creation, payment simulation, receipt generation, and order history
+- admin queue and status management
+- database-backed order, line-item, payment-attempt, notification, and queue-counter records
 
 ## Project Structure
 
@@ -257,6 +324,7 @@ Pickup scheduling and instant queue timing can also be tuned through config valu
 - SQLite is used by default.
 - The database file is created under `instance/app.db`.
 - Tables are initialized automatically when the app starts.
+- The current branch persists order-related records, line items, payment attempts, notifications, and queue counters.
 
 ## Demo Admin Account
 
@@ -275,7 +343,7 @@ Run the full test suite with:
 venv/bin/python -m unittest tests.test_auth tests.test_admin tests.test_menu tests.test_orders tests.test_user
 ```
 
-The current branch includes automated coverage for:
+The current test suite includes automated coverage for:
 
 - authentication
 - admin queue access and updates
@@ -301,7 +369,7 @@ python3 scripts/build_menu_json.py
 
 - Payments are **simulated** for demo and assessment purposes.
 - The AI chatbox depends on a valid OpenAI API key and available quota; otherwise it falls back automatically.
-- Profile, favourites, and shared-meal areas are supporting scope pages rather than fully developed data-management modules in this build.
+- Some project areas are broader in final scope than in the currently polished branch implementation, especially around extended profile, favourites, and reporting workflows.
 
 ## Future Extensions
 
@@ -313,4 +381,3 @@ Possible future improvements include:
 - menu management from the admin side
 - stronger analytics and reporting
 - real payment gateway integration
-
