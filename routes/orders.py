@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import re
 import secrets
+import socket
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
@@ -500,6 +501,32 @@ def _next_order_status(current_status: str) -> str | None:
     if current_index >= len(ORDER_STATUS_SEQUENCE) - 1:
         return None
     return ORDER_STATUS_SEQUENCE[current_index + 1]
+
+
+def _qr_base_url() -> str:
+    configured = str(current_app.config.get("PUBLIC_BASE_URL", "")).strip()
+    if configured:
+        return configured.rstrip("/")
+
+    host = request.host.split(":", 1)[0].strip().lower()
+    request_base = request.host_url.rstrip("/")
+    if host not in {"127.0.0.1", "localhost", "0.0.0.0"}:
+        return request_base
+
+    port = request.host.split(":", 1)[1] if ":" in request.host else ""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.connect(("8.8.8.8", 80))
+            lan_ip = probe.getsockname()[0]
+        if lan_ip and not lan_ip.startswith("127."):
+            return f"{request.scheme}://{lan_ip}:{port}" if port else f"{request.scheme}://{lan_ip}"
+    except OSError:
+        pass
+    return request_base
+
+
+def _qr_destination_url(order_number: str) -> str:
+    return f"{_qr_base_url()}{url_for('orders.order_detail', order_number=order_number)}"
 
 
 def _serialize_payment_attempt(attempt: PaymentAttempt) -> dict:
@@ -1446,19 +1473,13 @@ def receipt_pdf(order_number: str):
 @orders_bp.get("/orders/<order_number>/qr.png")
 def receipt_qr(order_number: str):
     order = Order.query.filter_by(order_number=order_number).first_or_404()
-    fulfillment_type = order.fulfillment_type if order.fulfillment_type in FULFILLMENT_TYPES else FULFILLMENT_TYPES[1]
-    queue_text = f"\nqueue_number={order.queue_number}" if order.queue_number else ""
-    counter_text = f"\ncounter_label={order.counter_label}" if order.counter_label else ""
     qr = qrcode.QRCode(
         version=3,
         border=1,
         box_size=8,
         error_correction=qrcode.constants.ERROR_CORRECT_M,
     )
-    qr.add_data(
-        f"MCQ ORDER\norder_number={order.order_number}\nconfirmation_code={order.confirmation_code}\n"
-        f"fulfillment_type={fulfillment_type}\npickup_at={order.pickup_at.isoformat()}{queue_text}{counter_text}"
-    )
+    qr.add_data(_qr_destination_url(order.order_number))
     qr.make(fit=True)
     image = qr.make_image(fill_color="black", back_color="white")
     buffer = io.BytesIO()

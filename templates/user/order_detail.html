@@ -353,6 +353,7 @@
             <div class="order-detail__ticket-item">
               <span>QR verification</span>
               <img class="order-detail__qr" src="{{ url_for('orders.receipt_qr', order_number=order.order_number) }}" alt="QR for {{ order.order_number }}" />
+              <p class="order-detail__line-meta">Scan to reopen this live order page on another device.</p>
             </div>
           </div>
         </aside>

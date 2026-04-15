@@ -30,6 +30,7 @@ class Config:
     OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
     OPENAI_API_BASE = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1")
     OPENAI_CHAT_MODEL = os.environ.get("OPENAI_CHAT_MODEL", "gpt-5-mini")
+    PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "")
     SUPPORT_CHAT_TIMEOUT_SECONDS = float(os.environ.get("SUPPORT_CHAT_TIMEOUT_SECONDS", "20"))
     SUPPORT_CHAT_MAX_HISTORY_MESSAGES = int(os.environ.get("SUPPORT_CHAT_MAX_HISTORY_MESSAGES", "10"))
     APP_ENV = os.environ.get("APP_ENV", "development")

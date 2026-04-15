@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from app import create_app
 from models import DailyQueueCounter, Order, OrderNotification, PaymentAttempt, db
+from routes.orders import _qr_destination_url
 
 
 class TestCheckoutAndOrders(unittest.TestCase):
@@ -271,6 +272,16 @@ class TestCheckoutAndOrders(unittest.TestCase):
         html = checkout.get_data(as_text=True)
         self.assertIn("Sauce on the side.", html)
         self.assertIn("Nguyen Tester", html)
+
+    def test_qr_destination_url_points_to_live_order_detail(self):
+        with self.app.test_request_context(
+            "/orders/MCQ-QRTEST/qr.png",
+            base_url="http://mcq.test:5001",
+        ):
+            self.assertEqual(
+                _qr_destination_url("MCQ-QRTEST"),
+                "http://mcq.test:5001/orders/MCQ-QRTEST",
+            )
 
     def test_pickup_slot_capacity_blocks_overbooked_time(self):
         self.app.config["PICKUP_SLOT_CAPACITY"] = 1

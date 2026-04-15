@@ -622,7 +622,7 @@
           </div>
           <div class="receipt-ticket__qr">
             <img src="{{ url_for('orders.receipt_qr', order_number=order.order_number) }}" alt="QR code for order {{ order.order_number }}" />
-            <p>Scan for order verification: {{ order.order_number }}</p>
+            <p>Scan to open live order tracking for {{ order.order_number }}</p>
           </div>
         </aside>
       </div>
