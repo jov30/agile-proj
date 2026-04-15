@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}Membership Profile | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .member-shell {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .member-hero,
+  .member-section {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .member-hero__grid,
+  .member-section__grid,
+  .member-stats,
+  .member-benefits {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .member-hero__grid,
+  .member-section__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  }
+
+  .member-card,
+  .member-visual,
+  .member-stat,
+  .member-note,
+  .member-benefit,
+  .member-orders,
+  .member-empty {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .member-card,
+  .member-note,
+  .member-benefit,
+  .member-orders,
+  .member-empty {
+    padding: 1.2rem;
+  }
+
+  .member-visual {
+    min-height: 100%;
+    padding: 1.2rem;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(22, 16, 14, 0.16), rgba(18, 14, 16, 0.84)),
+      url("{{ url_for('static', filename='images/inspiration/hero-new-world-gourmet.avif') }}");
+    background-size: cover;
+    background-position: center;
+    box-shadow: var(--shadow-strong);
+  }
+
+  .member-visual::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 auto;
+    width: 48%;
+    height: 62%;
+    opacity: 0.28;
+    background:
+      url("{{ url_for('static', filename='images/inspiration/saigon-skyline.webp') }}")
+      no-repeat
+      bottom
+      right
+      / contain;
+    pointer-events: none;
+  }
+
+  .member-card > *,
+  .member-visual > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .member-card h1,
+  .member-orders h2,
+  .member-section h2 {
+    margin: 0.18rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .member-card h1 {
+    font-size: clamp(2rem, 3vw, 3rem);
+  }
+
+  .member-card p,
+  .member-note p,
+  .member-benefit p,
+  .member-orders p,
+  .member-visual p,
+  .member-empty p {
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  .member-card p,
+  .member-visual p {
+    margin: 0.52rem 0 0;
+  }
+
+  .member-visual p {
+    color: rgba(255, 247, 239, 0.84);
+  }
+
+  .member-pills,
+  .member-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
+  .member-pills {
+    margin-top: 1rem;
+  }
+
+  .member-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.86rem;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
+  .member-pill--muted {
+    color: var(--text-main);
+    background: rgba(112, 85, 66, 0.08);
+  }
+
+  .member-balance {
+    margin-top: 1.05rem;
+    padding: 1rem 1.05rem;
+    border-radius: 24px;
+    background: rgba(255, 245, 235, 0.92);
+    border: 1px solid rgba(255, 180, 54, 0.16);
+  }
+
+  .member-balance span,
+  .member-visual span,
+  .member-order__meta span {
+    display: block;
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.15em;
+    font-size: 0.96rem;
+  }
+
+  .member-balance strong {
+    display: block;
+    margin-top: 0.2rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1;
+  }
+
+  .member-progress {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+  }
+
+  .member-progress__track {
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(112, 85, 66, 0.1);
+    overflow: hidden;
+  }
+
+  .member-progress__bar {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--brand-orange), var(--brand-red));
+  }
+
+  .member-progress__copy {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  .member-actions {
+    margin-top: 1rem;
+  }
+
+  .member-stat {
+    padding: 1rem 1.05rem;
+  }
+
+  .member-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .member-stat strong,
+  .member-benefit strong,
+  .member-note strong,
+  .member-order__title {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .member-stat strong {
+    font-size: 1.55rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .member-stat span,
+  .member-benefit p,
+  .member-note p {
+    color: var(--text-muted);
+  }
+
+  .member-benefits {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 1rem;
+  }
+
+  .member-orders__list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  .member-order {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.7rem 1rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .member-order:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .member-order__meta {
+    display: grid;
+    justify-items: end;
+    gap: 0.18rem;
+    text-align: right;
+  }
+
+  .member-order__meta strong {
+    font-size: 1rem;
+  }
+
+  .member-visual__stack {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.9rem;
+    align-content: end;
+    min-height: 100%;
+  }
+
+  .member-visual__card {
+    padding: 1rem 1.05rem;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 216, 115, 0.12);
+  }
+
+  .member-visual__card strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.2rem;
+  }
+
+  .member-visual__card p {
+    margin: 0.42rem 0 0;
+  }
+
+  @media (max-width: 1080px) {
+    .member-hero__grid,
+    .member-section__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .member-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .member-benefits {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .member-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .member-order {
+      grid-template-columns: 1fr;
+    }
+
+    .member-order__meta {
+      justify-items: start;
+      text-align: left;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="member-shell">
+  <section class="member-hero section-panel">
+    <div class="member-hero__grid">
+      <article class="member-card">
+        <p class="eyebrow">MCQ Membership</p>
+        <h1>{{ membership.member_name }}</h1>
+        <p>
+          Build a polished member identity around pickup habits, favourite dishes, and community participation. This page is ready
+          for a future loyalty backend without looking like a placeholder in the meantime.
+        </p>
+        <div class="member-pills">
+          <span class="member-pill">{{ membership.current_tier.name }}</span>
+          <span class="member-pill member-pill--muted">{{ membership.member_code }}</span>
+          <span class="member-pill member-pill--muted">{{ membership.member_email }}</span>
+        </div>
+        <div class="member-balance">
+          <span>Points wallet</span>
+          <strong>{{ membership.points_display }}</strong>
+          <p>Preview balance based on current order history and ready to connect to a real MCQ loyalty ledger.</p>
+          <div class="member-progress">
+            <div class="member-progress__track" aria-hidden="true">
+              <div class="member-progress__bar" style="width: {{ membership.progress_percent }}%;"></div>
+            </div>
+            <div class="member-progress__copy">
+              <span>{{ membership.current_tier.name }}</span>
+              {% if membership.next_tier %}
+                <span>{{ membership.points_to_next }} points to {{ membership.next_tier.name }}</span>
+              {% else %}
+                <span>Top tier unlocked</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="member-actions">
+          <a href="/community" class="button button--primary">MCQ Community</a>
+          <a href="/favorites" class="button button--secondary">Saved Meals</a>
+          <a href="/orders" class="button button--secondary">Order History</a>
+        </div>
+      </article>
+
+      <aside class="member-visual">
+        <div class="member-visual__stack">
+          <div>
+            <p class="eyebrow">Member scene</p>
+            <h2>Membership now feels like part of the restaurant brand, not a detached account utility.</h2>
+            <p>
+              Tiers, points, and perks live beside the ordering flow so repeat customers can move from profile to saved meals to community sharing.
+            </p>
+          </div>
+          <div class="member-visual__card">
+            <span>Next build connector</span>
+            <strong>Points, rewards, and vouchers</strong>
+            <p>{{ membership.preview_note }}</p>
+          </div>
+          <div class="member-visual__card">
+            <span>Community access</span>
+            <strong>Meals, stories, and member highlights</strong>
+            <p>Use the same member identity to share meal boards, pickup rituals, and favourite combinations later.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="member-section section-panel">
+    <div class="member-section__grid">
+      <div>
+        <p class="eyebrow">Member metrics</p>
+        <h2>Repeat-customer identity with useful loyalty scaffolding</h2>
+        <div class="member-stats">
+          <div class="member-stat">
+            <strong>{{ membership.total_spend_display }}</strong>
+            <span>Total member spend preview</span>
+          </div>
+          <div class="member-stat">
+            <strong>{{ membership.total_orders }}</strong>
+            <span>Orders linked to this profile</span>
+          </div>
+          <div class="member-stat">
+            <strong>{{ membership.instant_orders }}</strong>
+            <span>Instant pickup visits</span>
+          </div>
+          <div class="member-stat">
+            <strong>{{ membership.scheduled_orders }}</strong>
+            <span>Scheduled pickup visits</span>
+          </div>
+        </div>
+        <div class="member-benefits">
+          {% for benefit in membership.benefits %}
+            <article class="member-benefit">
+              <strong>{{ benefit.title }}</strong>
+              <p>{{ benefit.text }}</p>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if recent_orders %}
+        <article class="member-orders">
+          <p class="eyebrow">Recent activity</p>
+          <h2>Orders already connected to this member profile</h2>
+          <p>These cards make the membership area feel live now, while staying ready for a future rewards and social layer.</p>
+          <div class="member-orders__list">
+            {% for order in recent_orders %}
+              <div class="member-order">
+                <div>
+                  <strong class="member-order__title">{{ order.order_number }}</strong>
+                  <p>{{ order.fulfillment_label }} · {{ order.status }}</p>
+                </div>
+                <div class="member-order__meta">
+                  <span>Total</span>
+                  <strong>{{ order.total_display }}</strong>
+                  <a href="{{ order.href }}">Open order</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </article>
+      {% else %}
+        <article class="member-empty">
+          <p class="eyebrow">Member activity</p>
+          <h2>No linked orders yet</h2>
+          <p>
+            The membership shell is still useful before a first purchase. Once orders exist, this panel can show points transactions,
+            member rewards, and shareable meal boards.
+          </p>
+          <div class="button-row">
+            <a href="/menu" class="button button--primary">Browse Menu</a>
+            <a href="/community" class="button button--secondary">Open Community</a>
+          </div>
+        </article>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

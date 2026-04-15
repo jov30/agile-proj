@@ -1,10 +1,12 @@
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
+from zoneinfo import ZoneInfo
 
 from app import create_app
-from models import db
+from models import Order, OrderLineItem, db
 
 
 class TestSupportChat(unittest.TestCase):
@@ -31,6 +33,51 @@ class TestSupportChat(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmpdir.cleanup()
 
+    def _login_customer(self) -> None:
+        with self.client.session_transaction() as session:
+            session["auth_user"] = {
+                "name": "Lantern Member",
+                "email": "member@example.com",
+                "role": "customer",
+            }
+
+    def _seed_member_order(self) -> None:
+        with self.app.app_context():
+            order = Order(
+                order_number="MCQ-TEST-1001",
+                confirmation_code="AB12CD",
+                customer_name="Lantern Member",
+                customer_email="member@example.com",
+                customer_phone="0412 345 678",
+                fulfillment_type="instant",
+                pickup_at=datetime.now(ZoneInfo(self.app.config["APP_TIMEZONE"])).replace(tzinfo=None),
+                queue_date=None,
+                queue_number=3,
+                quoted_wait_minutes=18,
+                counter_label="Front Pickup Counter",
+                payment_method="card",
+                payment_status="Succeeded",
+                payment_reference="PAY-TEST-1001",
+                order_status="Ready for Pickup",
+                kitchen_notes="",
+                special_instructions="",
+                subtotal_cents=3200,
+                service_fee_cents=150,
+                total_cents=3350,
+            )
+            order.line_items.append(
+                OrderLineItem(
+                    item_id="pho-noodle-soup__raw-beef-pho",
+                    item_name="Raw Beef Pho",
+                    category_title="Pho Noodle Soup",
+                    unit_price_cents=1600,
+                    quantity=2,
+                    line_total_cents=3200,
+                )
+            )
+            db.session.add(order)
+            db.session.commit()
+
     def test_support_chat_requires_message(self):
         response = self.client.post("/api/support-chat", json={"message": ""})
         self.assertEqual(response.status_code, 400)
@@ -52,6 +99,36 @@ class TestSupportChat(unittest.TestCase):
         self.assertIn('id="support-dock"', html)
         self.assertNotIn('support-dock is-open', html)
         self.assertIn("Fallback Assistant", html)
+        self.assertIn(">Community<", html)
+
+    def test_profile_page_renders_membership_dashboard(self):
+        self._login_customer()
+        self._seed_member_order()
+
+        response = self.client.get("/profile")
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn("MCQ Membership", html)
+        self.assertIn("Lantern Member", html)
+        self.assertIn("Points wallet", html)
+        self.assertIn("MCQ Community", html)
+
+    def test_saved_meals_and_community_pages_render_new_scaffolds(self):
+        self._login_customer()
+        self._seed_member_order()
+
+        favorites = self.client.get("/favorites")
+        self.assertEqual(favorites.status_code, 200)
+        favorites_html = favorites.get_data(as_text=True)
+        self.assertIn("Saved Meals", favorites_html)
+        self.assertIn("Member favourite", favorites_html)
+
+        community = self.client.get("/community")
+        self.assertEqual(community.status_code, 200)
+        community_html = community.get_data(as_text=True)
+        self.assertIn("MCQ Community", community_html)
+        self.assertIn("Share Meal Story", community_html)
+        self.assertIn("Story composer", community_html)
 
     @patch("routes.user.requests.post")
     def test_support_chat_uses_openai_when_configured(self, mock_post):

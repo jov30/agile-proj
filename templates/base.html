@@ -50,6 +50,7 @@
     {% block head %}{% endblock %}
   </head>
   <body>
+    {% set account_href = url_for('user.profile') if current_user and not is_admin else url_for('auth.login') %}
     <header class="app-header">
       <div class="app-header__inner">
         <a href="/" class="brand">
@@ -71,10 +72,11 @@
           <a href="/cart" class="{% if request.path.startswith('/cart') %}is-active{% endif %}">Cart</a>
           <a href="/checkout?fulfillment=instant" class="{% if request.path.startswith('/checkout') or request.path.startswith('/payment') or request.path.startswith('/pickup-planner') %}is-active{% endif %}">Checkout</a>
           <a href="/orders" class="{% if request.path.startswith('/orders') %}is-active{% endif %}">Orders</a>
+          <a href="/community" class="{% if request.path.startswith('/community') or request.path.startswith('/shared-meals') or request.path.startswith('/favorites') %}is-active{% endif %}">Community</a>
           {% if is_admin %}
             <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin') %}is-active{% endif %}">Admin Queue</a>
           {% endif %}
-          <a href="/login" class="{% if request.path.startswith('/login') or request.path.startswith('/register') %}is-active{% endif %}">Account</a>
+          <a href="{{ account_href }}" class="{% if request.path.startswith('/login') or request.path.startswith('/register') or request.path.startswith('/profile') %}is-active{% endif %}">Account</a>
         </nav>
         {% if current_user %}
           <form method="post" action="{{ url_for('auth.logout') }}">

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Meals | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .saved-shell {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .saved-hero,
+  .saved-board,
+  .saved-collections {
+    padding: clamp(1.2rem, 3vw, 2rem);
+  }
+
+  .saved-hero__grid,
+  .saved-meals,
+  .saved-collection-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .saved-hero__grid {
+    grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+  }
+
+  .saved-panel,
+  .saved-visual,
+  .saved-meal,
+  .saved-collection {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .saved-panel,
+  .saved-meal,
+  .saved-collection {
+    padding: 1.2rem;
+  }
+
+  .saved-visual {
+    min-height: 100%;
+    padding: 1.2rem;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(180deg, rgba(24, 18, 16, 0.18), rgba(18, 14, 16, 0.86)),
+      url("{{ url_for('static', filename='images/inspiration/saigon-market-night.jpg') }}");
+    background-size: cover;
+    background-position: center;
+    box-shadow: var(--shadow-strong);
+  }
+
+  .saved-panel h1,
+  .saved-board h2,
+  .saved-collections h2 {
+    margin: 0.18rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .saved-panel h1 {
+    font-size: clamp(2rem, 3vw, 3rem);
+  }
+
+  .saved-panel p,
+  .saved-meal p,
+  .saved-collection p,
+  .saved-visual p {
+    line-height: 1.65;
+    color: var(--text-muted);
+  }
+
+  .saved-visual p {
+    color: rgba(255, 247, 239, 0.84);
+  }
+
+  .saved-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+
+  .saved-pill,
+  .saved-meal__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.64rem 0.88rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 800;
+  }
+
+  .saved-pill {
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
+  .saved-pill--muted {
+    color: var(--text-main);
+    background: rgba(112, 85, 66, 0.08);
+  }
+
+  .saved-meals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .saved-meal {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .saved-meal__media {
+    aspect-ratio: 1.08 / 1;
+    border-radius: 22px;
+    overflow: hidden;
+  }
+
+  .saved-meal__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .saved-meal__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .saved-meal__title {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.18rem;
+  }
+
+  .saved-meal__meta {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .saved-meal__badge {
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+  }
+
+  .saved-meal__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: auto;
+  }
+
+  .saved-collection-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .saved-collection--amber {
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(255, 240, 216, 0.94)),
+      #fff;
+  }
+
+  .saved-collection--teal {
+    background:
+      linear-gradient(180deg, rgba(247, 255, 254, 0.98), rgba(225, 244, 241, 0.95)),
+      #fff;
+  }
+
+  .saved-collection--plum {
+    background:
+      linear-gradient(180deg, rgba(255, 250, 255, 0.98), rgba(244, 233, 246, 0.95)),
+      #fff;
+  }
+
+  @media (max-width: 1080px) {
+    .saved-hero__grid,
+    .saved-meals,
+    .saved-collection-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="saved-shell">
+  <section class="saved-hero section-panel">
+    <div class="saved-hero__grid">
+      <article class="saved-panel">
+        <p class="eyebrow">Saved Meals</p>
+        <h1>Member meal boards ready for favourites and sharing.</h1>
+        <p>
+          This page turns the favourites area into a usable design system: saved dishes, member collections, and future community hooks
+          all sit in one place instead of a generic placeholder.
+        </p>
+        <div class="saved-summary">
+          <span class="saved-pill">{{ membership.current_tier.name }}</span>
+          <span class="saved-pill saved-pill--muted">{{ membership.points_display }} points</span>
+          <span class="saved-pill saved-pill--muted">{{ saved_items|length }} saved meal cards on screen</span>
+        </div>
+        <div class="button-row" style="margin-top: 1rem;">
+          <a href="/community" class="button button--primary">Share in MCQ Community</a>
+          <a href="/menu" class="button button--secondary">Browse Menu</a>
+        </div>
+      </article>
+
+      <aside class="saved-visual">
+        <p class="eyebrow">Collection preview</p>
+        <h2>Saved meals can become the bridge between membership and community.</h2>
+        <p>
+          The layout is prepared for real favourite toggles, share actions, and collaborative meal boards once the backend is connected.
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="saved-board section-panel">
+    <p class="eyebrow">Favourite lane</p>
+    <h2>Saved dishes with real menu artwork and next-step actions</h2>
+    <div class="saved-meals">
+      {% for item in saved_items %}
+        <article class="saved-meal">
+          <div class="saved-meal__media">
+            <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" />
+          </div>
+          <div class="saved-meal__header">
+            <div>
+              <p class="saved-meal__meta">{{ item.category }} · {{ item.price }}</p>
+              <h3 class="saved-meal__title">{{ item.name }}</h3>
+            </div>
+            <span class="saved-meal__badge">{{ item.badge }}</span>
+          </div>
+          <p>{{ item.reason }}</p>
+          <div class="saved-meal__actions">
+            <a href="{{ item.href }}" class="button button--secondary">Open Dish</a>
+            <a href="/community" class="button button--secondary">Share Idea</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="saved-collections section-panel">
+    <p class="eyebrow">Collection boards</p>
+    <h2>UI blocks ready for future favourite sets and social boards</h2>
+    <div class="saved-collection-grid">
+      {% for collection in collections %}
+        <article class="saved-collection saved-collection--{{ collection.accent }}">
+          <strong>{{ collection.title }}</strong>
+          <p>{{ collection.text }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
