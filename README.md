@@ -24,6 +24,8 @@ The project is designed around four main functional areas.
 
 ### 1. Authentication, Profile, and Favourite Meals
 
+Role Assignment: Samuel Ou
+
 - user registration
 - account creation to become a community member
 - user login and logout
@@ -40,6 +42,8 @@ The project is designed around four main functional areas.
 
 ### 2. Menu and Cart
 
+Role Assignment: Thomas Zeng
+
 - menu browsing with category-based navigation
 - filter menu bar and keyword search support
 - menu item detail flow
@@ -52,6 +56,8 @@ The project is designed around four main functional areas.
 - basic tests for menu and cart features
 
 ### 3. Checkout, Orders, and Receipts
+
+Role Assignment: Tony Le
 
 - checkout flow
 - simulated payment flow
@@ -66,6 +72,8 @@ The project is designed around four main functional areas.
 - basic tests for checkout and order features
 
 ### 4. Admin and Reporting
+
+Role Assignment: Jovan Pui
 
 - admin login and access flow
 - view and manage customer accounts
