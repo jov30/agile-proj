@@ -51,6 +51,8 @@ I think the most reasonable way to divide our project is into four main roles, w
 
 Role 1: Core Ordering Flow and User Interface
 
+Role Assignment: Samuel Ou
+
 This role focuses on the main customer journey of the application, especially the core ordering features and the main user-facing interface.
 
 Main files:
@@ -75,6 +77,8 @@ Main responsibilities:
 
 Role 2: Authentication and Account Features
 
+Role Assignment: Thomas Zeng
+
 This role focuses on authentication and account access.
 
 Main files:
@@ -91,6 +95,8 @@ Main responsibilities:
 - make sure account access works properly and securely
 
 Role 3: User Features and Social Features
+
+Role Assignment: Tony Le
 
 This role focuses on the main user-side features after login, including profile management, order history, and shared meal features.
 
@@ -112,6 +118,8 @@ Main responsibilities:
 - handle the main user-side logic after authentication
 
 Role 4: Admin Side, Testing, and Documentation
+
+Role Assignment: Jovan Pui
 
 This role focuses on the restaurant management side of the system, along with testing and project documentation.
 
