@@ -217,10 +217,6 @@
           <form method="post" class="auth-form" novalidate>
             <input type="hidden" name="next" value="{{ next_url }}" />
             <div class="field">
-              <label for="name">Display name</label>
-              <input id="name" name="name" type="text" value="{{ form_data.name }}" autocomplete="name" placeholder="Optional for customer sign-in" />
-            </div>
-            <div class="field">
               <label for="email">Email</label>
               <input id="email" name="email" type="email" value="{{ form_data.email }}" autocomplete="email" required />
             </div>
@@ -255,7 +251,7 @@
           </div>
           <div class="auth-side__card">
             <strong>Customer login</strong>
-            <p>Any valid email and 6+ character password creates a customer session for checkout, tracking, and in-site alerts.</p>
+            <p>Sign in with the email and password you used when you registered. No account yet? Use the <em>Create account</em> button.</p>
           </div>
         </div>
       </aside>
