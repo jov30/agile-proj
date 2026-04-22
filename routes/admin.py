@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from flask import Blueprint, render_template
 
-from models import FULFILLMENT_TYPES, ORDER_STATUS_SEQUENCE, Order
+from models import FULFILLMENT_TYPES, ORDER_STATUS_SEQUENCE, Order, db
 from routes.auth import admin_required
 
 
@@ -40,11 +40,19 @@ def admin_queue() -> str:
         .order_by(Order.created_at.asc())
         .all()
     )
-    instant_source = [order for order in active_orders if order.fulfillment_type == FULFILLMENT_TYPES[0]]
+    instant_source = [
+        order
+        for order in active_orders
+        if order.fulfillment_type == FULFILLMENT_TYPES[0]
+    ]
     instant_source.sort(key=lambda order: order.queue_number or 999999)
     instant_orders = [_serialize_admin_order(order) for order in instant_source]
 
-    scheduled_source = [order for order in active_orders if order.fulfillment_type == FULFILLMENT_TYPES[1]]
+    scheduled_source = [
+        order
+        for order in active_orders
+        if order.fulfillment_type == FULFILLMENT_TYPES[1]
+    ]
     scheduled_source.sort(key=lambda order: order.pickup_at)
     scheduled_orders = [_serialize_admin_order(order) for order in scheduled_source]
 
@@ -54,3 +62,16 @@ def admin_queue() -> str:
         scheduled_orders=scheduled_orders,
         order_statuses=list(ORDER_STATUS_SEQUENCE),
     )
+
+
+@admin_bp.get("/customers")
+@admin_required
+def admin_customers():
+    customer = (
+        db.session.query(
+            Order.customer_name, Order.customer_email, Order.customer_phone
+        )
+        .distinct()
+        .all()
+    )
+    return render_template("admin/customers.html", customers=customer)
