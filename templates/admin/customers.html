@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Customer Accounts</h1>
+<table>
+  {% for c in customers %}
+  <tr>
+    <td>{{ c.customer_name }}</td>
+    <td>{{ c.customer_email }}</td>
+    <<td>{{ c.customer_phone }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
