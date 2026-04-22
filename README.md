@@ -20,44 +20,36 @@ In addition to the core assignment requirements, the current branch also include
 
 ## Final Project Feature Scope
 
-The project is designed around four main functional areas.
+The project is divided into four person-owned feature tracks plus shared team integration tasks.
 
-### 1. Authentication, Profile, and Favourite Meals
-
-Role Assignment: Samuel Ou
+### Person 1 (Samuel) - Authentication, Profile, and Favourite Meals
 
 - user registration
-- account creation to become a community member
 - user login and logout
 - profile view and update
-- membership-style account scope for repeat customers
 - save favourite meals
 - share favourite meals with other users
 - view favourite meals shared by other users
-- authentication and profile forms with validation
+- auth/profile forms and validation
 - user-related backend routes
-- user and favourite-meal data handling in the database
-- connection of login, register, profile, and shared-favourite pages to backend logic
-- basic tests for authentication, profile, and favourite-meal flows
+- user model and database setup
+- favourite meal model and database setup
+- connect login, register, profile, and shared favourite meal pages to backend logic
+- basic tests for auth/profile/favourite meal features
 
-### 2. Menu and Cart
+### Person 2 (Zeng) - Menu and Cart
 
-Role Assignment: Thomas Zeng
-
-- menu browsing with category-based navigation
-- filter menu bar and keyword search support
-- menu item detail flow
+- filter menu bar, looking menu food by keyword
+- menu item detail flow if needed
 - add items to cart
 - update cart quantities
 - view cart summary and total price
 - cart-related backend routes
-- menu and cart data handling
-- connection of menu and cart pages to backend logic
-- basic tests for menu and cart features
+- menu/cart data handling
+- connect menu and cart pages to backend logic
+- basic tests for menu/cart features
 
-### 3. Checkout, Orders, and Receipts
-
-Role Assignment: Tony Le
+### Person 3 (Tony) - Checkout, Scheduled + Instant Online Orders, and Receipts + Membership + Chatbox
 
 - checkout flow
 - simulated payment flow
@@ -68,14 +60,14 @@ Role Assignment: Tony Le
 - order history
 - order-related backend routes
 - order model and database setup
-- connection of checkout, payment, receipt, and order pages to backend logic
-- basic tests for checkout and order features
+- connect checkout, payment, receipt, and order pages to backend logic
+- creating membership online card for customer
+- dong chatbox integrated with AI
+- basic tests for checkout/order features
 
-### 4. Admin and Reporting
+### Person 4 (Jovan) - Admin and Reporting
 
-Role Assignment: Jovan Pui
-
-- admin login and access flow
+- admin login/access flow
 - view and manage customer accounts
 - view customer profiles
 - add, edit, and remove menu items
@@ -83,10 +75,16 @@ Role Assignment: Jovan Pui
 - view customer orders
 - track pickup times
 - update order status
-- view sales and income records
-- monthly income chart and reporting
+- view sales/income records
+- monthly income chart/reporting
 - admin-related backend routes
 - basic tests for admin features
+
+### Shared Team Tasks
+
+- connect everything to SQLite + SQLAlchemy
+- agree on common models, field names, and routes
+- use separate branches and merge after each feature is stable
 
 ## Current Branch Enhancements
 
