@@ -117,7 +117,7 @@ def login() -> str:
             context = _auth_context(
                 title="Login",
                 eyebrow="Customer access",
-                intro="Sign in to your account or use the admin demo account to manage queue operations.",
+                intro="Sign in with the email and password you used when you registered. No account yet?",
                 submit_label="Sign in",
                 alternate_label="Create account",
                 alternate_href=url_for("auth.register"),
@@ -138,7 +138,7 @@ def login() -> str:
     context = _auth_context(
         title="Login",
         eyebrow="Customer access",
-        intro="Sign in to your account or use the admin demo account to manage queue operations.",
+        intro="Sign in with the email and password you used when you registered. No account yet?",
         submit_label="Sign in",
         alternate_label="Create account",
         alternate_href=url_for("auth.register"),
