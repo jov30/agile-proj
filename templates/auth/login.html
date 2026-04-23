@@ -21,8 +21,8 @@
     gap: 1.2rem;
   }
 
-  .auth-card,
-  .auth-side {
+  /* ── Form card ── */
+  .auth-card {
     position: relative;
     overflow: hidden;
     padding: 1.2rem;
@@ -34,8 +34,7 @@
     box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
   }
 
-  .auth-card::before,
-  .auth-side::before {
+  .auth-card::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -93,13 +92,9 @@
     background: #fff;
   }
 
-  .auth-alert,
-  .auth-side__card {
+  .auth-alert {
     padding: 1rem 1.05rem;
     border-radius: 22px;
-  }
-
-  .auth-alert {
     border: 1px solid rgba(179, 48, 64, 0.2);
     background: rgba(179, 48, 64, 0.08);
     color: #7f2040;
@@ -111,84 +106,115 @@
     line-height: 1.65;
   }
 
-  .auth-side__stack {
-    display: grid;
-    gap: 0.85rem;
-  }
-
+  /* ── Side panel ── */
   .auth-side {
-    color: var(--text-inverse);
-    background:
-      linear-gradient(180deg, rgba(21, 16, 14, 0.72), rgba(18, 14, 16, 0.9)),
-      url("{{ url_for('static', filename='images/inspiration/hem-street-food-dzuks.webp') }}"),
-      rgba(32, 23, 19, 0.92);
-    background-size: cover;
-    background-position: center;
-    border-color: rgba(255, 216, 115, 0.12);
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 216, 115, 0.12);
     box-shadow: var(--shadow-strong);
-  }
-
-  .auth-side::before {
     background:
-      radial-gradient(circle at 82% 18%, rgba(255, 216, 115, 0.18), transparent 14rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 24%);
-  }
-
-  .auth-side__card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 216, 115, 0.12);
-  }
-
-  .auth-side__scene {
-    min-height: 240px;
-    padding: 1.05rem;
-    border-radius: 24px;
+      linear-gradient(180deg, rgba(18, 13, 11, 0.55) 0%, rgba(14, 10, 9, 0.88) 100%),
+      url("{{ url_for('static', filename='images/inspiration/hem-street-food-dzuks.webp') }}")
+      center / cover no-repeat;
+    color: var(--text-inverse);
     display: grid;
-    align-items: end;
-    background:
-      linear-gradient(180deg, rgba(22, 16, 14, 0.12), rgba(22, 16, 14, 0.78)),
-      url("{{ url_for('static', filename='images/inspiration/hem-street-food-dzuks.webp') }}");
-    background-size: cover;
-    background-position: center;
-    border: 1px solid rgba(255, 216, 115, 0.12);
+    align-content: end;
+    min-height: 480px;
   }
 
-  .auth-side__scene span {
-    display: block;
-    margin-bottom: 0.24rem;
+  /* Warm vignette glow top-right */
+  .auth-side::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 80% 10%, rgba(255, 180, 54, 0.22), transparent 55%),
+      radial-gradient(ellipse at 20% 90%, rgba(235, 81, 48, 0.14), transparent 50%);
+  }
+
+  .auth-side__inner {
+    position: relative;
+    z-index: 1;
+    padding: 2rem 1.6rem 1.8rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  /* Kicker line */
+  .auth-side__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-family: "Bebas Neue", sans-serif;
-    font-size: 0.95rem;
-    letter-spacing: 0.15em;
+    font-size: 0.9rem;
+    letter-spacing: 0.18em;
     color: rgba(255, 216, 115, 0.9);
   }
 
-  .auth-side__scene strong {
+  .auth-side__kicker::before {
+    content: "";
     display: block;
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: clamp(1.25rem, 2vw, 1.8rem);
+    width: 28px;
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(255, 216, 115, 0.7);
   }
 
-  .auth-side__scene p {
-    margin: 0.45rem 0 0;
-    color: rgba(255, 247, 239, 0.84);
-    line-height: 1.55;
-  }
-
-  .auth-side__card strong {
-    display: block;
-    margin-bottom: 0.22rem;
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-  }
-
-  .auth-side__card p {
+  .auth-side__heading {
     margin: 0;
-    color: rgba(255, 247, 239, 0.82);
-    line-height: 1.6;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.7rem, 2.4vw, 2.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .auth-side__sub {
+    margin: 0;
+    color: rgba(255, 247, 239, 0.72);
+    line-height: 1.65;
+    font-size: 0.95rem;
+  }
+
+  /* Pill row */
+  .auth-side__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .auth-side__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: rgba(255, 247, 239, 0.9);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 216, 115, 0.16);
+    backdrop-filter: blur(6px);
+  }
+
+  .auth-side__pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--brand-gold);
+    flex-shrink: 0;
   }
 
   @media (max-width: 980px) {
     .auth-grid {
       grid-template-columns: 1fr;
+    }
+
+    .auth-side {
+      min-height: 320px;
     }
   }
 </style>
@@ -198,12 +224,16 @@
 <div class="auth-shell">
   <section class="auth-panel section-panel">
     <div class="auth-grid">
+
       <article class="auth-card">
         <div class="auth-content">
           <div class="auth-copy">
             <p class="eyebrow">{{ eyebrow }}</p>
             <h1>{{ title }}</h1>
-            <p>{{ intro }}</p>
+            <p>
+              {{ intro }}
+              Use the <em>Create account</em> button.
+            </p>
           </div>
           {% if errors %}
             <div class="auth-alert" role="alert">
@@ -217,16 +247,12 @@
           <form method="post" class="auth-form" novalidate>
             <input type="hidden" name="next" value="{{ next_url }}" />
             <div class="field">
-              <label for="name">Display name</label>
-              <input id="name" name="name" type="text" value="{{ form_data.name }}" autocomplete="name" placeholder="Optional for customer sign-in" />
-            </div>
-            <div class="field">
               <label for="email">Email</label>
               <input id="email" name="email" type="email" value="{{ form_data.email }}" autocomplete="email" required />
             </div>
             <div class="field">
               <label for="password">Password</label>
-              <input id="password" name="password" type="password" value="{{ form_data.password }}" autocomplete="current-password" required />
+              <input id="password" name="password" type="password" autocomplete="current-password" required />
             </div>
             <button type="submit" class="button button--primary">{{ submit_label }}</button>
             <a href="{{ alternate_href }}" class="button button--secondary">{{ alternate_label }}</a>
@@ -235,30 +261,19 @@
       </article>
 
       <aside class="auth-side">
-        <div class="auth-content auth-side__stack">
-          <article class="auth-side__scene">
-            <div>
-              <span>Street-food arrival</span>
-              <strong>Login now feels tied to the menu atmosphere instead of looking like a detached utility page.</strong>
-              <p>Banh mi, sunlight, and pickup flow set the tone before customers move into checkout or order tracking.</p>
-            </div>
-          </article>
-          <div>
-            <p class="eyebrow">Admin access</p>
-            <h2>Queue operations are role-protected.</h2>
-            <p>Use the admin demo credentials below to access status controls and queue management.</p>
-          </div>
-          <div class="auth-side__card">
-            <strong>{{ admin_demo.name }}</strong>
-            <p>{{ admin_demo.email }}</p>
-            <p>Password: {{ admin_demo.password }}</p>
-          </div>
-          <div class="auth-side__card">
-            <strong>Customer login</strong>
-            <p>Any valid email and 6+ character password creates a customer session for checkout, tracking, and in-site alerts.</p>
+        <div class="auth-side__inner">
+          <span class="auth-side__kicker">MCQ Vietnamese Street Food</span>
+          <h2 class="auth-side__heading">Order ahead, skip the wait, eat well.</h2>
+          <p class="auth-side__sub">Sign in to track your pickups, view receipts, and earn loyalty points on every order.</p>
+          <div class="auth-side__pills">
+            <span class="auth-side__pill">Instant queue ordering</span>
+            <span class="auth-side__pill">Scheduled pickup slots</span>
+            <span class="auth-side__pill">Loyalty points</span>
+            <span class="auth-side__pill">Order tracking</span>
           </div>
         </div>
       </aside>
+
     </div>
   </section>
 </div>

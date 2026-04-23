@@ -4,641 +4,853 @@
 
 {% block head %}
 <style>
-  .member-shell {
+  .profile-shell {
     display: grid;
-    gap: 1.35rem;
+    gap: 1.2rem;
   }
 
-  .member-hero,
-  .member-section {
-    padding: clamp(1.2rem, 3vw, 2rem);
+  /* ── Hero ── */
+  .profile-hero {
+    padding: clamp(1.4rem, 3vw, 2.2rem);
   }
 
-  .member-hero__grid,
-  .member-section__grid,
-  .member-stats,
-  .member-benefits {
-    display: grid;
-    gap: 1rem;
-  }
-
-  .member-hero__grid,
-  .member-section__grid {
-    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-  }
-
-  .member-card,
-  .member-visual,
-  .member-stat,
-  .member-note,
-  .member-benefit,
-  .member-orders,
-  .member-empty {
-    position: relative;
-    overflow: hidden;
-    border-radius: 30px;
-    border: 1px solid rgba(112, 85, 66, 0.12);
-    background:
-      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
-      #fff;
-    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
-  }
-
-  .member-card,
-  .member-note,
-  .member-benefit,
-  .member-orders,
-  .member-empty {
-    padding: 1.2rem;
-  }
-
-  .member-visual {
-    min-height: 100%;
-    padding: 1.2rem;
-    color: var(--text-inverse);
-    background:
-      linear-gradient(180deg, rgba(22, 16, 14, 0.16), rgba(18, 14, 16, 0.84)),
-      url("{{ url_for('static', filename='images/inspiration/hero-new-world-gourmet.avif') }}");
-    background-size: cover;
-    background-position: center;
-    box-shadow: var(--shadow-strong);
-  }
-
-  .member-visual::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0 auto;
-    width: 48%;
-    height: 62%;
-    opacity: 0.28;
-    background:
-      url("{{ url_for('static', filename='images/inspiration/saigon-skyline.webp') }}")
-      no-repeat
-      bottom
-      right
-      / contain;
-    pointer-events: none;
-  }
-
-  .member-card > *,
-  .member-visual > * {
+  .profile-hero__grid {
     position: relative;
     z-index: 1;
-  }
-
-  .member-card h1,
-  .member-orders h2,
-  .member-section h2 {
-    margin: 0.18rem 0 0;
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-  }
-
-  .member-card h1 {
-    font-size: clamp(2rem, 3vw, 3rem);
-  }
-
-  .member-card p,
-  .member-note p,
-  .member-benefit p,
-  .member-orders p,
-  .member-visual p,
-  .member-empty p {
-    color: var(--text-muted);
-    line-height: 1.65;
-  }
-
-  .member-card p,
-  .member-visual p {
-    margin: 0.52rem 0 0;
-  }
-
-  .member-visual p {
-    color: rgba(255, 247, 239, 0.84);
-  }
-
-  .member-pills,
-  .member-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem;
-  }
-
-  .member-pills {
-    margin-top: 1rem;
-  }
-
-  .member-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.65rem 0.9rem;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.86rem;
-    color: var(--brand-red);
-    background: rgba(255, 106, 19, 0.1);
-  }
-
-  .member-pill--muted {
-    color: var(--text-main);
-    background: rgba(112, 85, 66, 0.08);
-  }
-
-  .member-balance {
-    margin-top: 1.05rem;
-    padding: 1rem 1.05rem;
-    border-radius: 24px;
-    background: rgba(255, 245, 235, 0.92);
-    border: 1px solid rgba(255, 180, 54, 0.16);
-  }
-
-  .member-balance__grid,
-  .member-wallet {
     display: grid;
-    gap: 0.85rem;
-  }
-
-  .member-balance__grid {
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.76fr);
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 1.2rem;
     align-items: start;
   }
 
-  .member-balance span,
-  .member-visual span,
-  .member-order__meta span {
-    display: block;
-    font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 0.15em;
-    font-size: 0.96rem;
-  }
-
-  .member-balance strong {
-    display: block;
-    margin-top: 0.2rem;
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: clamp(2rem, 3vw, 3rem);
-    line-height: 1;
-  }
-
-  .member-progress {
+  .profile-identity {
     display: grid;
-    gap: 0.5rem;
-    margin-top: 0.9rem;
+    gap: 1.4rem;
   }
 
-  .member-progress__track {
-    height: 12px;
+  /* ── Nameplate with avatar ── */
+  .profile-nameplate {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+  }
+
+  .profile-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #2b170d;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+    box-shadow: 0 14px 28px rgba(255, 106, 19, 0.28);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .profile-avatar:hover {
+    box-shadow: 0 16px 32px rgba(255, 106, 19, 0.4);
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 999px;
+  }
+
+
+  .profile-nameplate__text h1 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+    line-height: 1.05;
+  }
+
+  .profile-nameplate__text p {
+    margin: 0.3rem 0 0;
+    color: var(--text-muted);
+  }
+
+  /* ── Tags ── */
+  .profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .profile-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    position: relative;
+  }
+
+  .profile-tag--tier {
+    color: #2b170d;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-amber));
+    cursor: help;
+  }
+
+  .profile-tag--code {
+    color: var(--text-muted);
+    background: rgba(112, 85, 66, 0.08);
+    border: 1px solid rgba(112, 85, 66, 0.14);
+    font-family: "Menlo", "Monaco", monospace;
+    font-weight: 600;
+    cursor: help;
+  }
+
+  /* Tooltip */
+  .profile-tag[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    text-align: center;
+    padding: 0.55rem 0.8rem;
+    border-radius: 14px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    font-family: "Be Vietnam Pro", sans-serif;
+    line-height: 1.4;
+    color: var(--text-inverse);
+    background: rgba(32, 22, 18, 0.95);
+    border: 1px solid rgba(255, 216, 115, 0.14);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+    z-index: 20;
+    pointer-events: none;
+    white-space: normal;
+  }
+
+  .profile-tag[data-tip]:hover::before {
+    content: "";
+    position: absolute;
+    bottom: calc(100% + 1px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(32, 22, 18, 0.95);
+    z-index: 21;
+    pointer-events: none;
+  }
+
+  /* ── Tier legend strip ── */
+  .profile-tier-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .profile-tier-legend__label {
+    width: 100%;
+    font-size: 0.75rem;
+    font-family: "Bebas Neue", sans-serif;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+  }
+
+  .tier-pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .tier-pip--active {
+    color: #2b170d;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-amber));
+  }
+
+  .tier-pip--inactive {
+    color: var(--text-muted);
+    background: rgba(112, 85, 66, 0.07);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+  }
+
+  .tier-pip__pts {
+    opacity: 0.72;
+    font-weight: 500;
+  }
+
+  /* ── Points ── */
+  .profile-points {
+    padding: 1.3rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 245, 228, 0.7);
+    border: 1px solid rgba(255, 180, 54, 0.18);
+  }
+
+  .profile-points__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .profile-points__number {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .profile-points__label {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .profile-points__rule {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-main);
+  }
+
+  .profile-voucher-box {
+    padding: 0.95rem 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    min-width: 180px;
+  }
+
+  .profile-voucher-box__label {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .profile-voucher-box__value {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+
+  .profile-voucher-box p {
+    margin: 0.3rem 0 0;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+  }
+
+  /* ── Progress ── */
+  .profile-progress { display: grid; gap: 0.9rem; }
+
+  .profile-progress__row { display: grid; gap: 0.45rem; }
+
+  .profile-progress__meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+  }
+
+  .profile-progress__meta b { color: var(--text-main); }
+
+  .profile-track {
+    height: 10px;
     border-radius: 999px;
     background: rgba(112, 85, 66, 0.1);
     overflow: hidden;
   }
 
-  .member-progress__bar {
+  .profile-track__bar {
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--brand-orange), var(--brand-red));
+    background: linear-gradient(90deg, var(--brand-amber), var(--brand-orange));
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .member-progress__copy {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    color: var(--text-muted);
-    font-size: 0.92rem;
-  }
-
-  .member-wallet {
-    padding: 0.95rem 1rem;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(112, 85, 66, 0.12);
-  }
-
-  .member-wallet strong,
-  .member-cardface__name,
-  .member-cardface__points strong,
-  .member-cardface__voucher strong {
-    display: block;
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-  }
-
-  .member-wallet strong {
-    font-size: 1.18rem;
-  }
-
-  .member-wallet__rule {
-    margin-top: 0.3rem;
-    font-weight: 700;
-    color: var(--text-main);
-  }
-
-  .member-cardface {
-    display: grid;
-    gap: 1rem;
-    padding: 1.15rem;
-    border-radius: 28px;
-    color: var(--text-inverse);
-    background:
-      linear-gradient(135deg, rgba(255, 180, 54, 0.16), rgba(255, 106, 19, 0.16)),
-      linear-gradient(180deg, rgba(34, 23, 19, 0.9), rgba(18, 14, 16, 0.95)),
-      rgba(23, 19, 21, 0.96);
-    border: 1px solid rgba(255, 216, 115, 0.18);
-    box-shadow: 0 22px 36px rgba(21, 11, 7, 0.18);
-  }
-
-  .member-cardface__top,
-  .member-cardface__chips,
-  .member-cardface__numbers {
+  .profile-actions {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 0.4rem;
+  }
+
+  /* ── Digital card ── */
+  .member-card-face {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    padding: 1.4rem;
+    display: grid;
+    gap: 1.1rem;
+    color: var(--text-inverse);
+    background:
+      linear-gradient(135deg, rgba(255, 180, 54, 0.14), rgba(255, 106, 19, 0.12)),
+      linear-gradient(180deg, rgba(36, 25, 21, 0.94), rgba(20, 15, 17, 0.97));
+    border: 1px solid rgba(255, 216, 115, 0.16);
+    box-shadow: 0 28px 56px rgba(21, 11, 7, 0.22);
+  }
+
+  .member-card-face::before {
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 216, 115, 0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .member-card-face__header {
+    display: flex;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 0.8rem;
-    align-items: center;
   }
 
-  .member-cardface__eyebrow,
-  .member-cardface__meta,
-  .member-cardface__scan-note {
+  .member-card-face__eyebrow {
     font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 0.15em;
+    font-size: 0.82rem;
+    letter-spacing: 0.18em;
+    color: rgba(255, 216, 115, 0.88);
+    margin-bottom: 0.3rem;
   }
 
-  .member-cardface__eyebrow {
-    font-size: 0.95rem;
-    color: rgba(255, 216, 115, 0.92);
+  .member-card-face__name {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.3rem, 2vw, 1.65rem);
+    font-weight: 800;
+    line-height: 1.1;
   }
 
-  .member-cardface__tier {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.55rem 0.82rem;
-    border-radius: 999px;
+  .member-card-face__sub {
+    font-family: "Menlo", "Monaco", monospace;
     font-size: 0.8rem;
+    color: rgba(255, 247, 239, 0.6);
+    margin-top: 0.25rem;
+  }
+
+  .member-card-face__tier-badge {
+    flex-shrink: 0;
+    padding: 0.5rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
     font-weight: 800;
     color: #2b170d;
     background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+    white-space: nowrap;
   }
 
-  .member-cardface__name {
-    font-size: clamp(1.4rem, 2vw, 1.8rem);
-  }
-
-  .member-cardface__meta {
-    display: block;
-    margin-top: 0.35rem;
-    font-size: 0.88rem;
-    color: rgba(255, 247, 239, 0.76);
-  }
-
-  .member-cardface__numbers {
+  .member-card-face__stats {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.8rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
   }
 
-  .member-cardface__points,
-  .member-cardface__voucher {
-    padding: 0.9rem 0.95rem;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 216, 115, 0.12);
+  .member-card-face__stat {
+    padding: 0.85rem 0.9rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 216, 115, 0.1);
   }
 
-  .member-cardface__points span,
-  .member-cardface__voucher span {
+  .member-card-face__stat span {
     display: block;
-    font-size: 0.82rem;
-    color: rgba(255, 247, 239, 0.8);
-  }
-
-  .member-cardface__points strong,
-  .member-cardface__voucher strong {
-    margin-top: 0.22rem;
-    font-size: 1.45rem;
-  }
-
-  .member-cardface__barcode {
-    padding: 0.85rem;
-    border-radius: 22px;
-    background: rgba(255, 250, 245, 0.98);
-  }
-
-  .member-cardface__barcode img {
-    width: 100%;
-    display: block;
-  }
-
-  .member-cardface__scan-note {
-    text-align: center;
-    font-size: 0.82rem;
-    color: rgba(255, 247, 239, 0.82);
-  }
-
-  .member-actions {
-    margin-top: 1rem;
-  }
-
-  .member-stat {
-    padding: 1rem 1.05rem;
-  }
-
-  .member-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .member-stat strong,
-  .member-benefit strong,
-  .member-note strong,
-  .member-order__title {
-    display: block;
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-  }
-
-  .member-stat strong {
-    font-size: 1.55rem;
+    font-size: 0.78rem;
+    color: rgba(255, 247, 239, 0.72);
     margin-bottom: 0.2rem;
   }
 
-  .member-stat span,
-  .member-benefit p,
-  .member-note p {
-    color: var(--text-muted);
+  .member-card-face__stat strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.35rem;
   }
 
-  .member-benefits {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-top: 1rem;
+  .member-card-face__barcode {
+    padding: 0.75rem;
+    border-radius: 18px;
+    background: rgba(255, 250, 245, 0.97);
   }
 
-  .member-orders__list {
+  .member-card-face__barcode img { width: 100%; display: block; }
+
+  .member-card-face__scan {
+    text-align: center;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 247, 239, 0.72);
+  }
+
+  /* ── Stats strip ── */
+  .profile-stats-row {
     display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.85rem;
-    margin-top: 1rem;
   }
 
-  .member-order {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.7rem 1rem;
-    padding: 0.95rem 0;
-    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+  .profile-stat {
+    position: relative;
+    overflow: hidden;
+    padding: 1.1rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 12px 28px rgba(53, 30, 20, 0.06);
   }
 
-  .member-order:last-child {
-    border-bottom: 0;
-    padding-bottom: 0;
+  .profile-stat::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 50%);
   }
 
-  .member-order__meta {
-    display: grid;
-    justify-items: end;
-    gap: 0.18rem;
-    text-align: right;
+  .profile-stat > * { position: relative; z-index: 1; }
+
+  .profile-stat__value {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.3rem;
   }
 
-  .member-order__meta strong {
-    font-size: 1rem;
+  .profile-stat__label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
   }
 
-  .member-visual__stack {
+  /* ── Lower ── */
+  .profile-lower { padding: clamp(1.4rem, 3vw, 2.2rem); }
+
+  .profile-lower__grid {
     position: relative;
     z-index: 1;
     display: grid;
-    gap: 0.9rem;
-    align-content: end;
-    min-height: 100%;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 1.2rem;
+    align-items: start;
   }
 
-  .member-visual__card {
+  .profile-benefits { display: grid; gap: 0.75rem; margin-top: 1.1rem; }
+
+  .profile-benefit {
+    display: flex;
+    gap: 0.95rem;
+    align-items: flex-start;
     padding: 1rem 1.05rem;
-    border-radius: 24px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 216, 115, 0.12);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(112, 85, 66, 0.1);
+    background: rgba(255, 255, 255, 0.6);
   }
 
-  .member-visual__card strong {
+  .profile-benefit__dot {
+    flex-shrink: 0;
+    width: 10px; height: 10px;
+    border-radius: 999px;
+    margin-top: 0.3rem;
+    background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
+    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.1);
+  }
+
+  .profile-benefit strong {
     display: block;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: 1.2rem;
+    font-size: 0.98rem;
+    margin-bottom: 0.2rem;
   }
 
-  .member-visual__card p {
-    margin: 0.42rem 0 0;
+  .profile-benefit p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.55;
   }
 
-  @media (max-width: 1080px) {
-    .member-hero__grid,
-    .member-section__grid {
-      grid-template-columns: 1fr;
-    }
-
-    .member-stats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .member-benefits {
-      grid-template-columns: 1fr;
-    }
-
-    .member-balance__grid {
-      grid-template-columns: 1fr;
-    }
+  /* ── Orders ── */
+  .profile-orders {
+    padding: 1.3rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 12px 28px rgba(53, 30, 20, 0.06);
   }
 
-  @media (max-width: 720px) {
-    .member-stats {
-      grid-template-columns: 1fr;
-    }
+  .profile-orders h2 {
+    margin: 0.2rem 0 0.25rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.35rem;
+  }
 
-    .member-order {
-      grid-template-columns: 1fr;
-    }
+  .profile-orders > p {
+    margin: 0 0 1rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
 
-    .member-order__meta {
-      justify-items: start;
-      text-align: left;
-    }
+  .profile-order-list { display: grid; gap: 0.5rem; }
 
-    .member-cardface__numbers {
-      grid-template-columns: 1fr;
-    }
+  .profile-order-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(112, 85, 66, 0.1);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .profile-order-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.1);
+  }
+
+  .profile-order-item__num {
+    font-family: "Menlo", "Monaco", monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .profile-order-item__meta { font-size: 0.84rem; color: var(--text-muted); }
+  .profile-order-item__right { text-align: right; flex-shrink: 0; }
+
+  .profile-order-item__total {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+  }
+
+  .profile-order-item__status {
+    display: inline-block;
+    margin-top: 0.2rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+    border: 1px solid rgba(0, 111, 116, 0.14);
+  }
+
+  /* ── Empty ── */
+  .profile-empty {
+    padding: 2rem 1.3rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    text-align: center;
+  }
+
+  .profile-empty__icon {
+    width: 56px; height: 56px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    background: rgba(255, 180, 54, 0.12);
+    border: 1px solid rgba(255, 180, 54, 0.2);
+  }
+
+  .profile-empty h2 {
+    margin: 0 0 0.5rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.35rem;
+  }
+
+  .profile-empty p {
+    margin: 0 auto 1.2rem;
+    max-width: 38ch;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .profile-hero__grid,
+    .profile-lower__grid { grid-template-columns: 1fr; }
+    .profile-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 640px) {
+    .profile-stats-row { grid-template-columns: 1fr 1fr; }
+    .profile-points__top { flex-direction: column; }
+    .profile-voucher-box { min-width: 0; width: 100%; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="member-shell">
-  <section class="member-hero section-panel">
-    <div class="member-hero__grid">
-      <article class="member-card">
-        <p class="eyebrow">MCQ Membership</p>
-        <h1>{{ membership.member_name }}</h1>
-        <p>
-          Build a polished member identity around pickup habits, favourite dishes, and community participation. This page is ready
-          for a future loyalty backend without looking like a placeholder in the meantime.
-        </p>
-        <div class="member-pills">
-          <span class="member-pill">{{ membership.current_tier.name }}</span>
-          <span class="member-pill member-pill--muted">{{ membership.member_code }}</span>
-          <span class="member-pill member-pill--muted">{{ membership.member_email }}</span>
-        </div>
-        <div class="member-balance">
-          <div class="member-balance__grid">
-            <div>
-              <span>Points wallet</span>
-              <strong>{{ membership.points_display }}</strong>
-              <p>Live loyalty preview based on current order history and ready to connect to a real MCQ membership ledger.</p>
-              <p class="member-wallet__rule">{{ membership.points_rule_display }}</p>
-              <div class="member-progress">
-                <div class="member-progress__track" aria-hidden="true">
-                  <div class="member-progress__bar" style="width: {{ membership.progress_percent }}%;"></div>
-                </div>
-                <div class="member-progress__copy">
-                  <span>{{ membership.current_tier.name }}</span>
-                  {% if membership.next_tier %}
-                    <span>{{ membership.points_to_next }} points to {{ membership.next_tier.name }}</span>
-                  {% else %}
-                    <span>Top tier unlocked</span>
-                  {% endif %}
-                </div>
+{% set name_parts = (membership.member_name or "").strip().split() %}
+{% set initials =
+  (name_parts[0][0] if name_parts|length > 0 else "") ~
+  (name_parts[1][0] if name_parts|length > 1 else "")
+%}
+{% set initials = initials.upper() or "MC" %}
+
+{% set all_tiers = [
+  {"name": "Lantern Starter",   "min_points": 0},
+  {"name": "Market Regular",    "min_points": 250},
+  {"name": "Golden Chopsticks", "min_points": 600},
+  {"name": "Distinction Member","min_points": 1000}
+] %}
+
+<div class="profile-shell">
+
+  {# ── Hero ── #}
+  <section class="profile-hero section-panel">
+    <div class="profile-hero__grid">
+
+      <div class="profile-identity">
+
+        {# Nameplate + avatar upload #}
+        <div class="profile-nameplate">
+          <div class="profile-avatar-wrap" id="avatarWrap">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar">
+                {% if avatar_url %}
+                  <img src="{{ avatar_url }}" alt="{{ membership.member_name }}" />
+                {% else %}
+                  <span>{{ initials }}</span>
+                {% endif %}
               </div>
             </div>
-            <div class="member-wallet">
-              <span>Redeem rule</span>
-              <strong>{{ membership.voucher_rule_display }}</strong>
-              <p>{{ membership.available_vouchers }} voucher{% if membership.available_vouchers != 1 %}s{% endif %} ready · {{ membership.voucher_value_display }} redeemable value.</p>
-              <div class="member-progress">
-                <div class="member-progress__track" aria-hidden="true">
-                  <div class="member-progress__bar" style="width: {{ membership.voucher_progress_percent }}%;"></div>
-                </div>
-                <div class="member-progress__copy">
-                  <span>Voucher ladder</span>
-                  {% if membership.available_vouchers > 0 and membership.voucher_progress_percent == 100 %}
-                    <span>Voucher ready to redeem now</span>
-                  {% else %}
-                    <span>{{ membership.points_to_next_voucher }} points to next {{ membership.voucher_unit_display }} voucher</span>
-                  {% endif %}
-                </div>
+          </div>
+          <div class="profile-nameplate__text">
+            <p class="eyebrow" style="margin-bottom: 0.4rem;">MCQ Membership</p>
+            <h1>{{ membership.member_name }}</h1>
+            <p>{{ membership.member_email }}</p>
+          </div>
+        </div>
+
+        {# Tags — hover for explanation #}
+        <div class="profile-tags">
+          <span
+            class="profile-tag profile-tag--tier"
+            data-tip="Your loyalty tier — earned by spending at MCQ. More points = higher tier and better rewards."
+          >{{ membership.current_tier.name }}</span>
+          <span
+            class="profile-tag profile-tag--code"
+            data-tip="Your unique MCQ Member ID — generated from your account. Show this at the counter or let staff scan the barcode on your digital card."
+          >{{ membership.member_code }}</span>
+        </div>
+
+        {# Tier ladder — shows all tiers, highlights current #}
+        <div class="profile-tier-legend">
+          <div class="profile-tier-legend__label">Loyalty tier ladder — your current tier is highlighted</div>
+          {% for tier in all_tiers %}
+            <span class="tier-pip {% if tier.name == membership.current_tier.name %}tier-pip--active{% else %}tier-pip--inactive{% endif %}">
+              {{ tier.name }}
+              <span class="tier-pip__pts">{{ tier.min_points }}+ pts</span>
+            </span>
+          {% endfor %}
+        </div>
+
+        {# Points + voucher #}
+        <div class="profile-points">
+          <div class="profile-points__top">
+            <div>
+              <div class="profile-points__label">Points wallet</div>
+              <div class="profile-points__number">{{ membership.points_display }}</div>
+              <div class="profile-points__rule">{{ membership.points_rule_display }}</div>
+            </div>
+            <div class="profile-voucher-box">
+              <div class="profile-voucher-box__label">Redeemable vouchers</div>
+              <div class="profile-voucher-box__value">{{ membership.voucher_value_display }}</div>
+              <p>{{ membership.available_vouchers }} voucher{% if membership.available_vouchers != 1 %}s{% endif %} ready · {{ membership.voucher_unit_display }} each</p>
+            </div>
+          </div>
+
+          <div class="profile-progress">
+            <div class="profile-progress__row">
+              <div class="profile-progress__meta">
+                <span><b>{{ membership.current_tier.name }}</b></span>
+                {% if membership.next_tier %}
+                  <span>{{ membership.points_to_next }} pts to <b>{{ membership.next_tier.name }}</b></span>
+                {% else %}
+                  <span><b>Top tier reached</b></span>
+                {% endif %}
+              </div>
+              <div class="profile-track">
+                <div class="profile-track__bar" style="width: {{ membership.progress_percent }}%;"></div>
+              </div>
+            </div>
+            <div class="profile-progress__row">
+              <div class="profile-progress__meta">
+                <span>Voucher ladder</span>
+                {% if membership.available_vouchers > 0 and membership.voucher_progress_percent == 100 %}
+                  <span><b>Ready to redeem</b></span>
+                {% else %}
+                  <span>{{ membership.points_to_next_voucher }} pts to next {{ membership.voucher_unit_display }}</span>
+                {% endif %}
+              </div>
+              <div class="profile-track">
+                <div class="profile-track__bar" style="width: {{ membership.voucher_progress_percent }}%;"></div>
               </div>
             </div>
           </div>
         </div>
-        <div class="member-actions">
+
+        <div class="profile-actions">
           <a href="/community" class="button button--primary">MCQ Community</a>
           <a href="/favorites" class="button button--secondary">Saved Meals</a>
           <a href="/orders" class="button button--secondary">Order History</a>
         </div>
-      </article>
+      </div>
 
-      <aside class="member-visual">
-        <div class="member-visual__stack">
-          <article class="member-cardface">
-            <div class="member-cardface__top">
-              <div>
-                <span class="member-cardface__eyebrow">MCQ Digital Member Card</span>
-                <strong class="member-cardface__name">{{ membership.member_name }}</strong>
-                <span class="member-cardface__meta">{{ membership.member_code }}</span>
-              </div>
-              <span class="member-cardface__tier">{{ membership.current_tier.name }}</span>
-            </div>
-            <div class="member-cardface__numbers">
-              <div class="member-cardface__points">
-                <span>Points</span>
-                <strong>{{ membership.points_display }}</strong>
-              </div>
-              <div class="member-cardface__voucher">
-                <span>Redeemable voucher</span>
-                <strong>{{ membership.voucher_value_display }}</strong>
-              </div>
-            </div>
-            <div class="member-cardface__barcode">
-              <img src="{{ url_for('user.membership_barcode') }}" alt="Membership barcode for {{ membership.member_code }}" />
-            </div>
-            <div class="member-cardface__scan-note">Scan at counter · {{ membership.voucher_rule_display }} · Distinction unlocks at 1000 points</div>
-          </article>
-          <div class="member-visual__card">
-            <span>Voucher ladder</span>
-            <strong>Distinction at 1000 points</strong>
-            <p>Once a member reaches 1000 points, the profile surfaces a $10 redeemable voucher wallet while keeping the card scan-ready.</p>
+      {# Digital card #}
+      <aside class="member-card-face">
+        <div class="member-card-face__header">
+          <div>
+            <div class="member-card-face__eyebrow">MCQ Digital Member Card</div>
+            <div class="member-card-face__name">{{ membership.member_name }}</div>
+            <div class="member-card-face__sub">{{ membership.member_code }}</div>
           </div>
-          <div class="member-visual__card">
-            <span>Community access</span>
-            <strong>Meals, stories, and member highlights</strong>
-            <p>Use the same member identity to share meal boards, pickup rituals, and favourite combinations later.</p>
+          <span class="member-card-face__tier-badge">{{ membership.current_tier.name }}</span>
+        </div>
+        <div class="member-card-face__stats">
+          <div class="member-card-face__stat">
+            <span>Points</span>
+            <strong>{{ membership.points_display }}</strong>
+          </div>
+          <div class="member-card-face__stat">
+            <span>Redeemable</span>
+            <strong>{{ membership.voucher_value_display }}</strong>
           </div>
         </div>
+        <div class="member-card-face__barcode">
+          <img src="{{ url_for('user.membership_barcode') }}" alt="Membership barcode for {{ membership.member_code }}" />
+        </div>
+        <div class="member-card-face__scan">Scan at counter · {{ membership.voucher_rule_display }}</div>
       </aside>
+
     </div>
   </section>
 
-  <section class="member-section section-panel">
-    <div class="member-section__grid">
+  {# ── Stats strip ── #}
+  <div class="profile-stats-row">
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ membership.total_spend_display }}</div>
+      <div class="profile-stat__label">Total member spend</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ membership.total_orders }}</div>
+      <div class="profile-stat__label">Orders on this profile</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ membership.instant_orders }}</div>
+      <div class="profile-stat__label">Instant pickup visits</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ membership.scheduled_orders }}</div>
+      <div class="profile-stat__label">Scheduled pickup visits</div>
+    </div>
+  </div>
+
+  {# ── Lower: benefits + orders ── #}
+  <section class="profile-lower section-panel">
+    <div class="profile-lower__grid">
+
       <div>
-        <p class="eyebrow">Member metrics</p>
-        <h2>Repeat-customer identity with useful loyalty scaffolding</h2>
-        <div class="member-stats">
-          <div class="member-stat">
-            <strong>{{ membership.total_spend_display }}</strong>
-            <span>Total member spend preview</span>
-          </div>
-          <div class="member-stat">
-            <strong>{{ membership.total_orders }}</strong>
-            <span>Orders linked to this profile</span>
-          </div>
-          <div class="member-stat">
-            <strong>{{ membership.instant_orders }}</strong>
-            <span>Instant pickup visits</span>
-          </div>
-          <div class="member-stat">
-            <strong>{{ membership.scheduled_orders }}</strong>
-            <span>Scheduled pickup visits</span>
-          </div>
-        </div>
-        <div class="member-benefits">
+        <p class="eyebrow">Member perks</p>
+        <h2 style="margin: 0.2rem 0 0; font-family: 'Bricolage Grotesque', 'Be Vietnam Pro', sans-serif; font-size: clamp(1.6rem, 2.4vw, 2.4rem);">
+          What this membership unlocks
+        </h2>
+        <div class="profile-benefits">
           {% for benefit in membership.benefits %}
-            <article class="member-benefit">
-              <strong>{{ benefit.title }}</strong>
-              <p>{{ benefit.text }}</p>
-            </article>
+            <div class="profile-benefit">
+              <div class="profile-benefit__dot"></div>
+              <div>
+                <strong>{{ benefit.title }}</strong>
+                <p>{{ benefit.text }}</p>
+              </div>
+            </div>
           {% endfor %}
         </div>
       </div>
 
       {% if recent_orders %}
-        <article class="member-orders">
+        <div class="profile-orders">
           <p class="eyebrow">Recent activity</p>
-          <h2>Orders already connected to this member profile</h2>
-          <p>These cards make the membership area feel live now, while staying ready for a future rewards and social layer.</p>
-          <div class="member-orders__list">
+          <h2>Your latest pickups</h2>
+          <p>Orders linked to your member profile — tap any to view receipt and live status.</p>
+          <div class="profile-order-list">
             {% for order in recent_orders %}
-              <div class="member-order">
+              <a href="{{ order.href }}" class="profile-order-item">
                 <div>
-                  <strong class="member-order__title">{{ order.order_number }}</strong>
-                  <p>{{ order.fulfillment_label }} · {{ order.status }}</p>
+                  <div class="profile-order-item__num">{{ order.order_number }}</div>
+                  <div class="profile-order-item__meta">{{ order.fulfillment_label }}</div>
                 </div>
-                <div class="member-order__meta">
-                  <span>Total</span>
-                  <strong>{{ order.total_display }}</strong>
-                  <a href="{{ order.href }}">Open order</a>
+                <div class="profile-order-item__right">
+                  <div class="profile-order-item__total">{{ order.total_display }}</div>
+                  <span class="profile-order-item__status">{{ order.status }}</span>
                 </div>
-              </div>
+              </a>
             {% endfor %}
           </div>
-        </article>
+        </div>
       {% else %}
-        <article class="member-empty">
-          <p class="eyebrow">Member activity</p>
-          <h2>No linked orders yet</h2>
-          <p>
-            The membership shell is still useful before a first purchase. Once orders exist, this panel can show points transactions,
-            member rewards, and shareable meal boards.
-          </p>
-          <div class="button-row">
+        <div class="profile-empty">
+          <div class="profile-empty__icon">🥢</div>
+          <h2>No orders yet</h2>
+          <p>Once you place your first order, your pickup history, receipt links, and loyalty points will all appear here.</p>
+          <div class="button-row" style="justify-content: center; margin-top: 0;">
             <a href="/menu" class="button button--primary">Browse Menu</a>
             <a href="/community" class="button button--secondary">Open Community</a>
           </div>
-        </article>
+        </div>
       {% endif %}
+
     </div>
   </section>
+
 </div>
+
 {% endblock %}
