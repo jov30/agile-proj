@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
+from sqlalchemy import func
 
-from models import FULFILLMENT_TYPES, ORDER_STATUS_SEQUENCE, Order, db
+from models import FULFILLMENT_TYPES, ORDER_STATUS_SEQUENCE, Order, User, db
 from routes.auth import admin_required
 
 
@@ -67,11 +68,78 @@ def admin_queue() -> str:
 @admin_bp.get("/customers")
 @admin_required
 def admin_customers():
-    customer = (
+    registered_email_subq = (
+        db.session.query(User.email).filter(User.role == "customer").subquery()
+    )
+
+    registered_rows = (
         db.session.query(
-            Order.customer_name, Order.customer_email, Order.customer_phone
+            User.name,
+            User.email,
+            User.created_at,
+            func.count(Order.id).label("order_count"),
+            func.coalesce(func.sum(Order.total_cents), 0).label("total_spent_cents"),
         )
-        .distinct()
+        .outerjoin(Order, User.email == Order.customer_email)
+        .filter(User.role == "customer")
+        .group_by(User.id)
         .all()
     )
-    return render_template("admin/customers.html", customers=customer)
+
+    guest_rows = (
+        db.session.query(
+            Order.customer_name.label("name"),
+            Order.customer_email.label("email"),
+            func.count(Order.id).label("order_count"),
+            func.sum(Order.total_cents).label("total_spent_cents"),
+        )
+        .filter(~Order.customer_email.in_(registered_email_subq))
+        .group_by(Order.customer_email)
+        .all()
+    )
+
+    customers = []
+    for r in registered_rows:
+        customers.append(
+            {
+                "name": r.name,
+                "email": r.email,
+                "joined": r.created_at.strftime("%-d %b %Y") if r.created_at else "—",
+                "order_count": r.order_count,
+                "total_spent": f"${r.total_spent_cents / 100:.2f}",
+                "type": "registered",
+            }
+        )
+    for r in guest_rows:
+        customers.append(
+            {
+                "name": r.name,
+                "email": r.email,
+                "joined": "—",
+                "order_count": r.order_count,
+                "total_spent": f"${(r.total_spent_cents or 0) / 100:.2f}",
+                "type": "guest",
+            }
+        )
+
+    customers.sort(key=lambda c: c["name"].lower())
+
+    q = request.args.get("q", "").strip()
+    if q:
+        q_lower = q.lower()
+        customers = [
+            c
+            for c in customers
+            if q_lower in c["name"].lower() or q_lower in c["email"].lower()
+        ]
+
+    registered_count = sum(1 for c in customers if c["type"] == "registered")
+    guest_count = sum(1 for c in customers if c["type"] == "guest")
+
+    return render_template(
+        "admin/customers.html",
+        customers=customers,
+        search_query=q,
+        registered_count=registered_count,
+        guest_count=guest_count,
+    )
