@@ -246,8 +246,13 @@
         placeholder="Search by name or email…"
         autocomplete="off"
       />
+      <select name="account_type" aria-label="Filter by account type">
+        <option value="all" {% if account_type == "all" %}selected{% endif %}>All accounts</option>
+        <option value="registered" {% if account_type == "registered" %}selected{% endif %}>Registered only</option>
+        <option value="guest" {% if account_type == "guest" %}selected{% endif %}>Guest only</option>
+      </select>
       <button type="submit" class="button button--secondary">Search</button>
-      {% if search_query %}
+      {% if search_query or account_type != "all" %}
         <a href="{{ url_for('admin.admin_customers') }}" class="button button--secondary">Clear</a>
       {% endif %}
     </form>
@@ -255,7 +260,14 @@
     {% if not customers %}
       <p class="admin-empty">
         {% if search_query %}
-          No customers found matching "{{ search_query }}".
+          No customers found matching "{{ search_query }}"
+          {% if account_type == "registered" %}
+            for registered accounts
+          {% elif account_type == "guest" %}
+            for guest accounts
+          {% endif %}.
+        {% elif account_type != "all" %}
+          No {{ "registered" if account_type == "registered" else "guest" }} customers found.
         {% else %}
           No customers yet.
         {% endif %}

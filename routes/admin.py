@@ -125,6 +125,13 @@ def admin_customers():
     customers.sort(key=lambda c: c["name"].lower())
 
     q = request.args.get("q", "").strip()
+    account_type = request.args.get("account_type", "all").strip().lower()
+    if account_type not in {"all", "registered", "guest"}:
+        account_type = "all"
+
+    if account_type != "all":
+        customers = [c for c in customers if c["type"] == account_type]
+
     if q:
         q_lower = q.lower()
         customers = [
@@ -140,6 +147,7 @@ def admin_customers():
         "admin/customers.html",
         customers=customers,
         search_query=q,
+        account_type=account_type,
         registered_count=registered_count,
         guest_count=guest_count,
     )
