@@ -6,6 +6,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect, text
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 db = SQLAlchemy()
 
@@ -173,6 +175,19 @@ class DailyQueueCounter(db.Model):
         onupdate=utc_now_naive,
     )
 
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(255), nullable=False, unique=True, index=True)
+    password_hash = db.Column(db.String(256), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default="customer")
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+    )
 
 class OrderNotification(db.Model):
     __tablename__ = "order_notifications"
@@ -290,3 +305,22 @@ def init_db(app: Flask) -> None:
     with app.app_context():
         db.create_all()
         _sync_legacy_schema()
+        _seed_demo_users()
+
+
+def _seed_demo_users() -> None:
+    """Insert demo customer accounts if they don't already exist."""
+    demo_users = [
+        {"name": "Linh Nguyen",   "email": "linh@gmail.com",   "password": "demo123"},
+        {"name": "Minh Tran",     "email": "minh@demo.local",   "password": "demo123"},
+        {"name": "Anh Pham",      "email": "anh@demo.local",    "password": "demo123"},
+    ]
+    for data in demo_users:
+        if not User.query.filter_by(email=data["email"]).first():
+            db.session.add(User(
+                name=data["name"],
+                email=data["email"],
+                password_hash=generate_password_hash(data["password"]),
+                role="customer",
+            ))
+    db.session.commit()

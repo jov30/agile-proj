@@ -81,7 +81,7 @@
         </nav>
         {% if current_user %}
           <form method="post" action="{{ url_for('auth.logout') }}">
-            <button type="submit" class="header-cta">Logout {{ current_user.name }}</button>
+            <button type="submit" class="header-cta">Logout</button>
           </form>
         {% else %}
           <a href="{{ url_for('auth.login') }}" class="header-cta">Login</a>

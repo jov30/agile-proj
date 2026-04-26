@@ -47,11 +47,13 @@ project-root/
 ```
 
 ```text
-I think the most reasonable way to divide our project is into four main roles, with each person having a clear main area of responsibility and a primary set of files. This way, everyone can make a meaningful contribution, collaboration becomes easier, and we can reduce merge conflicts as much as possible.
+The project is divided into four main roles, with each person responsible for a clear set of features and tasks. Core and shared team tasks are also outlined.
 
-Role 1: Core Ordering Flow and User Interface
+Person 1 (Samuel) — Authentication, Profile, and Favourite Meals
 
-This role focuses on the main customer journey of the application, especially the core ordering features and the main user-facing interface.
+Role Assignment: Samuel Ou
+
+This role focuses on authentication and user account features, including profile management and favourite meal sharing.
 
 Main files:
 - templates/base.html
@@ -65,17 +67,24 @@ Main files:
 - routes/menu.py
 
 Main responsibilities:
-- design and build the main customer-side pages
-- create the overall user flow for browsing meals, adding items to the cart, and checking out
-- display the order summary and total price clearly
-- design buttons, navigation, and layout for the ordering process
-- make sure the interface is clean, consistent, and easy to use
-- handle menu browsing, cart updates, and the customer-side checkout flow
-- help connect the frontend ordering pages with backend routes when needed
+- user registration
+- user login and logout
+- profile view and update
+- save favourite meals
+- share favourite meals with other users
+- view favourite meals shared by other users
+- auth/profile forms and validation
+- user-related backend routes
+- user model and database setup
+- favourite meal model and database setup
+- connect login, register, profile, and shared favourite meal pages to backend logic
+- basic tests for auth/profile/favourite meal features
 
-Role 2: Authentication and Account Features
+Person 2 (Zeng) — Menu and Cart
 
-This role focuses on authentication and account access.
+Role Assignment: Thomas Zeng
+
+This role focuses on menu browsing and cart experience.
 
 Main files:
 - templates/auth/login.html
@@ -83,16 +92,21 @@ Main files:
 - routes/auth.py
 
 Main responsibilities:
-- implement user registration
-- implement login and logout
-- handle session management
-- validate authentication forms
-- connect authentication logic with the user database
-- make sure account access works properly and securely
+- filter menu bar, looking menu food by keyword
+- menu item detail flow if needed
+- add items to cart
+- update cart quantities
+- view cart summary and total price
+- cart-related backend routes
+- menu/cart data handling
+- connect menu and cart pages to backend logic
+- basic tests for menu/cart features
 
-Role 3: User Features and Social Features
+Person 3 (Tony) — Checkout, Scheduled + Instant Online Orders, and Receipts + Membership + Chatbox
 
-This role focuses on the main user-side features after login, including profile management, order history, and shared meal features.
+Role Assignment: Tony Le
+
+This role focuses on checkout, order processing, receipt generation, membership, and chat features.
 
 Main files:
 - templates/user/orders.html
@@ -103,15 +117,21 @@ Main files:
 - routes/orders.py
 
 Main responsibilities:
-- build the user profile page
-- implement profile viewing and updating
-- create the order history page
-- handle user-side order records after checkout
-- implement favourite meal saving and sharing
-- allow users to view favourite meals shared by other users
-- handle the main user-side logic after authentication
+- checkout flow
+- simulated payment flow
+- scheduled pickup date and time selection
+- order confirmation
+- store order records in the database
+- PDF receipt generation
+- order history
+- order-related backend routes
+- order model and database setup
+- connect checkout, payment, receipt, and order pages to backend logic
+- creating membership online card for customer
+- Dong chatbox integrated with AI
+- basic tests for checkout/order features
 
-Role 4: Admin Side, Testing, and Documentation
+Person 4 (Jovan) — Admin and Reporting
 
 This role focuses on the restaurant management side of the system, along with testing and project documentation.
 
@@ -122,14 +142,23 @@ Main files:
 - tests/
 
 Main responsibilities:
-- build the admin dashboard
-- manage customer account records
-- manage menu items from the admin side
-- view and update customer orders
-- display monthly income charts
-- write and organise test files
-- maintain the README
-- help manage project documentation and repository organisation
+- admin login/access flow
+- view and manage customer accounts
+- view customer profiles
+- add, edit, and remove menu items
+- update prices, descriptions, ingredients, categories, and availability
+- view customer orders
+- track pickup times
+- update order status
+- view sales/income records
+- monthly income chart/reporting
+- admin-related backend routes
+- basic tests for admin features
+
+Shared team tasks:
+- connect everything to SQLite + SQLAlchemy
+- agree on common models, field names, and routes
+- use separate branches and merge after each feature is stable
 
 Shared Backend Files
 
