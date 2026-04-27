@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Vouchers | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .voucher-admin {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .voucher-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.75fr) minmax(0, 1.25fr);
+    gap: 1rem;
+  }
+
+  .admin-panel,
+  .voucher-card {
+    border-radius: 18px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)), #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+    padding: 1rem 1.1rem;
+  }
+
+  .voucher-values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+  }
+
+  .voucher-value {
+    min-height: 48px;
+    border: 1px solid rgba(255, 106, 19, 0.22);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-main);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
+  }
+
+  .voucher-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 420px;
+    background:
+      linear-gradient(135deg, rgba(42, 22, 11, 0.96), rgba(155, 49, 32, 0.92)),
+      #2a160b;
+    color: var(--text-inverse);
+  }
+
+  .voucher-card::before {
+    content: "";
+    position: absolute;
+    inset: 1rem;
+    border: 1px solid rgba(255, 216, 115, 0.32);
+    border-radius: 14px;
+    pointer-events: none;
+  }
+
+  .voucher-brand,
+  .voucher-meta,
+  .voucher-ideas {
+    position: relative;
+    z-index: 1;
+  }
+
+  .voucher-brand {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .voucher-brand img {
+    width: 74px;
+    height: 74px;
+    border-radius: 16px;
+    object-fit: cover;
+  }
+
+  .voucher-brand h2 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+  }
+
+  .voucher-value-display {
+    position: relative;
+    z-index: 1;
+    margin: 2rem 0 1rem;
+    font-family: "Bebas Neue", "Bricolage Grotesque", sans-serif;
+    font-size: clamp(4rem, 16vw, 8rem);
+    line-height: 0.85;
+    color: var(--brand-gold);
+  }
+
+  .voucher-code {
+    display: inline-flex;
+    position: relative;
+    z-index: 1;
+    border: 1px dashed rgba(255, 216, 115, 0.7);
+    border-radius: 999px;
+    padding: 0.55rem 0.9rem;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .voucher-ideas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 1.3rem;
+  }
+
+  .voucher-idea {
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.75rem;
+  }
+
+  .voucher-idea strong {
+    display: block;
+    color: var(--brand-gold);
+  }
+
+  .voucher-list {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+  }
+
+  .voucher-list a {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-main);
+    padding: 0.65rem 0.75rem;
+    text-decoration: none;
+    font-weight: 800;
+  }
+
+  @media (max-width: 900px) {
+    .voucher-grid,
+    .voucher-ideas {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="voucher-admin">
+  <section class="admin-panel">
+    <p class="eyebrow">Digital vouchers</p>
+    <h1 class="section-title">Voucher generator</h1>
+    <p class="section-copy">Create a demo-ready MCQ voucher with a unique code, logo, and serving guide.</p>
+  </section>
+
+  <section class="voucher-grid">
+    <aside class="admin-panel">
+      <p class="eyebrow">Create value</p>
+      <form class="voucher-values" method="post" action="{{ url_for('admin.admin_vouchers') }}">
+        {% for value in values %}
+          <button class="voucher-value" type="submit" name="value" value="{{ value }}">${{ value }}</button>
+        {% endfor %}
+      </form>
+
+      <div class="voucher-list">
+        {% for voucher in vouchers %}
+          <a href="{{ url_for('admin.admin_vouchers', code=voucher.code) }}">
+            <span>{{ voucher.code }}</span>
+            <span>{{ voucher.value_display }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </aside>
+
+    {% if selected_voucher %}
+      <article class="voucher-card">
+        <div class="voucher-brand">
+          <img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ logo" />
+          <div>
+            <p class="eyebrow">MCQ Vietnamese Street Food</p>
+            <h2>Digital Gift Voucher</h2>
+          </div>
+        </div>
+        <div class="voucher-value-display">{{ selected_voucher.value_display }}</div>
+        <div class="voucher-code">{{ selected_voucher.code }}</div>
+        <p class="voucher-meta">Created {{ selected_voucher.created_label }} · Redeem in store for pickup orders, drinks, and street-food favourites.</p>
+        <div class="voucher-ideas">
+          <div class="voucher-idea">
+            <strong>{{ selected_voucher.banh_mi_count }}</strong>
+            <span>banh mi serves approx.</span>
+          </div>
+          <div class="voucher-idea">
+            <strong>{{ selected_voucher.coffee_count }}</strong>
+            <span>Vietnamese coffees approx.</span>
+          </div>
+          <div class="voucher-idea">
+            <strong>{{ selected_voucher.combo_count }}</strong>
+            <span>banh mi + coffee combos approx.</span>
+          </div>
+        </div>
+      </article>
+    {% else %}
+      <article class="voucher-card">
+        <div class="voucher-brand">
+          <img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ logo" />
+          <div>
+            <p class="eyebrow">MCQ Vietnamese Street Food</p>
+            <h2>Create a voucher</h2>
+          </div>
+        </div>
+        <p class="voucher-meta">Choose a value on the left to generate the first unique digital voucher.</p>
+      </article>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

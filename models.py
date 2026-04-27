@@ -189,6 +189,22 @@ class User(db.Model):
         default=utc_now_naive,
     )
 
+
+class Voucher(db.Model):
+    __tablename__ = "vouchers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(32), nullable=False, unique=True, index=True)
+    value_cents = db.Column(db.Integer, nullable=False)
+    label = db.Column(db.String(120), nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+
+
 class OrderNotification(db.Model):
     __tablename__ = "order_notifications"
 

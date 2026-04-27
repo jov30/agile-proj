@@ -1,18 +1,20 @@
 from __future__ import annotations
 
 import json
+import secrets
 from pathlib import Path
 
 from flask import Blueprint, redirect, render_template, request, url_for
 from sqlalchemy import func, or_, select
 
 from menu_catalog import load_enriched_menu
-from models import FULFILLMENT_TYPES, ORDER_STATUS_SEQUENCE, Order, User, db
+from models import FULFILLMENT_TYPES, ORDER_STATUS_SEQUENCE, Order, User, Voucher, db
 from routes.auth import admin_required
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 _ROOT_DIR = Path(__file__).resolve().parent.parent
+VOUCHER_VALUES = (10, 20, 30, 40, 50, 80, 100, 150, 200)
 
 
 def _menu_path() -> Path:
@@ -87,6 +89,29 @@ def _serialize_admin_order(order: Order) -> dict:
         "kitchen_notes": order.kitchen_notes,
         "next_statuses": next_statuses,
     }
+
+
+def _voucher_payload(voucher: Voucher) -> dict:
+    dollars = voucher.value_cents // 100
+    banh_mi_count = max(1, voucher.value_cents // 1000)
+    coffee_count = max(1, voucher.value_cents // 600)
+    combo_count = max(1, voucher.value_cents // 1600)
+    return {
+        "code": voucher.code,
+        "label": voucher.label,
+        "value_display": f"${dollars}",
+        "created_label": voucher.created_at.strftime("%d %b %Y"),
+        "banh_mi_count": banh_mi_count,
+        "coffee_count": coffee_count,
+        "combo_count": combo_count,
+    }
+
+
+def _new_voucher_code() -> str:
+    while True:
+        code = f"MCQ-{secrets.token_hex(3).upper()}"
+        if Voucher.query.filter_by(code=code).first() is None:
+            return code
 
 
 @admin_bp.get("/")
@@ -263,6 +288,39 @@ def admin_menu():
         categories=categories,
         items=items,
         available_count=sum(1 for item in items if item["available"]),
+    )
+
+
+@admin_bp.route("/vouchers", methods=["GET", "POST"])
+@admin_required
+def admin_vouchers():
+    if request.method == "POST":
+        raw_value = request.form.get("value", "").strip()
+        try:
+            dollars = int(raw_value)
+        except ValueError:
+            dollars = 10
+        if dollars not in VOUCHER_VALUES:
+            dollars = 10
+        voucher = Voucher(
+            code=_new_voucher_code(),
+            value_cents=dollars * 100,
+            label=f"MCQ ${dollars} Digital Voucher",
+        )
+        db.session.add(voucher)
+        db.session.commit()
+        return redirect(url_for("admin.admin_vouchers", code=voucher.code))
+
+    vouchers = Voucher.query.order_by(Voucher.created_at.desc()).limit(24).all()
+    selected_code = request.args.get("code", "").strip()
+    selected = next((voucher for voucher in vouchers if voucher.code == selected_code), None)
+    if selected is None and vouchers:
+        selected = vouchers[0]
+    return render_template(
+        "admin/vouchers.html",
+        values=VOUCHER_VALUES,
+        vouchers=[_voucher_payload(voucher) for voucher in vouchers],
+        selected_voucher=_voucher_payload(selected) if selected else None,
     )
 
 
