@@ -239,7 +239,7 @@
 
   .admin-customer {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
     gap: 0.5rem 0.9rem;
     align-items: center;
     padding: 0.78rem 0.9rem;
@@ -307,6 +307,36 @@
   .admin-badge--guest {
     color: var(--brand-red);
     background: rgba(255, 106, 19, 0.1);
+  }
+
+  .admin-customer__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.4rem;
+  }
+
+  .admin-row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0 0.72rem;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.16);
+    background: rgba(255, 255, 255, 0.62);
+    color: var(--text-main);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+  }
+
+  .admin-row-action:hover,
+  .admin-row-action:focus-visible {
+    border-color: rgba(255, 106, 19, 0.34);
+    background: #fff;
+    color: var(--brand-red);
   }
 
   .admin-empty {
@@ -422,6 +452,10 @@
             <span class="admin-badge admin-badge--{{ c.type }}">
               {{ "Registered" if c.type == "registered" else "Guest" }}
             </span>
+            <div class="admin-customer__actions">
+              <a class="admin-row-action" href="{{ url_for('admin.admin_customers', q=c.email) }}">View orders</a>
+              <a class="admin-row-action" href="mailto:{{ c.email }}">Email</a>
+            </div>
           </article>
         {% endfor %}
       </div>
