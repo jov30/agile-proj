@@ -93,19 +93,28 @@ def _serialize_admin_order(order: Order) -> dict:
 
 def _voucher_payload(voucher: Voucher) -> dict:
     dollars = voucher.value_cents // 100
-    banh_mi_count = max(1, voucher.value_cents // 1000)
-    coffee_count = max(1, voucher.value_cents // 600)
-    combo_count = max(1, voucher.value_cents // 1600)
+    included_items = voucher.included_items or (
+        f"{max(1, voucher.value_cents // 1000)} banh mi serves approx.\n"
+        f"{max(1, voucher.value_cents // 600)} Vietnamese coffees approx.\n"
+        f"{max(1, voucher.value_cents // 1600)} banh mi + coffee combos approx."
+    )
     return {
+        "id": voucher.id,
         "code": voucher.code,
         "label": voucher.label,
+        "subtitle": voucher.subtitle or "For lucky customer",
+        "terms": voucher.terms
+        or "This gift certificate is not redeemable for cash.\nOne time use only.",
         "description": voucher.description
-        or "Use this voucher for MCQ street-food favourites such as banh mi, Vietnamese coffee, pho, rice bowls, and pickup combos.",
+        or f"This voucher entitles the bearer to {dollars} dollars worth of MCQ Vietnamese Street Food.",
+        "included_items": included_items,
+        "included_lines": [line.strip() for line in included_items.splitlines() if line.strip()],
+        "expires_at": voucher.expires_at or "13 May 2026",
+        "footer_note": voucher.footer_note
+        or "Authorised by MCQ Vietnamese Street Food. For catering or voucher enquiries, please contact the store team.",
         "value_display": f"${dollars}",
+        "value": dollars,
         "created_label": voucher.created_at.strftime("%d %b %Y"),
-        "banh_mi_count": banh_mi_count,
-        "coffee_count": coffee_count,
-        "combo_count": combo_count,
     }
 
 
@@ -303,22 +312,37 @@ def admin_menu():
 @admin_required
 def admin_vouchers():
     if request.method == "POST":
+        action = request.form.get("action", "create").strip()
         raw_value = request.form.get("value", "").strip()
         try:
             dollars = int(raw_value)
         except ValueError:
             dollars = 10
-        if dollars not in VOUCHER_VALUES:
+        if action != "update" and dollars not in VOUCHER_VALUES:
             dollars = 10
-        description = request.form.get("description", "").strip()
-        voucher = Voucher(
-            code=_new_voucher_code(),
-            value_cents=dollars * 100,
-            label=f"MCQ ${dollars} Digital Voucher",
-            description=description
-            or "Use this voucher for MCQ street-food favourites such as banh mi, Vietnamese coffee, pho, rice bowls, and pickup combos.",
-        )
-        db.session.add(voucher)
+        if action == "update" and dollars < 1:
+            dollars = 10
+        voucher = None
+        if action == "update":
+            voucher_id = request.form.get("voucher_id", "").strip()
+            if voucher_id.isdigit():
+                voucher = Voucher.query.get(int(voucher_id))
+        if voucher is None:
+            voucher = Voucher(code=_new_voucher_code(), value_cents=dollars * 100, label="")
+            db.session.add(voucher)
+        requested_code = request.form.get("code", "").strip().upper()
+        if requested_code and requested_code != voucher.code:
+            existing = Voucher.query.filter_by(code=requested_code).first()
+            if existing is None:
+                voucher.code = requested_code
+        voucher.value_cents = dollars * 100
+        voucher.label = request.form.get("label", "").strip() or f"${dollars} Catering Voucher"
+        voucher.subtitle = request.form.get("subtitle", "").strip() or "For lucky customer"
+        voucher.description = request.form.get("description", "").strip()
+        voucher.terms = request.form.get("terms", "").strip()
+        voucher.included_items = request.form.get("included_items", "").strip()
+        voucher.expires_at = request.form.get("expires_at", "").strip() or "13 May 2026"
+        voucher.footer_note = request.form.get("footer_note", "").strip()
         db.session.commit()
         return redirect(url_for("admin.admin_vouchers", code=voucher.code))
 

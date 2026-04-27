@@ -198,6 +198,11 @@ class Voucher(db.Model):
     value_cents = db.Column(db.Integer, nullable=False)
     label = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    subtitle = db.Column(db.String(180), nullable=True)
+    terms = db.Column(db.Text, nullable=True)
+    included_items = db.Column(db.Text, nullable=True)
+    expires_at = db.Column(db.String(40), nullable=True)
+    footer_note = db.Column(db.Text, nullable=True)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -240,6 +245,16 @@ def _sync_legacy_schema() -> None:
         with db.engine.begin() as conn:
             if "description" not in voucher_columns:
                 conn.execute(text("ALTER TABLE vouchers ADD COLUMN description TEXT"))
+            if "subtitle" not in voucher_columns:
+                conn.execute(text("ALTER TABLE vouchers ADD COLUMN subtitle VARCHAR(180)"))
+            if "terms" not in voucher_columns:
+                conn.execute(text("ALTER TABLE vouchers ADD COLUMN terms TEXT"))
+            if "included_items" not in voucher_columns:
+                conn.execute(text("ALTER TABLE vouchers ADD COLUMN included_items TEXT"))
+            if "expires_at" not in voucher_columns:
+                conn.execute(text("ALTER TABLE vouchers ADD COLUMN expires_at VARCHAR(40)"))
+            if "footer_note" not in voucher_columns:
+                conn.execute(text("ALTER TABLE vouchers ADD COLUMN footer_note TEXT"))
     if "orders" not in tables:
         return
 

@@ -11,7 +11,7 @@
 
   .voucher-grid {
     display: grid;
-    grid-template-columns: minmax(280px, 0.75fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(320px, 0.72fr) minmax(0, 1.28fr);
     gap: 1rem;
   }
 
@@ -45,27 +45,57 @@
   .voucher-card {
     position: relative;
     overflow: hidden;
-    min-height: 420px;
-    background:
-      radial-gradient(circle at 20% 12%, rgba(255, 216, 115, 0.5), transparent 28%),
-      radial-gradient(circle at 92% 22%, rgba(255, 106, 19, 0.58), transparent 25%),
-      linear-gradient(135deg, #111827 0%, #7f1d1d 45%, #f97316 100%);
-    color: var(--text-inverse);
-    box-shadow: 0 26px 60px rgba(127, 29, 29, 0.34), 0 12px 28px rgba(255, 106, 19, 0.22);
+    min-height: 470px;
+    background: linear-gradient(135deg, #21a74a 0%, #0c8a43 100%);
+    color: #18120d;
+    padding: 2.4rem;
+    box-shadow: 0 26px 60px rgba(7, 89, 39, 0.28), 0 12px 28px rgba(12, 138, 67, 0.22);
   }
 
   .voucher-card::before {
     content: "";
     position: absolute;
-    inset: 1rem;
-    border: 2px solid rgba(255, 216, 115, 0.55);
-    border-radius: 14px;
+    inset: auto auto 0 0;
+    width: 220px;
+    height: 260px;
+    background:
+      radial-gradient(circle at 30% 22%, #ef4444 0 9px, transparent 10px),
+      radial-gradient(circle at 58% 20%, #facc15 0 11px, transparent 12px),
+      radial-gradient(circle at 42% 36%, #22c55e 0 15px, transparent 16px),
+      linear-gradient(145deg, #0f8b54, #075f3d);
+    border-radius: 0 90px 0 0;
+    opacity: 0.95;
     pointer-events: none;
+  }
+
+  .voucher-certificate {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) 2px minmax(0, 0.95fr);
+    gap: 1.7rem;
+    min-height: 330px;
+    margin-left: clamp(0rem, 8vw, 3.8rem);
+    padding: clamp(1.1rem, 3vw, 1.7rem);
+    background: #f7f1e9;
+    box-shadow: 12px 12px 0 rgba(2, 92, 43, 0.35), 0 18px 42px rgba(42, 22, 11, 0.18);
+  }
+
+  .voucher-divider {
+    background: #d9160f;
+  }
+
+  .voucher-left,
+  .voucher-right {
+    display: grid;
+    align-content: center;
+    text-align: center;
   }
 
   .voucher-brand,
   .voucher-meta,
-  .voucher-ideas {
+  .voucher-ideas,
+  .voucher-print-actions {
     position: relative;
     z-index: 1;
   }
@@ -75,9 +105,21 @@
     gap: 0.8rem;
   }
 
+  .voucher-field {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .voucher-field label {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .voucher-field input,
   .voucher-create textarea {
     width: 100%;
-    min-height: 110px;
     border-radius: 14px;
     border: 1px solid rgba(112, 85, 66, 0.18);
     background: rgba(255, 255, 255, 0.84);
@@ -85,6 +127,10 @@
     color: var(--text-main);
     font: inherit;
     padding: 0.8rem;
+  }
+
+  .voucher-create textarea {
+    min-height: 96px;
   }
 
   .voucher-create-actions {
@@ -97,12 +143,13 @@
     display: flex;
     gap: 0.8rem;
     align-items: center;
+    justify-content: center;
   }
 
   .voucher-brand img {
-    width: 74px;
+    width: 138px;
     height: 74px;
-    border-radius: 16px;
+    border-radius: 0;
     object-fit: cover;
   }
 
@@ -115,55 +162,101 @@
   .voucher-value-display {
     position: relative;
     z-index: 1;
-    margin: 2rem 0 1rem;
+    margin: 0 0 0.55rem;
     font-family: "Bebas Neue", "Bricolage Grotesque", sans-serif;
-    font-size: clamp(4rem, 16vw, 8rem);
+    font-size: clamp(4.5rem, 13vw, 8.5rem);
     line-height: 0.85;
-    color: var(--brand-gold);
+    color: #d9160f;
+    letter-spacing: 0.02em;
   }
 
   .voucher-code {
     display: inline-flex;
     position: relative;
     z-index: 1;
-    border: 1px dashed rgba(255, 216, 115, 0.7);
+    justify-content: center;
+    border: 1px dashed rgba(217, 22, 15, 0.55);
     border-radius: 999px;
     padding: 0.55rem 0.9rem;
-    background: rgba(255, 255, 255, 0.08);
-    font-size: 1.15rem;
+    background: rgba(217, 22, 15, 0.08);
+    color: #d9160f;
+    font-size: 0.95rem;
     font-weight: 900;
     letter-spacing: 0.08em;
   }
 
   .voucher-ideas {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.6rem;
-    margin-top: 1.3rem;
+    gap: 0.35rem;
+    margin: 0.8rem 0 0;
+    text-align: left;
   }
 
   .voucher-idea {
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.18);
-    border: 1px solid rgba(255, 216, 115, 0.24);
-    padding: 0.75rem;
+    border-radius: 999px;
+    background: rgba(217, 22, 15, 0.08);
+    border: 1px solid rgba(217, 22, 15, 0.12);
+    padding: 0.42rem 0.65rem;
+    font-size: 0.82rem;
   }
 
   .voucher-description {
     position: relative;
     z-index: 1;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 216, 115, 0.24);
-    color: rgba(255, 247, 239, 0.94);
-    line-height: 1.6;
-    margin: 1rem 0 0;
-    padding: 0.9rem;
+    color: #24150c;
+    line-height: 1.55;
+    margin: 0.8rem 0;
   }
 
   .voucher-idea strong {
     display: block;
-    color: var(--brand-gold);
+    color: #d9160f;
+  }
+
+  .voucher-title {
+    margin: 0.4rem 0;
+    color: #d9160f;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .voucher-subtitle {
+    color: #d9160f;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .voucher-terms-title,
+  .voucher-expiry {
+    color: #d9160f;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .voucher-terms {
+    white-space: pre-line;
+    line-height: 1.45;
+    margin: 0.8rem 0 1rem;
+  }
+
+  .voucher-footer {
+    position: relative;
+    z-index: 1;
+    margin: 1.6rem 0 0 clamp(0rem, 8vw, 3.8rem);
+    color: #fff;
+    font-size: clamp(0.95rem, 2vw, 1.25rem);
+    font-style: italic;
+    line-height: 1.35;
+    white-space: pre-line;
+  }
+
+  .voucher-print-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.9rem;
   }
 
   .voucher-list {
@@ -186,9 +279,41 @@
 
   @media (max-width: 900px) {
     .voucher-grid,
-    .voucher-ideas,
     .voucher-create-actions {
       grid-template-columns: 1fr;
+    }
+
+    .voucher-certificate {
+      grid-template-columns: 1fr;
+      margin-left: 0;
+    }
+
+    .voucher-divider {
+      height: 2px;
+    }
+  }
+
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    .voucher-card,
+    .voucher-card * {
+      visibility: visible;
+    }
+
+    .voucher-card {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      min-height: 100vh;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .voucher-print-actions {
+      display: none;
     }
   }
 </style>
@@ -206,8 +331,40 @@
     <aside class="admin-panel">
       <p class="eyebrow">Create value</p>
       <form class="voucher-create" method="post" action="{{ url_for('admin.admin_vouchers') }}">
-        <label class="eyebrow" for="voucher-description">Voucher includes</label>
-        <textarea id="voucher-description" name="description">Use this voucher for MCQ street-food favourites: banh mi, Vietnamese coffee, pho, rice bowls, fresh juices, and pickup combos.</textarea>
+        <input type="hidden" name="action" value="create" />
+        <div class="voucher-field">
+          <label>Title</label>
+          <input name="label" value="$150 Catering Voucher" />
+        </div>
+        <div class="voucher-field">
+          <label>Subtitle</label>
+          <input name="subtitle" value="For lucky customer in 12 days of Christmas giveaway" />
+        </div>
+        <div class="voucher-field">
+          <label>Valid until</label>
+          <input name="expires_at" value="13 May 2026" />
+        </div>
+        <div class="voucher-field">
+          <label>Voucher description</label>
+          <textarea name="description">This voucher entitles the bearer to catering order value at MCQ Street Food Mirrabooka.</textarea>
+        </div>
+        <div class="voucher-field">
+          <label>Included items and quantities</label>
+          <textarea name="included_items">10 banh mi platters
+12 Vietnamese iced coffees
+8 fresh juice cups
+1 catering pickup combo</textarea>
+        </div>
+        <div class="voucher-field">
+          <label>Terms and conditions</label>
+          <textarea name="terms">This gift certificate is not redeemable for cash.
+One time use only.</textarea>
+        </div>
+        <div class="voucher-field">
+          <label>Footer contact</label>
+          <textarea name="footer_note">Authorised by MCQ Vietnamese Street Food.
+For catering order requests, please contact: cateringorders@mcqinternational.com</textarea>
+        </div>
         <div class="voucher-create-actions">
           {% for value in values %}
             <button class="voucher-value" type="submit" name="value" value="{{ value }}">${{ value }}</button>
@@ -223,34 +380,81 @@
           </a>
         {% endfor %}
       </div>
+
+      {% if selected_voucher %}
+        <form class="voucher-create" method="post" action="{{ url_for('admin.admin_vouchers') }}">
+          <input type="hidden" name="action" value="update" />
+          <input type="hidden" name="voucher_id" value="{{ selected_voucher.id }}" />
+          <p class="eyebrow">Edit selected voucher</p>
+          <div class="voucher-field">
+            <label>Unique code</label>
+            <input name="code" value="{{ selected_voucher.code }}" />
+          </div>
+          <div class="voucher-field">
+            <label>Value</label>
+            <input name="value" value="{{ selected_voucher.value }}" />
+          </div>
+          <div class="voucher-field">
+            <label>Title</label>
+            <input name="label" value="{{ selected_voucher.label }}" />
+          </div>
+          <div class="voucher-field">
+            <label>Subtitle</label>
+            <input name="subtitle" value="{{ selected_voucher.subtitle }}" />
+          </div>
+          <div class="voucher-field">
+            <label>Valid until</label>
+            <input name="expires_at" value="{{ selected_voucher.expires_at }}" />
+          </div>
+          <div class="voucher-field">
+            <label>Voucher description</label>
+            <textarea name="description">{{ selected_voucher.description }}</textarea>
+          </div>
+          <div class="voucher-field">
+            <label>Included items and quantities</label>
+            <textarea name="included_items">{{ selected_voucher.included_items }}</textarea>
+          </div>
+          <div class="voucher-field">
+            <label>Terms and conditions</label>
+            <textarea name="terms">{{ selected_voucher.terms }}</textarea>
+          </div>
+          <div class="voucher-field">
+            <label>Footer contact</label>
+            <textarea name="footer_note">{{ selected_voucher.footer_note }}</textarea>
+          </div>
+          <button class="button button--primary" type="submit">Save voucher</button>
+        </form>
+      {% endif %}
     </aside>
 
     {% if selected_voucher %}
       <article class="voucher-card">
-        <div class="voucher-brand">
-          <img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ logo" />
-          <div>
-            <p class="eyebrow">MCQ Vietnamese Street Food</p>
-            <h2>Digital Gift Voucher</h2>
+        <div class="voucher-certificate">
+          <div class="voucher-left">
+            <div class="voucher-value-display">{{ selected_voucher.value_display }}</div>
+            <h2 class="voucher-title">{{ selected_voucher.label }}</h2>
+            <p class="voucher-subtitle">{{ selected_voucher.subtitle }}</p>
+            <div class="voucher-code">Code {{ selected_voucher.code }}</div>
+          </div>
+          <div class="voucher-divider"></div>
+          <div class="voucher-right">
+            <div class="voucher-brand">
+              <img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ logo" />
+            </div>
+            <h3 class="voucher-terms-title">Terms and Conditions</h3>
+            <p class="voucher-description">{{ selected_voucher.description }}</p>
+            <p class="voucher-terms">{{ selected_voucher.terms }}</p>
+            <div class="voucher-ideas">
+              {% for line in selected_voucher.included_lines %}
+                <div class="voucher-idea">{{ line }}</div>
+              {% endfor %}
+            </div>
+            <p class="voucher-expiry">Valid until {{ selected_voucher.expires_at }}</p>
           </div>
         </div>
-        <div class="voucher-value-display">{{ selected_voucher.value_display }}</div>
-        <div class="voucher-code">{{ selected_voucher.code }}</div>
-        <p class="voucher-meta">Created {{ selected_voucher.created_label }} · Redeem in store for pickup orders, drinks, and street-food favourites.</p>
-        <p class="voucher-description">{{ selected_voucher.description }}</p>
-        <div class="voucher-ideas">
-          <div class="voucher-idea">
-            <strong>{{ selected_voucher.banh_mi_count }}</strong>
-            <span>banh mi serves approx.</span>
-          </div>
-          <div class="voucher-idea">
-            <strong>{{ selected_voucher.coffee_count }}</strong>
-            <span>Vietnamese coffees approx.</span>
-          </div>
-          <div class="voucher-idea">
-            <strong>{{ selected_voucher.combo_count }}</strong>
-            <span>banh mi + coffee combos approx.</span>
-          </div>
+        <p class="voucher-footer">{{ selected_voucher.footer_note }}</p>
+        <div class="voucher-print-actions">
+          <button class="button button--primary" type="button" onclick="window.print()">Print voucher</button>
         </div>
       </article>
     {% else %}
