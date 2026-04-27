@@ -81,6 +81,14 @@
   .admin-catalog-tools input {
     flex: 1;
     min-width: 240px;
+  }
+
+  .admin-catalog-tools select {
+    min-width: 170px;
+  }
+
+  .admin-catalog-tools input,
+  .admin-catalog-tools select {
     min-height: 42px;
     border-radius: 999px;
     border: 1px solid rgba(112, 85, 66, 0.18);
@@ -211,15 +219,30 @@
 
   <section class="admin-panel">
     <p class="eyebrow">Edit catalog</p>
-    <div class="admin-catalog-tools">
+    <form class="admin-catalog-tools" id="catalog-filter-form">
       <input id="catalog-search" type="search" placeholder="Search menu items by name, category, price, ingredients, or image path" autocomplete="off" />
+      <select id="catalog-category" aria-label="Filter category">
+        <option value="">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category.title|lower }}">{{ category.title }}</option>
+        {% endfor %}
+      </select>
+      <select id="catalog-availability" aria-label="Filter availability">
+        <option value="">All availability</option>
+        <option value="available">Available</option>
+        <option value="unavailable">Unavailable</option>
+      </select>
+      <button class="button button--secondary" type="submit">Apply</button>
+      <button class="button button--secondary" type="button" id="catalog-clear">Clear</button>
       <span class="admin-catalog-count" id="catalog-count">{{ items|length }} showing</span>
-    </div>
+    </form>
     <div class="admin-menu-list">
       {% for item in items %}
         <article
           class="admin-menu-card"
           data-catalog-item
+          data-category="{{ item.category_title|lower }}"
+          data-availability="{{ 'available' if item.available else 'unavailable' }}"
           data-search="{{ item.name }} {{ item.category_title }} {{ item.price }} {{ item.summary }} {{ item.ingredients }} {{ item.image }}"
         >
           <div class="admin-menu-card__head">
@@ -276,7 +299,11 @@
 </div>
 <script>
   (() => {
+    const form = document.getElementById("catalog-filter-form");
     const search = document.getElementById("catalog-search");
+    const category = document.getElementById("catalog-category");
+    const availability = document.getElementById("catalog-availability");
+    const clear = document.getElementById("catalog-clear");
     const count = document.getElementById("catalog-count");
     const cards = Array.from(document.querySelectorAll("[data-catalog-item]"));
     const staticBase = "{{ url_for('static', filename='') }}";
@@ -287,13 +314,38 @@
       if (count) count.textContent = `${showing} showing`;
     }
 
-    if (search) {
-      search.addEventListener("input", () => {
-        const q = search.value.trim().toLowerCase();
-        cards.forEach((card) => {
-          card.hidden = q.length > 0 && !card.dataset.search.toLowerCase().includes(q);
-        });
-        updateCount();
+    function applyFilters() {
+      const q = search ? search.value.trim().toLowerCase() : "";
+      const cat = category ? category.value : "";
+      const status = availability ? availability.value : "";
+      cards.forEach((card) => {
+        const matchesText = !q || card.dataset.search.toLowerCase().includes(q);
+        const matchesCategory = !cat || card.dataset.category === cat;
+        const matchesAvailability = !status || card.dataset.availability === status;
+        card.hidden = !(matchesText && matchesCategory && matchesAvailability);
+      });
+      updateCount();
+    }
+
+    if (form) {
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        applyFilters();
+      });
+    }
+
+    [search, category, availability].forEach((control) => {
+      if (!control) return;
+      control.addEventListener("input", applyFilters);
+      control.addEventListener("change", applyFilters);
+    });
+
+    if (clear) {
+      clear.addEventListener("click", () => {
+        if (search) search.value = "";
+        if (category) category.value = "";
+        if (availability) availability.value = "";
+        applyFilters();
       });
     }
 
