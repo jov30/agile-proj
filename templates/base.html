@@ -75,7 +75,8 @@
           <a href="/membership" class="{% if request.path.startswith('/membership') or request.path.startswith('/profile') %}is-active{% endif %}">Membership</a>
           <a href="/community" class="{% if request.path.startswith('/community') or request.path.startswith('/shared-meals') or request.path.startswith('/favorites') %}is-active{% endif %}">Community</a>
           {% if is_admin %}
-            <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin') %}is-active{% endif %}">Admin Queue</a>
+            <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin/orders') %}is-active{% endif %}">Admin Queue</a>
+            <a href="{{ url_for('admin.admin_customers') }}" class="{% if request.path.startswith('/admin/customers') %}is-active{% endif %}">Customers</a>
           {% endif %}
           <a href="{{ account_href }}" class="{% if request.path.startswith('/login') or request.path.startswith('/register') or request.path.startswith('/profile') %}is-active{% endif %}">Account</a>
         </nav>
