@@ -44,10 +44,10 @@
 
   .voucher-card {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     width: min(100%, 1120px);
-    aspect-ratio: 16 / 7;
-    min-height: auto;
+    aspect-ratio: 16 / 8.6;
+    min-height: 560px;
     background: linear-gradient(135deg, #21a74a 0%, #0c8a43 100%);
     color: #18120d;
     padding: 3.4%;
@@ -93,7 +93,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1.02fr) 6px minmax(0, 0.98fr);
     gap: 3%;
-    height: 74%;
+    min-height: 390px;
     margin-left: 12%;
     padding: 2.9% 3.2%;
     background:
@@ -167,6 +167,13 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.55rem;
+  }
+
+  .voucher-value.is-selected {
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+    color: #2a160b;
+    border-color: rgba(255, 106, 19, 0.6);
+    box-shadow: 0 10px 22px rgba(255, 106, 19, 0.18);
   }
 
   .voucher-brand {
@@ -300,6 +307,8 @@
 
   .voucher-print-actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
     justify-content: flex-end;
     margin-top: 1rem;
   }
@@ -361,6 +370,7 @@
       aspect-ratio: auto;
       border-radius: 0;
       box-shadow: none;
+      overflow: hidden;
     }
 
     .voucher-print-actions {
@@ -380,47 +390,69 @@
 
   <section class="voucher-grid">
     <aside class="admin-panel">
-      <p class="eyebrow">Create value</p>
       <form class="voucher-create" method="post" action="{{ url_for('admin.admin_vouchers') }}">
-        <input type="hidden" name="action" value="create" />
+        {% if selected_voucher %}
+          <input type="hidden" name="voucher_id" value="{{ selected_voucher.id }}" />
+        {% endif %}
+        <p class="eyebrow">Live voucher editor</p>
+        <div class="voucher-field">
+          <label>Unique code</label>
+          <input name="code" value="{{ selected_voucher.code if selected_voucher else '' }}" placeholder="Auto-generated if left blank" />
+        </div>
+        <div class="voucher-field">
+          <label>Value</label>
+          <input id="voucher-value-input" name="value" value="{{ selected_voucher.value if selected_voucher else 150 }}" />
+        </div>
+        <div class="voucher-create-actions" aria-label="Voucher value presets">
+          {% for value in values %}
+            <button
+              class="voucher-value {% if selected_voucher and selected_voucher.value == value %}is-selected{% endif %}"
+              type="button"
+              data-voucher-value="{{ value }}"
+            >
+              ${{ value }}
+            </button>
+          {% endfor %}
+        </div>
         <div class="voucher-field">
           <label>Title</label>
-          <input name="label" value="$150 Catering Voucher" />
+          <input name="label" value="{{ selected_voucher.label if selected_voucher else '$150 Catering Voucher' }}" />
         </div>
         <div class="voucher-field">
           <label>Subtitle</label>
-          <input name="subtitle" value="For lucky customer in 12 days of Christmas giveaway" />
+          <input name="subtitle" value="{{ selected_voucher.subtitle if selected_voucher else 'For lucky customer in 12 days of Christmas giveaway' }}" />
         </div>
         <div class="voucher-field">
           <label>Valid until</label>
-          <input name="expires_at" value="13 May 2026" />
+          <input name="expires_at" value="{{ selected_voucher.expires_at if selected_voucher else '13 May 2026' }}" />
         </div>
         <div class="voucher-field">
           <label>Voucher description</label>
-          <textarea name="description">This voucher entitles the bearer to catering order value at MCQ Street Food Mirrabooka.</textarea>
+          <textarea name="description">{{ selected_voucher.description if selected_voucher else 'This voucher entitles the bearer to catering order value at MCQ Street Food Mirrabooka.' }}</textarea>
         </div>
         <div class="voucher-field">
           <label>Included items and quantities</label>
-          <textarea name="included_items">10 banh mi platters
+          <textarea name="included_items">{{ selected_voucher.included_items if selected_voucher else '10 banh mi platters
 12 Vietnamese iced coffees
 8 fresh juice cups
-1 catering pickup combo</textarea>
+1 catering pickup combo' }}</textarea>
         </div>
         <div class="voucher-field">
           <label>Terms and conditions</label>
-          <textarea name="terms">This gift certificate is not redeemable for cash.
-One time use only.</textarea>
+          <textarea name="terms">{{ selected_voucher.terms if selected_voucher else 'This gift certificate is not redeemable for cash.
+One time use only.' }}</textarea>
         </div>
         <div class="voucher-field">
           <label>Footer contact</label>
-          <textarea name="footer_note">Authorised by MCQ Vietnamese Street Food.
-For catering order requests, please contact: cateringorders@mcqinternational.com</textarea>
+          <textarea name="footer_note">{{ selected_voucher.footer_note if selected_voucher else 'Authorised by MCQ Vietnamese Street Food.
+For catering order requests, please contact: cateringorders@mcqinternational.com' }}</textarea>
         </div>
-        <div class="voucher-create-actions">
-          {% for value in values %}
-            <button class="voucher-value" type="submit" name="value" value="{{ value }}">${{ value }}</button>
-          {% endfor %}
-        </div>
+        <button class="button button--primary" type="submit" name="action" value="{% if selected_voucher %}update{% else %}create{% endif %}">
+          {% if selected_voucher %}Save voucher{% else %}Create voucher{% endif %}
+        </button>
+        {% if selected_voucher %}
+          <button class="button button--secondary" type="submit" name="action" value="create">Create as new voucher</button>
+        {% endif %}
       </form>
 
       <div class="voucher-list">
@@ -432,60 +464,16 @@ For catering order requests, please contact: cateringorders@mcqinternational.com
         {% endfor %}
       </div>
 
-      {% if selected_voucher %}
-        <form class="voucher-create" method="post" action="{{ url_for('admin.admin_vouchers') }}">
-          <input type="hidden" name="action" value="update" />
-          <input type="hidden" name="voucher_id" value="{{ selected_voucher.id }}" />
-          <p class="eyebrow">Edit selected voucher</p>
-          <div class="voucher-field">
-            <label>Unique code</label>
-            <input name="code" value="{{ selected_voucher.code }}" />
-          </div>
-          <div class="voucher-field">
-            <label>Value</label>
-            <input name="value" value="{{ selected_voucher.value }}" />
-          </div>
-          <div class="voucher-field">
-            <label>Title</label>
-            <input name="label" value="{{ selected_voucher.label }}" />
-          </div>
-          <div class="voucher-field">
-            <label>Subtitle</label>
-            <input name="subtitle" value="{{ selected_voucher.subtitle }}" />
-          </div>
-          <div class="voucher-field">
-            <label>Valid until</label>
-            <input name="expires_at" value="{{ selected_voucher.expires_at }}" />
-          </div>
-          <div class="voucher-field">
-            <label>Voucher description</label>
-            <textarea name="description">{{ selected_voucher.description }}</textarea>
-          </div>
-          <div class="voucher-field">
-            <label>Included items and quantities</label>
-            <textarea name="included_items">{{ selected_voucher.included_items }}</textarea>
-          </div>
-          <div class="voucher-field">
-            <label>Terms and conditions</label>
-            <textarea name="terms">{{ selected_voucher.terms }}</textarea>
-          </div>
-          <div class="voucher-field">
-            <label>Footer contact</label>
-            <textarea name="footer_note">{{ selected_voucher.footer_note }}</textarea>
-          </div>
-          <button class="button button--primary" type="submit">Save voucher</button>
-        </form>
-      {% endif %}
     </aside>
 
     {% if selected_voucher %}
       <article class="voucher-card">
         <div class="voucher-certificate">
           <div class="voucher-left">
-            <div class="voucher-value-display">{{ selected_voucher.value_display }}</div>
-            <h2 class="voucher-title">{{ selected_voucher.label }}</h2>
-            <p class="voucher-subtitle">{{ selected_voucher.subtitle }}</p>
-            <div class="voucher-code">Code {{ selected_voucher.code }}</div>
+            <div class="voucher-value-display" data-preview-value>{{ selected_voucher.value_display }}</div>
+            <h2 class="voucher-title" data-preview-label>{{ selected_voucher.label }}</h2>
+            <p class="voucher-subtitle" data-preview-subtitle>{{ selected_voucher.subtitle }}</p>
+            <div class="voucher-code">Code <span data-preview-code>{{ selected_voucher.code }}</span></div>
           </div>
           <div class="voucher-divider"></div>
           <div class="voucher-right">
@@ -493,19 +481,20 @@ For catering order requests, please contact: cateringorders@mcqinternational.com
               <img src="{{ url_for('static', filename='images/mcq-logo.jpg') }}" alt="MCQ logo" />
             </div>
             <h3 class="voucher-terms-title">Terms and Conditions</h3>
-            <p class="voucher-description">{{ selected_voucher.description }}</p>
-            <p class="voucher-terms">{{ selected_voucher.terms }}</p>
-            <div class="voucher-ideas">
+            <p class="voucher-description" data-preview-description>{{ selected_voucher.description }}</p>
+            <p class="voucher-terms" data-preview-terms>{{ selected_voucher.terms }}</p>
+            <div class="voucher-ideas" data-preview-items>
               {% for line in selected_voucher.included_lines %}
                 <div class="voucher-idea">{{ line }}</div>
               {% endfor %}
             </div>
-            <p class="voucher-expiry">Valid until {{ selected_voucher.expires_at }}</p>
+            <p class="voucher-expiry">Valid until <span data-preview-expiry>{{ selected_voucher.expires_at }}</span></p>
           </div>
         </div>
-        <p class="voucher-footer">{{ selected_voucher.footer_note }}</p>
+        <p class="voucher-footer" data-preview-footer>{{ selected_voucher.footer_note }}</p>
         <div class="voucher-print-actions">
           <button class="button button--primary" type="button" onclick="window.print()">Print voucher</button>
+          <button class="button button--secondary" type="button" onclick="window.print()">Save PDF</button>
         </div>
       </article>
     {% else %}
@@ -522,4 +511,69 @@ For catering order requests, please contact: cateringorders@mcqinternational.com
     {% endif %}
   </section>
 </div>
+<script>
+  (() => {
+    const valueInput = document.getElementById("voucher-value-input");
+    const valueButtons = document.querySelectorAll("[data-voucher-value]");
+    const form = document.querySelector(".voucher-create");
+    const previewValue = document.querySelector("[data-preview-value]");
+    const previewCode = document.querySelector("[data-preview-code]");
+    const previewLabel = document.querySelector("[data-preview-label]");
+    const previewSubtitle = document.querySelector("[data-preview-subtitle]");
+    const previewDescription = document.querySelector("[data-preview-description]");
+    const previewTerms = document.querySelector("[data-preview-terms]");
+    const previewItems = document.querySelector("[data-preview-items]");
+    const previewExpiry = document.querySelector("[data-preview-expiry]");
+    const previewFooter = document.querySelector("[data-preview-footer]");
+
+    function field(name) {
+      return form ? form.querySelector(`[name="${name}"]`) : null;
+    }
+
+    function money(value) {
+      const number = Number(String(value || "").replace(/[^\d.]/g, ""));
+      return number > 0 ? `$${Math.round(number)}` : "$0";
+    }
+
+    function updatePreview() {
+      if (!form) return;
+      if (previewValue) previewValue.textContent = money(field("value")?.value);
+      if (previewCode) previewCode.textContent = field("code")?.value.trim() || "AUTO";
+      if (previewLabel) previewLabel.textContent = field("label")?.value || "MCQ Voucher";
+      if (previewSubtitle) previewSubtitle.textContent = field("subtitle")?.value || "For lucky customer";
+      if (previewDescription) previewDescription.textContent = field("description")?.value || "";
+      if (previewTerms) previewTerms.textContent = field("terms")?.value || "";
+      if (previewExpiry) previewExpiry.textContent = field("expires_at")?.value || "";
+      if (previewFooter) previewFooter.textContent = field("footer_note")?.value || "";
+      if (previewItems) {
+        const lines = (field("included_items")?.value || "")
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+        previewItems.innerHTML = "";
+        lines.forEach((line) => {
+          const item = document.createElement("div");
+          item.className = "voucher-idea";
+          item.textContent = line;
+          previewItems.appendChild(item);
+        });
+      }
+    }
+
+    valueButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (valueInput) valueInput.value = button.dataset.voucherValue || "";
+        valueButtons.forEach((item) => item.classList.remove("is-selected"));
+        button.classList.add("is-selected");
+        updatePreview();
+      });
+    });
+    if (form) {
+      form.querySelectorAll("input, textarea").forEach((input) => {
+        input.addEventListener("input", updatePreview);
+      });
+      updatePreview();
+    }
+  })();
+</script>
 {% endblock %}
