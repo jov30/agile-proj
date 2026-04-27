@@ -52,6 +52,28 @@
     box-shadow: 0 22px 40px rgba(53, 30, 20, 0.12);
   }
 
+  .admin-stat--link.is-active {
+    border-color: rgba(255, 106, 19, 0.5);
+    background:
+      linear-gradient(180deg, rgba(255, 245, 232, 0.98), rgba(255, 231, 204, 0.96)),
+      #fff7ed;
+    box-shadow: 0 18px 34px rgba(255, 106, 19, 0.14);
+  }
+
+  .admin-stat--link.is-active::after {
+    content: "Active filter";
+    position: absolute;
+    top: 0.65rem;
+    right: 0.8rem;
+    border-radius: 999px;
+    padding: 0.2rem 0.48rem;
+    background: rgba(255, 106, 19, 0.12);
+    color: var(--brand-red);
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
   .admin-stat--link:focus-visible {
     outline: 2px solid rgba(255, 106, 19, 0.28);
     outline-offset: 2px;
@@ -306,15 +328,15 @@
         </p>
       </div>
       <div class="admin-hero__stats">
-        <a class="admin-stat admin-stat--link" href="{{ url_for('admin.admin_customers') }}">
+        <a class="admin-stat admin-stat--link {% if account_type == 'all' %}is-active{% endif %}" href="{{ url_for('admin.admin_customers') }}">
           <strong>{{ customers|length }}</strong>
           <span>Total customers{% if search_query %} matching "{{ search_query }}"{% endif %}</span>
         </a>
-        <a class="admin-stat admin-stat--link" href="{{ url_for('admin.admin_customers', account_type='registered') }}">
+        <a class="admin-stat admin-stat--link {% if account_type == 'registered' %}is-active{% endif %}" href="{{ url_for('admin.admin_customers', account_type='registered') }}">
           <strong>{{ registered_count }}</strong>
           <span>Registered accounts</span>
         </a>
-        <a class="admin-stat admin-stat--link" href="{{ url_for('admin.admin_customers', account_type='guest') }}">
+        <a class="admin-stat admin-stat--link {% if account_type == 'guest' %}is-active{% endif %}" href="{{ url_for('admin.admin_customers', account_type='guest') }}">
           <strong>{{ guest_count }}</strong>
           <span>Guest orderers</span>
         </a>
