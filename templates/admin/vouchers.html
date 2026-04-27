@@ -47,16 +47,18 @@
     overflow: hidden;
     min-height: 420px;
     background:
-      linear-gradient(135deg, rgba(42, 22, 11, 0.96), rgba(155, 49, 32, 0.92)),
-      #2a160b;
+      radial-gradient(circle at 20% 12%, rgba(255, 216, 115, 0.5), transparent 28%),
+      radial-gradient(circle at 92% 22%, rgba(255, 106, 19, 0.58), transparent 25%),
+      linear-gradient(135deg, #111827 0%, #7f1d1d 45%, #f97316 100%);
     color: var(--text-inverse);
+    box-shadow: 0 26px 60px rgba(127, 29, 29, 0.34), 0 12px 28px rgba(255, 106, 19, 0.22);
   }
 
   .voucher-card::before {
     content: "";
     position: absolute;
     inset: 1rem;
-    border: 1px solid rgba(255, 216, 115, 0.32);
+    border: 2px solid rgba(255, 216, 115, 0.55);
     border-radius: 14px;
     pointer-events: none;
   }
@@ -66,6 +68,29 @@
   .voucher-ideas {
     position: relative;
     z-index: 1;
+  }
+
+  .voucher-create {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .voucher-create textarea {
+    width: 100%;
+    min-height: 110px;
+    border-radius: 14px;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    background: rgba(255, 255, 255, 0.84);
+    box-sizing: border-box;
+    color: var(--text-main);
+    font: inherit;
+    padding: 0.8rem;
+  }
+
+  .voucher-create-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
   }
 
   .voucher-brand {
@@ -119,8 +144,21 @@
 
   .voucher-idea {
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 216, 115, 0.24);
     padding: 0.75rem;
+  }
+
+  .voucher-description {
+    position: relative;
+    z-index: 1;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 216, 115, 0.24);
+    color: rgba(255, 247, 239, 0.94);
+    line-height: 1.6;
+    margin: 1rem 0 0;
+    padding: 0.9rem;
   }
 
   .voucher-idea strong {
@@ -148,7 +186,8 @@
 
   @media (max-width: 900px) {
     .voucher-grid,
-    .voucher-ideas {
+    .voucher-ideas,
+    .voucher-create-actions {
       grid-template-columns: 1fr;
     }
   }
@@ -166,10 +205,14 @@
   <section class="voucher-grid">
     <aside class="admin-panel">
       <p class="eyebrow">Create value</p>
-      <form class="voucher-values" method="post" action="{{ url_for('admin.admin_vouchers') }}">
-        {% for value in values %}
-          <button class="voucher-value" type="submit" name="value" value="{{ value }}">${{ value }}</button>
-        {% endfor %}
+      <form class="voucher-create" method="post" action="{{ url_for('admin.admin_vouchers') }}">
+        <label class="eyebrow" for="voucher-description">Voucher includes</label>
+        <textarea id="voucher-description" name="description">Use this voucher for MCQ street-food favourites: banh mi, Vietnamese coffee, pho, rice bowls, fresh juices, and pickup combos.</textarea>
+        <div class="voucher-create-actions">
+          {% for value in values %}
+            <button class="voucher-value" type="submit" name="value" value="{{ value }}">${{ value }}</button>
+          {% endfor %}
+        </div>
       </form>
 
       <div class="voucher-list">
@@ -194,6 +237,7 @@
         <div class="voucher-value-display">{{ selected_voucher.value_display }}</div>
         <div class="voucher-code">{{ selected_voucher.code }}</div>
         <p class="voucher-meta">Created {{ selected_voucher.created_label }} · Redeem in store for pickup orders, drinks, and street-food favourites.</p>
+        <p class="voucher-description">{{ selected_voucher.description }}</p>
         <div class="voucher-ideas">
           <div class="voucher-idea">
             <strong>{{ selected_voucher.banh_mi_count }}</strong>

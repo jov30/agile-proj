@@ -99,6 +99,8 @@ def _voucher_payload(voucher: Voucher) -> dict:
     return {
         "code": voucher.code,
         "label": voucher.label,
+        "description": voucher.description
+        or "Use this voucher for MCQ street-food favourites such as banh mi, Vietnamese coffee, pho, rice bowls, and pickup combos.",
         "value_display": f"${dollars}",
         "created_label": voucher.created_at.strftime("%d %b %Y"),
         "banh_mi_count": banh_mi_count,
@@ -308,10 +310,13 @@ def admin_vouchers():
             dollars = 10
         if dollars not in VOUCHER_VALUES:
             dollars = 10
+        description = request.form.get("description", "").strip()
         voucher = Voucher(
             code=_new_voucher_code(),
             value_cents=dollars * 100,
             label=f"MCQ ${dollars} Digital Voucher",
+            description=description
+            or "Use this voucher for MCQ street-food favourites such as banh mi, Vietnamese coffee, pho, rice bowls, and pickup combos.",
         )
         db.session.add(voucher)
         db.session.commit()

@@ -197,6 +197,7 @@ class Voucher(db.Model):
     code = db.Column(db.String(32), nullable=False, unique=True, index=True)
     value_cents = db.Column(db.Integer, nullable=False)
     label = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=True)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -234,6 +235,11 @@ class OrderNotification(db.Model):
 def _sync_legacy_schema() -> None:
     inspector = inspect(db.engine)
     tables = set(inspector.get_table_names())
+    if "vouchers" in tables:
+        voucher_columns = {column["name"] for column in inspector.get_columns("vouchers")}
+        with db.engine.begin() as conn:
+            if "description" not in voucher_columns:
+                conn.execute(text("ALTER TABLE vouchers ADD COLUMN description TEXT"))
     if "orders" not in tables:
         return
 
