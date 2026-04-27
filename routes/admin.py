@@ -114,23 +114,35 @@ def _new_voucher_code() -> str:
             return code
 
 
-@admin_bp.get("/")
-@admin_required
-def admin_dashboard() -> str:
-    monthly_rows = (
+def _income_rows(period_expr, *, limit: int) -> list[dict]:
+    rows = (
         db.session.query(
-            func.strftime("%Y-%m", Order.created_at).label("month"),
+            period_expr.label("period"),
             func.count(Order.id).label("order_count"),
             func.coalesce(func.sum(Order.total_cents), 0).label("revenue_cents"),
         )
-        .group_by("month")
-        .order_by(func.strftime("%Y-%m", Order.created_at).desc())
-        .limit(6)
+        .group_by("period")
+        .order_by(period_expr.desc())
+        .limit(limit)
         .all()
     )
-    monthly_rows = list(reversed(monthly_rows))
-    max_monthly_revenue = max((row.revenue_cents for row in monthly_rows), default=0) or 1
+    rows = list(reversed(rows))
+    max_revenue = max((row.revenue_cents for row in rows), default=0) or 1
+    return [
+        {
+            "period": row.period,
+            "order_count": row.order_count,
+            "revenue_display": f"${row.revenue_cents / 100:.2f}",
+            "bar_height": max(6, round((row.revenue_cents / max_revenue) * 100)),
+            "bar_width": max(4, round((row.revenue_cents / max_revenue) * 100)),
+        }
+        for row in rows
+    ]
 
+
+@admin_bp.get("/")
+@admin_required
+def admin_dashboard() -> str:
     recent_orders = (
         Order.query.order_by(Order.created_at.desc())
         .limit(8)
@@ -147,15 +159,9 @@ def admin_dashboard() -> str:
         completed_orders=completed_orders,
         active_orders=active_orders,
         revenue_display=f"${revenue_cents / 100:.2f}",
-        monthly_report=[
-            {
-                "month": row.month,
-                "order_count": row.order_count,
-                "revenue_display": f"${row.revenue_cents / 100:.2f}",
-                "bar_width": max(4, round((row.revenue_cents / max_monthly_revenue) * 100)),
-            }
-            for row in monthly_rows
-        ],
+        daily_report=_income_rows(func.strftime("%Y-%m-%d", Order.created_at), limit=14),
+        monthly_report=_income_rows(func.strftime("%Y-%m", Order.created_at), limit=8),
+        yearly_report=_income_rows(func.strftime("%Y", Order.created_at), limit=5),
         recent_orders=[_serialize_admin_order(order) for order in recent_orders],
     )
 
