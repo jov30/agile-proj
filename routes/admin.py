@@ -68,6 +68,9 @@ def admin_queue() -> str:
 @admin_bp.get("/customers")
 @admin_required
 def admin_customers():
+    # NOTE: queries all customers into memory for simplicity.
+    # TODO: refactor pagination at scale.
+
     registered_email_subq = (
         db.session.query(User.email).filter(User.role == "customer").subquery()
     )
@@ -142,6 +145,8 @@ def admin_customers():
 
     registered_count = sum(1 for c in customers if c["type"] == "registered")
     guest_count = sum(1 for c in customers if c["type"] == "guest")
+    # TODO: optimise customer stats aggregation (e.g. compute registered/guest counts in the DB
+    # or in the initial query instead of iterating over the full customers list in Python)
 
     return render_template(
         "admin/customers.html",
