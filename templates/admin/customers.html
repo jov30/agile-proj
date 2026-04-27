@@ -218,6 +218,19 @@
     outline-offset: 2px;
   }
 
+  .admin-search-form .admin-clear-action {
+    color: var(--text-muted);
+    background: transparent;
+    border-color: rgba(112, 85, 66, 0.16);
+    box-shadow: none;
+  }
+
+  .admin-search-form .admin-clear-action:hover {
+    color: var(--brand-red);
+    background: rgba(255, 255, 255, 0.58);
+    box-shadow: none;
+  }
+
   /* Customer rows */
   .admin-customer-list {
     display: grid;
@@ -366,7 +379,7 @@
       </select>
       <button type="submit" class="button button--secondary">Search</button>
       {% if search_query or account_type != "all" %}
-        <a href="{{ url_for('admin.admin_customers') }}" class="button button--secondary">Clear</a>
+        <a href="{{ url_for('admin.admin_customers') }}" class="button button--secondary admin-clear-action">Clear</a>
       {% endif %}
     </form>
 
