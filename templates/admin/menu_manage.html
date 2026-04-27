@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Menu Items | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .admin-menu {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .admin-panel {
+    border-radius: 18px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)), #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+    padding: 1rem 1.1rem;
+  }
+
+  .admin-menu-form,
+  .admin-menu-card {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .admin-menu-form {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .admin-field {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .admin-field--wide {
+    grid-column: span 2;
+  }
+
+  .admin-field label {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .admin-field input,
+  .admin-field select,
+  .admin-field textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    background: rgba(255, 255, 255, 0.84);
+    box-sizing: border-box;
+    color: var(--text-main);
+    font: inherit;
+    padding: 0.72rem 0.8rem;
+  }
+
+  .admin-check {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    color: var(--text-main);
+    font-weight: 800;
+  }
+
+  .admin-menu-list {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .admin-catalog-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin: 0.8rem 0;
+  }
+
+  .admin-catalog-tools input {
+    flex: 1;
+    min-width: 240px;
+  }
+
+  .admin-catalog-tools select {
+    min-width: 170px;
+  }
+
+  .admin-catalog-tools input,
+  .admin-catalog-tools select {
+    min-height: 42px;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    background: rgba(255, 255, 255, 0.84);
+    box-sizing: border-box;
+    color: var(--text-main);
+    font: inherit;
+    padding: 0 1rem;
+  }
+
+  .admin-catalog-count {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .admin-menu-card {
+    border: 1px solid rgba(112, 85, 66, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 0.9rem;
+  }
+
+  .admin-menu-card__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .admin-menu-card__head h3 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .admin-menu-card__preview {
+    display: grid;
+    grid-template-columns: 104px 1fr;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .admin-menu-card__preview img {
+    width: 104px;
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    object-fit: cover;
+    background: rgba(112, 85, 66, 0.1);
+  }
+
+  .admin-badge {
+    align-self: start;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    color: #1a6e3c;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.32rem 0.66rem;
+    white-space: nowrap;
+  }
+
+  .admin-badge.is-off {
+    background: rgba(255, 106, 19, 0.1);
+    color: var(--brand-red);
+  }
+
+  .admin-menu-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 980px) {
+    .admin-menu-form {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-field--wide {
+      grid-column: auto;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-menu">
+  <section class="admin-panel">
+    <p class="eyebrow">Menu management</p>
+    <h1 class="section-title">Menu items</h1>
+    <p class="section-copy">{{ items|length }} items · {{ available_count }} currently available. Add, edit, remove, and update prices, descriptions, ingredients, categories, and availability.</p>
+  </section>
+
+  <section class="admin-panel">
+    <p class="eyebrow">Add item</p>
+    <form class="admin-menu-form" method="post" action="{{ url_for('admin.admin_menu') }}">
+      <input type="hidden" name="action" value="add" />
+      <div class="admin-field">
+        <label>Name</label>
+        <input name="name" required />
+      </div>
+      <div class="admin-field">
+        <label>Category</label>
+        <select name="category_id">
+          {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="admin-field">
+        <label>Price</label>
+        <input name="price" placeholder="$15" />
+      </div>
+      <div class="admin-field admin-field--wide">
+        <label>Description</label>
+        <input name="summary" />
+      </div>
+      <div class="admin-field">
+        <label>Ingredients</label>
+        <input name="ingredients" placeholder="Rice noodles, beef broth" />
+      </div>
+      <div class="admin-field">
+        <label>Image path</label>
+        <input name="image" placeholder="images/menu/items/example.jpg" />
+      </div>
+      <label class="admin-check"><input type="checkbox" name="available" checked /> Available</label>
+      <button class="button button--primary" type="submit">Add item</button>
+    </form>
+  </section>
+
+  <section class="admin-panel">
+    <p class="eyebrow">Edit catalog</p>
+    <form class="admin-catalog-tools" id="catalog-filter-form">
+      <input id="catalog-search" type="search" placeholder="Search menu items by name, category, price, ingredients, or image path" autocomplete="off" />
+      <select id="catalog-category" aria-label="Filter category">
+        <option value="">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category.title|lower }}">{{ category.title }}</option>
+        {% endfor %}
+      </select>
+      <select id="catalog-availability" aria-label="Filter availability">
+        <option value="">All availability</option>
+        <option value="available">Available</option>
+        <option value="unavailable">Unavailable</option>
+      </select>
+      <button class="button button--secondary" type="submit">Apply</button>
+      <button class="button button--secondary" type="button" id="catalog-clear">Clear</button>
+      <span class="admin-catalog-count" id="catalog-count">{{ items|length }} showing</span>
+    </form>
+    <div class="admin-menu-list">
+      {% for item in items %}
+        <article
+          class="admin-menu-card"
+          data-catalog-item
+          data-category="{{ item.category_title|lower }}"
+          data-availability="{{ 'available' if item.available else 'unavailable' }}"
+          data-search="{{ item.name }} {{ item.category_title }} {{ item.price }} {{ item.summary }} {{ item.ingredients }} {{ item.image }}"
+        >
+          <div class="admin-menu-card__head">
+            <div class="admin-menu-card__preview">
+              <img
+                src="{{ url_for('static', filename=item.image or 'images/menu/pho-classic.jpg') }}"
+                alt="{{ item.name }}"
+                data-image-preview
+              />
+              <div>
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.category_title }} · {{ item.price }}</p>
+              </div>
+            </div>
+            <span class="admin-badge {% if not item.available %}is-off{% endif %}">
+              {{ "Available" if item.available else "Unavailable" }}
+            </span>
+          </div>
+          <form class="admin-menu-form" method="post" action="{{ url_for('admin.admin_menu') }}">
+            <input type="hidden" name="action" value="edit" />
+            <input type="hidden" name="item_id" value="{{ item.id }}" />
+            <div class="admin-field">
+              <label>Name</label>
+              <input name="name" value="{{ item.name }}" required />
+            </div>
+            <div class="admin-field">
+              <label>Price</label>
+              <input name="price" value="{{ item.price }}" />
+            </div>
+            <div class="admin-field admin-field--wide">
+              <label>Description</label>
+              <input name="summary" value="{{ item.summary }}" />
+            </div>
+            <div class="admin-field admin-field--wide">
+              <label>Ingredients</label>
+              <input name="ingredients" value="{{ item.ingredients }}" />
+            </div>
+            <div class="admin-field">
+              <label>Image path</label>
+              <input name="image" value="{{ item.image }}" data-image-input />
+            </div>
+            <label class="admin-check"><input type="checkbox" name="available" {% if item.available %}checked{% endif %} /> Available</label>
+            <button class="button button--secondary" type="submit">Save</button>
+          </form>
+          <form class="admin-menu-card__actions" method="post" action="{{ url_for('admin.admin_menu') }}">
+            <input type="hidden" name="action" value="delete" />
+            <input type="hidden" name="item_id" value="{{ item.id }}" />
+            <button class="button button--secondary" type="submit">Remove</button>
+          </form>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+<script>
+  (() => {
+    const form = document.getElementById("catalog-filter-form");
+    const search = document.getElementById("catalog-search");
+    const category = document.getElementById("catalog-category");
+    const availability = document.getElementById("catalog-availability");
+    const clear = document.getElementById("catalog-clear");
+    const count = document.getElementById("catalog-count");
+    const cards = Array.from(document.querySelectorAll("[data-catalog-item]"));
+    const staticBase = "{{ url_for('static', filename='') }}";
+    const fallback = "{{ url_for('static', filename='images/menu/pho-classic.jpg') }}";
+
+    function updateCount() {
+      const showing = cards.filter((card) => !card.hidden).length;
+      if (count) count.textContent = `${showing} showing`;
+    }
+
+    function applyFilters() {
+      const q = search ? search.value.trim().toLowerCase() : "";
+      const cat = category ? category.value : "";
+      const status = availability ? availability.value : "";
+      cards.forEach((card) => {
+        const matchesText = !q || card.dataset.search.toLowerCase().includes(q);
+        const matchesCategory = !cat || card.dataset.category === cat;
+        const matchesAvailability = !status || card.dataset.availability === status;
+        card.hidden = !(matchesText && matchesCategory && matchesAvailability);
+      });
+      updateCount();
+    }
+
+    if (form) {
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        applyFilters();
+      });
+    }
+
+    [search, category, availability].forEach((control) => {
+      if (!control) return;
+      control.addEventListener("input", applyFilters);
+      control.addEventListener("change", applyFilters);
+    });
+
+    if (clear) {
+      clear.addEventListener("click", () => {
+        if (search) search.value = "";
+        if (category) category.value = "";
+        if (availability) availability.value = "";
+        applyFilters();
+      });
+    }
+
+    cards.forEach((card) => {
+      const input = card.querySelector("[data-image-input]");
+      const preview = card.querySelector("[data-image-preview]");
+      if (!input || !preview) return;
+      input.addEventListener("input", () => {
+        const value = input.value.trim();
+        preview.src = value ? staticBase + value : fallback;
+      });
+      preview.addEventListener("error", () => {
+        preview.src = fallback;
+      });
+    });
+  })();
+</script>
+{% endblock %}

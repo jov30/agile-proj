@@ -169,8 +169,8 @@
       {% endif %}
       <div class="item-detail__actions">
         <div class="item-detail__cart-tools">
-          <button type="button" class="button button--primary" id="detail-add-cart" data-item-id="{{ item.id }}">
-            Add to cart
+          <button type="button" class="button button--primary" id="detail-add-cart" data-item-id="{{ item.id }}" {% if item.available is sameas false %}disabled{% endif %}>
+            {{ "Unavailable" if item.available is sameas false else "Add to cart" }}
           </button>
           <div class="item-detail__qty" id="detail-qty" hidden>
             <button type="button" id="detail-decrease" aria-label="Decrease quantity">-</button>

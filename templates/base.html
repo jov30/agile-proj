@@ -75,16 +75,37 @@
           <a href="/membership" class="{% if request.path.startswith('/membership') or request.path.startswith('/profile') %}is-active{% endif %}">Membership</a>
           <a href="/community" class="{% if request.path.startswith('/community') or request.path.startswith('/shared-meals') or request.path.startswith('/favorites') %}is-active{% endif %}">Community</a>
           {% if is_admin %}
-            <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin') %}is-active{% endif %}">Admin Queue</a>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="{% if request.path == '/admin/' %}is-active{% endif %}">Admin</a>
+            <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin/orders/queue') %}is-active{% endif %}">Admin Queue</a>
+            <a href="{{ url_for('admin.admin_orders') }}" class="{% if request.path == '/admin/orders' %}is-active{% endif %}">All Orders</a>
+            <a href="{{ url_for('admin.admin_customers') }}" class="{% if request.path.startswith('/admin/customers') %}is-active{% endif %}">Customers</a>
+            <a href="{{ url_for('admin.admin_menu') }}" class="{% if request.path.startswith('/admin/menu') %}is-active{% endif %}">Menu Admin</a>
+            <a href="{{ url_for('admin.admin_vouchers') }}" class="{% if request.path.startswith('/admin/vouchers') %}is-active{% endif %}">Vouchers</a>
           {% endif %}
-          <a href="{{ account_href }}" class="{% if request.path.startswith('/login') or request.path.startswith('/register') or request.path.startswith('/profile') %}is-active{% endif %}">Account</a>
+          {% if current_user and not is_admin %}
+            <a href="{{ account_href }}" class="{% if request.path.startswith('/login') or request.path.startswith('/register') or request.path.startswith('/profile') %}is-active{% endif %}">Account</a>
+          {% endif %}
         </nav>
         {% if current_user %}
-          <form method="post" action="{{ url_for('auth.logout') }}">
-            <button type="submit" class="header-cta">Logout</button>
-          </form>
+          <div class="header-actions">
+            {% if not is_admin %}
+              <form method="post" action="{{ url_for('auth.demo_admin_mode') }}">
+                <input type="hidden" name="next" value="{{ url_for('admin.admin_dashboard') }}" />
+                <button type="submit" class="header-cta">Admin Mode</button>
+              </form>
+            {% endif %}
+            <form method="post" action="{{ url_for('auth.logout') }}">
+              <button type="submit" class="header-cta">Logout</button>
+            </form>
+          </div>
         {% else %}
-          <a href="{{ url_for('auth.login') }}" class="header-cta">Login</a>
+          <div class="header-actions">
+            <form method="post" action="{{ url_for('auth.demo_admin_mode') }}">
+              <input type="hidden" name="next" value="{{ url_for('admin.admin_dashboard') }}" />
+              <button type="submit" class="header-cta">Admin Mode</button>
+            </form>
+            <a href="{{ url_for('auth.login') }}" class="header-cta">Login</a>
+          </div>
         {% endif %}
       </div>
     </header>

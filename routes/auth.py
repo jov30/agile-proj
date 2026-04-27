@@ -225,3 +225,15 @@ def logout():
     session.pop(SESSION_USER_KEY, None)
     session.modified = True
     return redirect(url_for("public.home"))
+
+
+@auth_bp.post("/demo/admin-mode")
+def demo_admin_mode():
+    session[SESSION_USER_KEY] = {
+        "name": current_app.config["ADMIN_NAME"],
+        "email": current_app.config["ADMIN_EMAIL"],
+        "role": "admin",
+    }
+    session.modified = True
+    next_url = _safe_next_url(request.form.get("next"))
+    return redirect(next_url or url_for("admin.admin_dashboard"))
