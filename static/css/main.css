@@ -201,6 +201,24 @@ img {
   box-shadow: 0 22px 36px rgba(255, 106, 19, 0.34);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.header-actions form {
+  margin: 0;
+}
+
+.header-cta {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
 .app-main {
   width: min(var(--page-width), calc(100% - 2rem));
   flex: 1;
@@ -753,6 +771,11 @@ img {
   }
 
   .header-cta {
+    width: 100%;
+  }
+
+  .header-actions,
+  .header-actions form {
     width: 100%;
   }
 

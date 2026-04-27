@@ -88,7 +88,13 @@
             <button type="submit" class="header-cta">Logout</button>
           </form>
         {% else %}
-          <a href="{{ url_for('auth.login') }}" class="header-cta">Login</a>
+          <div class="header-actions">
+            <form method="post" action="{{ url_for('auth.demo_admin_mode') }}">
+              <input type="hidden" name="next" value="{{ url_for('admin.admin_dashboard') }}" />
+              <button type="submit" class="header-cta">Admin Mode</button>
+            </form>
+            <a href="{{ url_for('auth.login') }}" class="header-cta">Login</a>
+          </div>
         {% endif %}
       </div>
     </header>
