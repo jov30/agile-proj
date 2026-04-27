@@ -45,10 +45,12 @@
   .voucher-card {
     position: relative;
     overflow: hidden;
-    min-height: 470px;
+    width: min(100%, 1120px);
+    aspect-ratio: 16 / 7;
+    min-height: auto;
     background: linear-gradient(135deg, #21a74a 0%, #0c8a43 100%);
     color: #18120d;
-    padding: 2.4rem;
+    padding: 3.4%;
     box-shadow: 0 26px 60px rgba(7, 89, 39, 0.28), 0 12px 28px rgba(12, 138, 67, 0.22);
   }
 
@@ -56,14 +58,31 @@
     content: "";
     position: absolute;
     inset: auto auto 0 0;
-    width: 220px;
-    height: 260px;
+    width: 18%;
+    height: 42%;
     background:
-      radial-gradient(circle at 30% 22%, #ef4444 0 9px, transparent 10px),
-      radial-gradient(circle at 58% 20%, #facc15 0 11px, transparent 12px),
-      radial-gradient(circle at 42% 36%, #22c55e 0 15px, transparent 16px),
+      radial-gradient(circle at 30% 22%, #ef4444 0 7%, transparent 8%),
+      radial-gradient(circle at 58% 20%, #facc15 0 8%, transparent 9%),
+      radial-gradient(circle at 42% 36%, #22c55e 0 11%, transparent 12%),
       linear-gradient(145deg, #0f8b54, #075f3d);
-    border-radius: 0 90px 0 0;
+    border-radius: 0 50% 0 0;
+    opacity: 0.95;
+    pointer-events: none;
+  }
+
+  .voucher-card::after {
+    content: "";
+    position: absolute;
+    left: 1.5%;
+    top: 18%;
+    width: 18%;
+    height: 34%;
+    background:
+      radial-gradient(circle at 20% 65%, #f97316 0 12%, transparent 13%),
+      radial-gradient(circle at 42% 42%, #ef4444 0 10%, transparent 11%),
+      radial-gradient(circle at 62% 25%, #fde047 0 9%, transparent 10%),
+      radial-gradient(circle at 70% 58%, #22c55e 0 11%, transparent 12%);
+    filter: drop-shadow(0 18px 18px rgba(3, 66, 34, 0.25));
     opacity: 0.95;
     pointer-events: none;
   }
@@ -72,13 +91,15 @@
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1.05fr) 2px minmax(0, 0.95fr);
-    gap: 1.7rem;
-    min-height: 330px;
-    margin-left: clamp(0rem, 8vw, 3.8rem);
-    padding: clamp(1.1rem, 3vw, 1.7rem);
-    background: #f7f1e9;
-    box-shadow: 12px 12px 0 rgba(2, 92, 43, 0.35), 0 18px 42px rgba(42, 22, 11, 0.18);
+    grid-template-columns: minmax(0, 1.02fr) 6px minmax(0, 0.98fr);
+    gap: 3%;
+    height: 74%;
+    margin-left: 12%;
+    padding: 2.9% 3.2%;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.94), rgba(255, 248, 238, 0.98)),
+      #f7f1e9;
+    box-shadow: 10px 10px 0 rgba(2, 92, 43, 0.35), 0 18px 42px rgba(42, 22, 11, 0.18);
   }
 
   .voucher-divider {
@@ -90,6 +111,15 @@
     display: grid;
     align-content: center;
     text-align: center;
+    min-width: 0;
+  }
+
+  .voucher-left {
+    gap: 0.7rem;
+  }
+
+  .voucher-right {
+    gap: 0.35rem;
   }
 
   .voucher-brand,
@@ -147,10 +177,10 @@
   }
 
   .voucher-brand img {
-    width: 138px;
-    height: 74px;
+    width: min(38%, 150px);
+    height: auto;
     border-radius: 0;
-    object-fit: cover;
+    object-fit: contain;
   }
 
   .voucher-brand h2 {
@@ -164,7 +194,7 @@
     z-index: 1;
     margin: 0 0 0.55rem;
     font-family: "Bebas Neue", "Bricolage Grotesque", sans-serif;
-    font-size: clamp(4.5rem, 13vw, 8.5rem);
+    font-size: clamp(4rem, 10vw, 9rem);
     line-height: 0.85;
     color: #d9160f;
     letter-spacing: 0.02em;
@@ -187,8 +217,8 @@
 
   .voucher-ideas {
     display: grid;
-    gap: 0.35rem;
-    margin: 0.8rem 0 0;
+    gap: 0.28rem;
+    margin: 0.45rem 0 0;
     text-align: left;
   }
 
@@ -196,8 +226,8 @@
     border-radius: 999px;
     background: rgba(217, 22, 15, 0.08);
     border: 1px solid rgba(217, 22, 15, 0.12);
-    padding: 0.42rem 0.65rem;
-    font-size: 0.82rem;
+    padding: 0.32rem 0.58rem;
+    font-size: clamp(0.68rem, 0.95vw, 0.82rem);
   }
 
   .voucher-description {
@@ -205,7 +235,8 @@
     z-index: 1;
     color: #24150c;
     line-height: 1.55;
-    margin: 0.8rem 0;
+    margin: 0.35rem 0;
+    font-size: clamp(0.74rem, 1vw, 0.94rem);
   }
 
   .voucher-idea strong {
@@ -214,11 +245,12 @@
   }
 
   .voucher-title {
-    margin: 0.4rem 0;
+    margin: 0;
     color: #d9160f;
     font-weight: 900;
     letter-spacing: 0.22em;
     text-transform: uppercase;
+    font-size: clamp(1.25rem, 2.1vw, 2.15rem);
   }
 
   .voucher-subtitle {
@@ -226,6 +258,8 @@
     font-weight: 900;
     letter-spacing: 0.18em;
     text-transform: uppercase;
+    font-size: clamp(0.78rem, 1.15vw, 1.05rem);
+    margin: 0;
   }
 
   .voucher-terms-title,
@@ -236,18 +270,29 @@
     text-transform: uppercase;
   }
 
+  .voucher-terms-title {
+    font-size: clamp(1.1rem, 1.8vw, 1.7rem);
+    margin: 0.2rem 0;
+  }
+
   .voucher-terms {
     white-space: pre-line;
-    line-height: 1.45;
-    margin: 0.8rem 0 1rem;
+    line-height: 1.35;
+    margin: 0.1rem 0;
+    font-size: clamp(0.72rem, 0.95vw, 0.9rem);
+  }
+
+  .voucher-expiry {
+    margin: 0.3rem 0 0;
+    font-size: clamp(0.86rem, 1.2vw, 1.1rem);
   }
 
   .voucher-footer {
     position: relative;
     z-index: 1;
-    margin: 1.6rem 0 0 clamp(0rem, 8vw, 3.8rem);
+    margin: 3.2% 0 0 16%;
     color: #fff;
-    font-size: clamp(0.95rem, 2vw, 1.25rem);
+    font-size: clamp(0.86rem, 1.6vw, 1.25rem);
     font-style: italic;
     line-height: 1.35;
     white-space: pre-line;
@@ -256,7 +301,7 @@
   .voucher-print-actions {
     display: flex;
     justify-content: flex-end;
-    margin-top: 0.9rem;
+    margin-top: 1rem;
   }
 
   .voucher-list {
@@ -284,16 +329,21 @@
     }
 
     .voucher-certificate {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr) 4px minmax(0, 1fr);
       margin-left: 0;
     }
 
     .voucher-divider {
-      height: 2px;
+      height: auto;
     }
   }
 
   @media print {
+    @page {
+      size: landscape;
+      margin: 0;
+    }
+
     body * {
       visibility: hidden;
     }
@@ -307,7 +357,8 @@
       position: fixed;
       inset: 0;
       width: 100vw;
-      min-height: 100vh;
+      height: 100vh;
+      aspect-ratio: auto;
       border-radius: 0;
       box-shadow: none;
     }
