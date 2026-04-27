@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Profile | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .admin-customer-profile {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .admin-panel {
+    border-radius: 18px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)), #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+    padding: 1rem 1.1rem;
+  }
+
+  .profile-grid,
+  .profile-stats {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .profile-grid {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .profile-stat {
+    border: 1px solid rgba(112, 85, 66, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 0.85rem;
+  }
+
+  .profile-stat strong {
+    display: block;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.25rem;
+  }
+
+  .profile-form {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .profile-form input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    background: rgba(255, 255, 255, 0.84);
+    box-sizing: border-box;
+    font: inherit;
+    padding: 0.72rem 0.8rem;
+  }
+
+  .order-list {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .order-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.75rem;
+    align-items: center;
+    border: 1px solid rgba(112, 85, 66, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 0.78rem 0.9rem;
+  }
+
+  .order-row span,
+  .profile-stat span {
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .profile-grid,
+    .profile-stats,
+    .order-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-customer-profile">
+  <section class="admin-panel">
+    <p class="eyebrow">{{ customer.type }} customer</p>
+    <h1 class="section-title">{{ customer.name }}</h1>
+    <p class="section-copy">{{ customer.email }} · {{ customer.joined }}</p>
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <strong>{{ customer.order_count }}</strong>
+        <span>Orders</span>
+      </div>
+      <div class="profile-stat">
+        <strong>{{ customer.total_spent }}</strong>
+        <span>Total spent</span>
+      </div>
+      <div class="profile-stat">
+        <strong>{{ customer.type|title }}</strong>
+        <span>Account type</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="profile-grid">
+    <article class="admin-panel">
+      <p class="eyebrow">Profile</p>
+      {% if user %}
+        <form class="profile-form" method="post" action="{{ url_for('admin.admin_customer_detail', email=customer.email) }}">
+          <label>Name</label>
+          <input name="name" value="{{ user.name }}" />
+          <label>Email</label>
+          <input name="email" value="{{ user.email }}" />
+          <button class="button button--primary" type="submit">Save profile</button>
+        </form>
+      {% else %}
+        <p>Guest customers do not have a registered profile yet. Their order records are still visible here.</p>
+      {% endif %}
+    </article>
+
+    <article class="admin-panel">
+      <p class="eyebrow">Order history</p>
+      <div class="order-list">
+        {% for order in orders %}
+          <div class="order-row">
+            <div>
+              <strong>{{ order.order_number }}</strong>
+              <span>{{ order.pickup_label }} · {{ order.fulfillment_type|title }}</span>
+            </div>
+            <strong>{{ order.total_display }}</strong>
+            <a class="button button--secondary" href="{{ url_for('orders.order_detail', order_number=order.order_number) }}">Open</a>
+          </div>
+        {% else %}
+          <p>No orders for this customer yet.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</div>
+{% endblock %}

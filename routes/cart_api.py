@@ -64,6 +64,8 @@ def _build_cart_payload(menu: dict) -> dict:
         if not found:
             continue
         cat, item = found
+        if item.get("available", True) is False:
+            continue
         unit = price_to_cents(item.get("price"))
         line_total = unit * qty
         total += line_total
@@ -118,8 +120,12 @@ def add_item():
     if qty < 1:
         return jsonify({"error": "quantity must be at least 1"}), 400
     menu = _menu()
-    if not find_item(menu, item_id):
+    found = find_item(menu, item_id)
+    if not found:
         return jsonify({"error": "Unknown menu item"}), 404
+    _, item = found
+    if item.get("available", True) is False:
+        return jsonify({"error": "This menu item is currently unavailable"}), 409
     lines = _get_lines()
     merged = False
     for row in lines:

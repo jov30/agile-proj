@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Orders | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .admin-orders-page {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .admin-panel {
+    border-radius: 18px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)), #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+    padding: 1rem 1.1rem;
+  }
+
+  .admin-order-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.9rem;
+  }
+
+  .admin-order-filters input,
+  .admin-order-filters select {
+    min-height: 42px;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.2);
+    background: rgba(255, 255, 255, 0.84);
+    padding: 0 1rem;
+    font: inherit;
+  }
+
+  .admin-order-filters input {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .admin-order-table {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .admin-order-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.7rem;
+    align-items: center;
+    border: 1px solid rgba(112, 85, 66, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 0.78rem 0.9rem;
+  }
+
+  .admin-order-row strong,
+  .admin-order-row span {
+    display: block;
+  }
+
+  .admin-order-row span {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+
+  .admin-badge {
+    border-radius: 999px;
+    background: rgba(255, 106, 19, 0.1);
+    color: var(--brand-red);
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.32rem 0.66rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 860px) {
+    .admin-order-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-orders-page">
+  <section class="admin-panel">
+    <p class="eyebrow">Customer orders</p>
+    <h1 class="section-title">All orders</h1>
+    <p class="section-copy">Search customer orders, track pickup timing, and open each order for status management.</p>
+    <form class="admin-order-filters" method="get" action="{{ url_for('admin.admin_orders') }}">
+      <input type="search" name="q" value="{{ filters.q }}" placeholder="Search order, name, or email" />
+      <select name="status" aria-label="Filter status">
+        <option value="">All statuses</option>
+        {% for status in available_statuses %}
+          <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
+        {% endfor %}
+      </select>
+      <select name="fulfillment" aria-label="Filter fulfillment">
+        <option value="">All pickup types</option>
+        {% for item in fulfillment_types %}
+          <option value="{{ item }}" {% if filters.fulfillment == item %}selected{% endif %}>{{ item|title }}</option>
+        {% endfor %}
+      </select>
+      <button class="button button--secondary" type="submit">Filter</button>
+      <a class="button button--secondary" href="{{ url_for('admin.admin_orders') }}">Clear</a>
+    </form>
+  </section>
+
+  <section class="admin-panel">
+    <p class="eyebrow">{{ orders|length }} orders · {{ total_display }}</p>
+    <div class="admin-order-table">
+      {% for order in orders %}
+        <article class="admin-order-row">
+          <div>
+            <strong>{{ order.order_number }}</strong>
+            <span>{{ order.customer_name }} · {{ order.pickup_label }}</span>
+            <span>{{ order.fulfillment_type|title }}{% if order.queue_display %} · {{ order.queue_display }}{% endif %}</span>
+          </div>
+          <span class="admin-badge">{{ order.order_status }}</span>
+          <a class="button button--primary" href="{{ url_for('orders.order_detail', order_number=order.order_number) }}">Open detail</a>
+        </article>
+      {% else %}
+        <p>No orders match the current filters.</p>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

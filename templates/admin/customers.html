@@ -453,7 +453,8 @@
               {{ "Registered" if c.type == "registered" else "Guest" }}
             </span>
             <div class="admin-customer__actions">
-              <a class="admin-row-action" href="{{ url_for('admin.admin_customers', q=c.email) }}">View orders</a>
+              <a class="admin-row-action" href="{{ c.profile_href }}">View profile</a>
+              <a class="admin-row-action" href="{{ url_for('admin.admin_orders', q=c.email) }}">View orders</a>
               <a class="admin-row-action" href="mailto:{{ c.email }}">Email</a>
             </div>
           </article>
