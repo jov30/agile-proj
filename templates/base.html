@@ -37,6 +37,8 @@
           <a href="/orders" class="{% if request.path.startswith('/orders') %}is-active{% endif %}">Orders</a>
           <a href="/profile" class="{% if request.path.startswith('/profile') %}is-active{% endif %}">Profile</a>
           <a href="/support" class="{% if request.path.startswith('/support') %}is-active{% endif %}">Support</a>
+          <a id="nav-login" href="/login" class="header-cta">Login</a>
+          <button id="nav-logout" type="button" class="header-cta" style="display: none;">Logout</button>
         </nav>
         <a href="/menu" class="header-cta">Order Pickup</a>
       </div>
@@ -61,8 +63,8 @@
         </div>
       </div>
     </footer>
-    <aside class="support-dock is-open" id="support-dock" aria-label="Customer support chat">
-      <button class="support-dock__launcher" id="support-launcher" type="button" aria-expanded="true">
+    <aside class="support-dock" id="support-dock" aria-label="Customer support chat">
+      <button class="support-dock__launcher" id="support-launcher" type="button" aria-expanded="false">
         Chat Support
       </button>
       <div class="support-dock__panel" id="support-panel">
@@ -105,6 +107,8 @@
         const closeButton = document.getElementById('support-close');
         const chatLog = document.getElementById('support-chat-log');
         const prompts = document.querySelectorAll('.support-prompt');
+        const loginLink = document.getElementById('nav-login');
+        const logoutButton = document.getElementById('nav-logout');
         const answers = {
           pickup:
             'Scheduled pickup is part of the project core flow. The future checkout will let customers choose a pickup date and time before confirming the order.',
@@ -153,9 +157,44 @@
           });
         });
 
-        if (window.matchMedia('(max-width: 720px)').matches) {
-          setOpenState(false);
+        setOpenState(false);
+
+        async function initAuthUi() {
+          if (!logoutButton || !loginLink) return;
+          try {
+            const resp = await fetch('/api/auth/me', { headers: { Accept: 'application/json' } });
+            if (!resp.ok) {
+              loginLink.style.display = 'inline-flex';
+              return;
+            }
+            const data = await resp.json();
+            if (!data.authenticated) {
+              loginLink.style.display = 'inline-flex';
+              logoutButton.style.display = 'none';
+              return;
+            }
+            loginLink.style.display = 'none';
+            logoutButton.style.display = 'inline-flex';
+            logoutButton.addEventListener('click', async () => {
+              try {
+                const out = await fetch('/api/auth/logout', {
+                  method: 'POST',
+                  headers: { Accept: 'application/json' },
+                });
+                if (!out.ok) throw new Error('Logout failed');
+                window.location.href = '/login';
+              } catch (_) {
+                alert('Could not log out. Please try again.');
+              }
+            });
+          } catch (_) {
+            // Keep nav unchanged if auth API is unavailable.
+            loginLink.style.display = 'inline-flex';
+            logoutButton.style.display = 'none';
+          }
         }
+
+        initAuthUi();
       })();
     </script>
     {% block scripts %}{% endblock %}
