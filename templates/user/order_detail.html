@@ -326,6 +326,7 @@
         <div class="order-detail__actions">
           <a href="{{ url_for('orders.receipt', order=order.order_number) }}" class="button button--primary">Open receipt</a>
           <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--secondary">Download PDF</a>
+          <a href="{{ url_for('user.shared_meals', order=order.order_number) }}" class="button button--secondary">Share this meal</a>
           <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
             <button type="submit" class="button button--secondary button--inline">Order again</button>
           </form>
