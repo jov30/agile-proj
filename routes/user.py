@@ -10,7 +10,7 @@ import requests
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import format_aud, load_enriched_menu
-from models import CommunityComment, CommunityPost, CommunityReaction, CommunitySave, Order, db
+from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, db
 from routes.auth import current_user
 from routes.helpers import render_feature_page
 
@@ -23,6 +23,7 @@ _ROOT_DIR = Path(__file__).resolve().parent.parent
 _REACTION_TYPES = ("love", "want_to_try", "saved_for_later")
 _COMMENT_FOCUS = ("taste", "portion_size", "spice_level", "drink_pairing", "pickup_timing")
 _POST_TYPES = ("meal_review", "usual_combo", "pickup_tip")
+_COMMENT_VOTE_TYPES = ("helpful", "tried_this", "good_tip")
 
 _MEMBERSHIP_TIERS = (
     {"name": "Lantern Starter", "min_points": 0, "accent": "amber"},
@@ -165,8 +166,42 @@ def _share_order_context(order_number: str | None, menu_lookup: dict[str, dict])
         "meal_items": ", ".join(meal_items),
         "total_display": format_aud(order.total_cents),
         "pickup_type": "Instant counter pickup" if order.fulfillment_type == "instant" else "Scheduled pickup",
-        "caption": f"Sharing my {order.order_number} pickup: {', '.join(meal_items[:3])}.",
+        "caption": _share_prompt_caption(request.args.get("prompt"), order, meal_items),
         "image": image or "images/inspiration/street-food-life.jpg",
+    }
+
+
+def _share_prompt_caption(prompt: str | None, order: Order, meal_items: list[str]) -> str:
+    meal_text = ", ".join(meal_items[:3])
+    prompt_key = (prompt or "").strip().lower()
+    if prompt_key == "best_part":
+        return f"The best part of my {order.order_number} pickup was {meal_text}."
+    if prompt_key == "tip":
+        return f"Tip for the next customer ordering {meal_text}: "
+    if prompt_key == "pairing":
+        return f"I would pair {meal_text} with "
+    return f"Sharing my {order.order_number} pickup: {meal_text}."
+
+
+def _remix_context(post_id: str | None) -> dict | None:
+    if not post_id:
+        return None
+    try:
+        post = CommunityPost.query.get(int(post_id))
+    except (TypeError, ValueError):
+        return None
+    if not post:
+        return None
+    return {
+        "post_id": post.id,
+        "meal_name": post.meal_name,
+        "meal_items": post.meal_items or post.meal_name,
+        "caption": f"Remixing {post.author_name}'s combo: {post.meal_items or post.meal_name}. I would change ",
+        "tip": post.tip or "",
+        "spice_level": post.spice_level or "",
+        "portion_note": post.portion_note or "",
+        "drink_pairing": post.drink_pairing or "",
+        "pickup_timing_note": post.pickup_timing_note or "",
     }
 
 
@@ -179,7 +214,15 @@ def _serialize_community_post(post: CommunityPost, menu_lookup: dict[str, dict],
     }
     viewer_saved = any(save.identity_key == identity_key for save in post.saves)
     helpful_notes = [
-        {"focus": comment.focus.replace("_", " ").title(), "body": comment.body, "author": comment.author_name}
+        {
+            "id": comment.id,
+            "focus": comment.focus.replace("_", " ").title(),
+            "body": comment.body,
+            "author": comment.author_name,
+            "helpful_count": sum(1 for vote in comment.votes if vote.vote_type == "helpful"),
+            "tried_count": sum(1 for vote in comment.votes if vote.vote_type == "tried_this"),
+            "good_tip_count": sum(1 for vote in comment.votes if vote.vote_type == "good_tip"),
+        }
         for comment in post.comments[-3:]
     ]
     return {
@@ -363,6 +406,37 @@ def _membership_summary(orders: list[Order]) -> dict:
     }
 
 
+def _mission_progress(identity_key: str, posts: list[CommunityPost], orders: list[Order]) -> list[dict]:
+    own_posts = [post for post in posts if post.identity_key == identity_key]
+    own_comments = CommunityComment.query.filter_by(identity_key=identity_key).count()
+    own_saves = CommunitySave.query.filter_by(identity_key=identity_key).count()
+    pho_posts = sum(1 for post in own_posts if "pho" in post.meal_name.lower() or "pho" in (post.meal_items or "").lower())
+    tip_posts = sum(1 for post in own_posts if post.tip or post.spice_level or post.pickup_timing_note)
+    return [
+        {"title": "Share a pho combo", "progress": min(pho_posts, 1), "target": 1},
+        {"title": "Post a useful food tip", "progress": min(tip_posts, 1), "target": 1},
+        {"title": "Save 3 customer meal ideas", "progress": min(own_saves, 3), "target": 3},
+        {"title": "Comment on 2 pickup or taste tips", "progress": min(own_comments, 2), "target": 2},
+        {"title": "Share from an order receipt", "progress": min(sum(1 for post in own_posts if post.order_number), 1), "target": 1},
+    ]
+
+
+def _featured_tip(posts: list[CommunityPost]) -> dict | None:
+    comments = [comment for post in posts for comment in post.comments]
+    if not comments:
+        return None
+    best = max(comments, key=lambda comment: (len(comment.votes), comment.created_at))
+    if not best.votes:
+        return None
+    return {
+        "focus": best.focus.replace("_", " ").title(),
+        "body": best.body,
+        "author": best.author_name,
+        "votes": len(best.votes),
+        "post_id": best.post_id,
+    }
+
+
 def _all_community_posts() -> list[CommunityPost]:
     return (
         CommunityPost.query.order_by(CommunityPost.created_at.desc(), CommunityPost.id.desc())
@@ -434,6 +508,7 @@ def _community_context() -> dict:
     posts = [_serialize_community_post(post, menu_lookup, identity_key) for post in raw_posts]
     orders = _active_customer_orders()
     shared_order = _share_order_context(request.args.get("order"), menu_lookup)
+    remix_post = _remix_context(request.args.get("remix"))
     today = raw_posts[0].created_at.date() if raw_posts else None
     today_posts = [post for post in posts if today and post["created_label"] == today.strftime("%d %b %Y")][:4]
     most_liked = sorted(posts, key=lambda post: (post["like_count"], post["comment_count"]), reverse=True)[:4]
@@ -446,6 +521,7 @@ def _community_context() -> dict:
         "member_name": member_name,
         "posts": posts,
         "shared_order": shared_order,
+        "remix_post": remix_post,
         "recent_orders": [
             {
                 "order_number": order.order_number,
@@ -455,6 +531,8 @@ def _community_context() -> dict:
             for order in orders[:5]
         ],
         "community_stats": _community_stats(identity_key, raw_posts, orders),
+        "missions": _mission_progress(identity_key, raw_posts, orders),
+        "featured_tip": _featured_tip(raw_posts),
         "boards": [
             {"title": "Today's shared meals", "items": today_posts},
             {"title": "Most liked this week", "items": most_liked},
@@ -801,6 +879,33 @@ def save_community_post(post_id: int):
         )
     db.session.commit()
     return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+@user_bp.post("/community/comments/<int:comment_id>/vote")
+def vote_community_comment(comment_id: int):
+    comment = CommunityComment.query.get_or_404(comment_id)
+    vote_type = request.form.get("vote_type", "helpful")
+    if vote_type not in _COMMENT_VOTE_TYPES:
+        vote_type = "helpful"
+    identity_key, author_name, _email = _community_identity()
+    existing = CommunityCommentVote.query.filter_by(
+        comment_id=comment.id,
+        identity_key=identity_key,
+        vote_type=vote_type,
+    ).first()
+    if existing:
+        db.session.delete(existing)
+    else:
+        db.session.add(
+            CommunityCommentVote(
+                comment_id=comment.id,
+                identity_key=identity_key,
+                author_name=author_name,
+                vote_type=vote_type,
+            )
+        )
+    db.session.commit()
+    return redirect(url_for("user.shared_meals", _anchor=f"post-{comment.post_id}"))
 
 
 @user_bp.get("/support")

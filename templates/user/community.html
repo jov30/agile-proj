@@ -140,6 +140,40 @@
     padding-left: 0.65rem;
     color: var(--text-muted);
   }
+  .community-tip-votes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+  }
+  .community-tip-votes form { display: inline-flex; }
+  .community-tip-votes button {
+    border: 1px solid rgba(112, 85, 66, 0.16);
+    border-radius: 999px;
+    padding: 0.34rem 0.5rem;
+    background: rgba(255, 255, 255, 0.82);
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .community-mission {
+    display: grid;
+    gap: 0.42rem;
+    margin-top: 0.7rem;
+  }
+  .community-mission__bar {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(112, 85, 66, 0.12);
+  }
+  .community-mission__bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--brand-orange), var(--brand-red));
+  }
   .community-empty {
     border: 1px dashed rgba(112, 85, 66, 0.32);
     border-radius: 18px;
@@ -205,8 +239,15 @@
               <p>{{ shared_order.pickup_type }} · {{ shared_order.total_display }}</p>
             </div>
           {% endif %}
+          {% if remix_post %}
+            <div class="community-order-share">
+              <strong>Remix this combo</strong>
+              <p>{{ remix_post.meal_items }}</p>
+            </div>
+          {% endif %}
           <form method="post" action="{{ url_for('user.create_community_post') }}">
             <input type="hidden" name="order_number" value="{{ shared_order.order_number if shared_order else '' }}">
+            <input type="hidden" name="meal_items" value="{{ shared_order.meal_items if shared_order else remix_post.meal_items if remix_post else '' }}">
             <div class="community-form-row">
               <input name="author_name" value="{{ member_name }}" aria-label="Display name">
               <select name="post_type" aria-label="Post type">
@@ -215,17 +256,17 @@
                 <option value="pickup_tip">Pickup tip</option>
               </select>
             </div>
-            <input name="meal_name" value="{{ shared_order.meal_name if shared_order else '' }}" placeholder="Meal name or combo" aria-label="Meal name">
-            <textarea name="caption" placeholder="Short review, usual combo, or meal story..." aria-label="Caption">{{ shared_order.caption if shared_order else '' }}</textarea>
+            <input name="meal_name" value="{{ shared_order.meal_name if shared_order else remix_post.meal_name if remix_post else '' }}" placeholder="Meal name or combo" aria-label="Meal name">
+            <textarea name="caption" placeholder="Short review, usual combo, or meal story..." aria-label="Caption">{{ shared_order.caption if shared_order else remix_post.caption if remix_post else '' }}</textarea>
             <div class="community-form-row">
-              <input name="tip" placeholder="Tip, e.g. tastes better at spice level 2" aria-label="Food tip">
+              <input name="tip" value="{{ remix_post.tip if remix_post else '' }}" placeholder="Tip, e.g. tastes better at spice level 2" aria-label="Food tip">
               <input name="photo_url" placeholder="Optional food photo URL" aria-label="Food photo URL">
             </div>
             <div class="community-form-row">
-              <input name="spice_level" placeholder="Spice level note" aria-label="Spice level">
-              <input name="portion_note" placeholder="Portion size note" aria-label="Portion size">
-              <input name="drink_pairing" placeholder="Drink pairing" aria-label="Drink pairing">
-              <input name="pickup_timing_note" placeholder="Pickup timing note" aria-label="Pickup timing">
+              <input name="spice_level" value="{{ remix_post.spice_level if remix_post else '' }}" placeholder="Spice level note" aria-label="Spice level">
+              <input name="portion_note" value="{{ remix_post.portion_note if remix_post else '' }}" placeholder="Portion size note" aria-label="Portion size">
+              <input name="drink_pairing" value="{{ remix_post.drink_pairing if remix_post else '' }}" placeholder="Drink pairing" aria-label="Drink pairing">
+              <input name="pickup_timing_note" value="{{ remix_post.pickup_timing_note if remix_post else '' }}" placeholder="Pickup timing note" aria-label="Pickup timing">
             </div>
             <button class="button button--primary" type="submit">Share Meal Story</button>
           </form>
@@ -268,6 +309,7 @@
                     <button class="{% if post.viewer_saved %}is-active{% endif %}" type="submit">Share to Favorites · {{ post.save_count }}</button>
                   </form>
                   <a class="button button--secondary" href="{{ url_for('user.favorites') }}">Open Favorites</a>
+                  <a class="button button--secondary" href="{{ url_for('user.shared_meals', remix=post.id) }}">Remix this combo</a>
                 </div>
                 <form class="community-comment-form" method="post" action="{{ url_for('user.comment_on_community_post', post_id=post.id) }}">
                   <select name="focus" aria-label="Comment focus">
@@ -283,7 +325,17 @@
                 {% if post.comments %}
                   <div class="community-comments">
                     {% for comment in post.comments %}
-                      <div class="community-comment"><strong>{{ comment.focus }}:</strong> {{ comment.body }} <span>— {{ comment.author }}</span></div>
+                      <div class="community-comment">
+                        <strong>{{ comment.focus }}:</strong> {{ comment.body }} <span>— {{ comment.author }}</span>
+                        <div class="community-tip-votes">
+                          {% for vote_type, label, count in [('helpful', 'Helpful', comment.helpful_count), ('tried_this', 'Tried this', comment.tried_count), ('good_tip', 'Good tip', comment.good_tip_count)] %}
+                            <form method="post" action="{{ url_for('user.vote_community_comment', comment_id=comment.id) }}">
+                              <input type="hidden" name="vote_type" value="{{ vote_type }}">
+                              <button type="submit">{{ label }} · {{ count }}</button>
+                            </form>
+                          {% endfor %}
+                        </div>
+                      </div>
                     {% endfor %}
                   </div>
                 {% endif %}
@@ -312,12 +364,25 @@
           {% endif %}
         </article>
         <article class="community-card">
-          <h3>Mini Challenges</h3>
-          <ul>
-            {% for challenge in challenges %}
-              <li>{{ challenge }}</li>
-            {% endfor %}
-          </ul>
+          <h3>Community Missions</h3>
+          {% for mission in missions %}
+            {% set percent = (mission.progress / mission.target * 100)|round(0, 'floor') %}
+            <div class="community-mission">
+              <strong>{{ mission.title }}</strong>
+              <div class="community-mission__bar"><span style="width: {{ percent }}%;"></span></div>
+              <p>{{ mission.progress }} / {{ mission.target }}</p>
+            </div>
+          {% endfor %}
+        </article>
+        <article class="community-card">
+          <h3>Featured Helpful Tip</h3>
+          {% if featured_tip %}
+            <p><strong>{{ featured_tip.focus }}:</strong> {{ featured_tip.body }}</p>
+            <p>{{ featured_tip.votes }} helpful votes · {{ featured_tip.author }}</p>
+            <a class="button button--secondary" href="#post-{{ featured_tip.post_id }}">Open tip</a>
+          {% else %}
+            <p>Vote on a useful comment to feature the first community tip.</p>
+          {% endif %}
         </article>
       </aside>
     </div>

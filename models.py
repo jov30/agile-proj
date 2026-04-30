@@ -328,6 +328,32 @@ class CommunityComment(db.Model):
     )
 
     post = db.relationship("CommunityPost", back_populates="comments")
+    votes = db.relationship(
+        "CommunityCommentVote",
+        back_populates="comment",
+        cascade="all, delete-orphan",
+    )
+
+
+class CommunityCommentVote(db.Model):
+    __tablename__ = "community_comment_votes"
+    __table_args__ = (
+        db.UniqueConstraint("comment_id", "identity_key", "vote_type", name="uq_community_comment_vote_identity_type"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey("community_comments.id"), nullable=False, index=True)
+    identity_key = db.Column(db.String(80), nullable=False, index=True)
+    author_name = db.Column(db.String(120), nullable=False)
+    vote_type = db.Column(db.String(40), nullable=False, index=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+
+    comment = db.relationship("CommunityComment", back_populates="votes")
 
 
 class CommunitySave(db.Model):
