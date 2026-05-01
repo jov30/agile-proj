@@ -237,6 +237,146 @@ class OrderNotification(db.Model):
     order = db.relationship("Order", back_populates="notifications")
 
 
+class CommunityPost(db.Model):
+    __tablename__ = "community_posts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    author_name = db.Column(db.String(120), nullable=False)
+    author_email = db.Column(db.String(255), nullable=True, index=True)
+    identity_key = db.Column(db.String(80), nullable=False, index=True)
+    post_type = db.Column(db.String(40), nullable=False, default="meal_review", index=True)
+    meal_name = db.Column(db.String(255), nullable=False)
+    meal_items = db.Column(db.Text, nullable=True)
+    caption = db.Column(db.Text, nullable=False)
+    tip = db.Column(db.String(255), nullable=True)
+    photo_url = db.Column(db.String(500), nullable=True)
+    order_number = db.Column(db.String(32), db.ForeignKey("orders.order_number"), nullable=True, index=True)
+    order_total_cents = db.Column(db.Integer, nullable=True)
+    pickup_type = db.Column(db.String(40), nullable=True)
+    spice_level = db.Column(db.String(40), nullable=True)
+    portion_note = db.Column(db.String(120), nullable=True)
+    drink_pairing = db.Column(db.String(120), nullable=True)
+    pickup_timing_note = db.Column(db.String(160), nullable=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        onupdate=utc_now_naive,
+        index=True,
+    )
+
+    order = db.relationship("Order")
+    reactions = db.relationship(
+        "CommunityReaction",
+        back_populates="post",
+        cascade="all, delete-orphan",
+    )
+    comments = db.relationship(
+        "CommunityComment",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        order_by="CommunityComment.created_at.asc()",
+    )
+    saves = db.relationship(
+        "CommunitySave",
+        back_populates="post",
+        cascade="all, delete-orphan",
+    )
+
+
+class CommunityReaction(db.Model):
+    __tablename__ = "community_reactions"
+    __table_args__ = (
+        db.UniqueConstraint("post_id", "identity_key", "reaction_type", name="uq_community_reaction_identity_type"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("community_posts.id"), nullable=False, index=True)
+    identity_key = db.Column(db.String(80), nullable=False, index=True)
+    author_name = db.Column(db.String(120), nullable=False)
+    reaction_type = db.Column(db.String(40), nullable=False, index=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+
+    post = db.relationship("CommunityPost", back_populates="reactions")
+
+
+class CommunityComment(db.Model):
+    __tablename__ = "community_comments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("community_posts.id"), nullable=False, index=True)
+    identity_key = db.Column(db.String(80), nullable=False, index=True)
+    author_name = db.Column(db.String(120), nullable=False)
+    focus = db.Column(db.String(40), nullable=False, default="taste", index=True)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+
+    post = db.relationship("CommunityPost", back_populates="comments")
+    votes = db.relationship(
+        "CommunityCommentVote",
+        back_populates="comment",
+        cascade="all, delete-orphan",
+    )
+
+
+class CommunityCommentVote(db.Model):
+    __tablename__ = "community_comment_votes"
+    __table_args__ = (
+        db.UniqueConstraint("comment_id", "identity_key", "vote_type", name="uq_community_comment_vote_identity_type"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey("community_comments.id"), nullable=False, index=True)
+    identity_key = db.Column(db.String(80), nullable=False, index=True)
+    author_name = db.Column(db.String(120), nullable=False)
+    vote_type = db.Column(db.String(40), nullable=False, index=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+
+    comment = db.relationship("CommunityComment", back_populates="votes")
+
+
+class CommunitySave(db.Model):
+    __tablename__ = "community_saves"
+    __table_args__ = (
+        db.UniqueConstraint("post_id", "identity_key", name="uq_community_save_identity"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("community_posts.id"), nullable=False, index=True)
+    identity_key = db.Column(db.String(80), nullable=False, index=True)
+    author_name = db.Column(db.String(120), nullable=False)
+    save_type = db.Column(db.String(40), nullable=False, default="saved_for_later", index=True)
+    created_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        index=True,
+    )
+
+    post = db.relationship("CommunityPost", back_populates="saves")
+
+
 def _sync_legacy_schema() -> None:
     inspector = inspect(db.engine)
     tables = set(inspector.get_table_names())

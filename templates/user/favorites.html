@@ -198,15 +198,15 @@
     <div class="saved-hero__grid">
       <article class="saved-panel">
         <p class="eyebrow">Saved Meals</p>
-        <h1>Member meal boards ready for favourites and sharing.</h1>
+        <h1>Member meal boards for orders, community saves, and repeat combos.</h1>
         <p>
-          This page turns the favourites area into a usable design system: saved dishes, member collections, and future community hooks
-          all sit in one place instead of a generic placeholder.
+          Keep reliable dishes from your order history and collect community meal posts you want to try later.
         </p>
         <div class="saved-summary">
           <span class="saved-pill">{{ membership.current_tier.name }}</span>
           <span class="saved-pill saved-pill--muted">{{ membership.points_display }} points</span>
           <span class="saved-pill saved-pill--muted">{{ saved_items|length }} saved meal cards on screen</span>
+          <span class="saved-pill saved-pill--muted">{{ saved_community_posts|length }} community saves</span>
         </div>
         <div class="button-row" style="margin-top: 1rem;">
           <a href="/community" class="button button--primary">Share in MCQ Community</a>
@@ -215,13 +215,46 @@
       </article>
 
       <aside class="saved-visual">
-        <p class="eyebrow">Collection preview</p>
-        <h2>Saved meals can become the bridge between membership and community.</h2>
+        <p class="eyebrow">Community favorites</p>
+        <h2>Saved community posts now flow back into this favorites board.</h2>
         <p>
-          The layout is prepared for real favourite toggles, share actions, and collaborative meal boards once the backend is connected.
+          Use the community feed to save a pickup combo, review, spice tip, or drink pairing and it will appear here.
         </p>
       </aside>
     </div>
+  </section>
+
+  <section class="saved-board section-panel">
+    <p class="eyebrow">Community saves</p>
+    <h2>Meal ideas saved from customer posts</h2>
+    {% if saved_community_posts %}
+      <div class="saved-meals">
+        {% for post in saved_community_posts %}
+          <article class="saved-meal">
+            <div class="saved-meal__media">
+              <img src="{% if post.image.startswith('http') %}{{ post.image }}{% else %}{{ url_for('static', filename=post.image) }}{% endif %}" alt="{{ post.meal }}" />
+            </div>
+            <div class="saved-meal__header">
+              <div>
+                <p class="saved-meal__meta">{{ post.author }} · {{ post.type_label }}</p>
+                <h3 class="saved-meal__title">{{ post.meal }}</h3>
+              </div>
+              <span class="saved-meal__badge">{{ post.save_count }} saves</span>
+            </div>
+            <p>{{ post.caption }}</p>
+            <div class="saved-meal__actions">
+              <a href="{{ url_for('user.shared_meals') }}#post-{{ post.id }}" class="button button--secondary">Open Post</a>
+              <a href="/menu" class="button button--secondary">Build Similar Order</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="saved-meal">
+        <p>Save a community post to collect customer tips and meal ideas here.</p>
+        <a href="/community" class="button button--secondary">Open Community</a>
+      </div>
+    {% endif %}
   </section>
 
   <section class="saved-board section-panel">
@@ -252,7 +285,7 @@
 
   <section class="saved-collections section-panel">
     <p class="eyebrow">Collection boards</p>
-    <h2>UI blocks ready for future favourite sets and social boards</h2>
+    <h2>Favorite sets and social boards</h2>
     <div class="saved-collection-grid">
       {% for collection in collections %}
         <article class="saved-collection saved-collection--{{ collection.accent }}">

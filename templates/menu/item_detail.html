@@ -115,6 +115,22 @@
     color: var(--brand-red);
     background: rgba(255, 106, 19, 0.1);
   }
+  .item-detail__community-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+  .item-detail__community-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.48rem 0.68rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
   .item-detail__section {
     margin-top: 1.1rem;
     padding-top: 1.1rem;
@@ -166,6 +182,13 @@
       <p class="item-detail__summary">{{ item.summary or "" }}</p>
       {% if item.price %}
         <p class="item-detail__price">{{ item.price }}</p>
+      {% endif %}
+      {% if item.community_badges %}
+        <div class="item-detail__community-badges">
+          {% for badge in item.community_badges %}
+            <span class="item-detail__community-badge">{{ badge }}</span>
+          {% endfor %}
+        </div>
       {% endif %}
       <div class="item-detail__actions">
         <div class="item-detail__cart-tools">

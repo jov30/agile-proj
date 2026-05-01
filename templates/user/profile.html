@@ -445,6 +445,7 @@
     font-weight: 800;
     line-height: 1;
     margin-bottom: 0.3rem;
+    overflow-wrap: anywhere;
   }
 
   .profile-stat__label {
@@ -680,6 +681,12 @@
             class="profile-tag profile-tag--code"
             data-tip="Your unique MCQ Member ID — generated from your account. Show this at the counter or let staff scan the barcode on your digital card."
           >{{ membership.member_code }}</span>
+          {% for badge in community_stats.badges %}
+            <span
+              class="profile-tag"
+              data-tip="Community badge based on shared posts, reactions, and dish patterns."
+            >{{ badge }}</span>
+          {% endfor %}
         </div>
 
         {# Tier ladder — shows all tiers, highlights current #}
@@ -791,6 +798,25 @@
     <div class="profile-stat">
       <div class="profile-stat__value">{{ membership.scheduled_orders }}</div>
       <div class="profile-stat__label">Scheduled pickup visits</div>
+    </div>
+  </div>
+
+  <div class="profile-stats-row">
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ community_stats.posts_shared }}</div>
+      <div class="profile-stat__label">Community posts shared</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ community_stats.likes_received }}</div>
+      <div class="profile-stat__label">Community reactions received</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ community_stats.most_shared_dish }}</div>
+      <div class="profile-stat__label">Most frequently shared dish</div>
+    </div>
+    <div class="profile-stat">
+      <div class="profile-stat__value">{{ community_stats.favorite_combo }}</div>
+      <div class="profile-stat__label">Favorite combo</div>
     </div>
   </div>
 

@@ -5,7 +5,7 @@ from pathlib import Path
 from flask import Blueprint, abort, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import find_item, load_enriched_menu
-from models import FULFILLMENT_TYPES, Order
+from models import CommunityPost, FULFILLMENT_TYPES, Order
 
 public_bp = Blueprint("public", __name__)
 
@@ -37,6 +37,41 @@ def _home_context(*, track_error: str | None = None, track_value: str = "") -> d
         "track_error": track_error,
         "track_value": track_value,
     }
+
+
+def _community_menu_badges() -> dict[str, list[str]]:
+    badges: dict[str, list[str]] = {}
+    posts = CommunityPost.query.order_by(CommunityPost.created_at.desc()).limit(100).all()
+    for post in posts:
+        key = post.meal_name.lower()
+        labels = badges.setdefault(key, [])
+        if len(post.reactions) >= 3 and "Loved by members" not in labels:
+            labels.append("Loved by members")
+        if post.order_number and "Pickup combo" not in labels:
+            labels.append("Pickup combo")
+        if post.spice_level and "Spice tip" not in labels:
+            labels.append("Spice tip")
+        if post.drink_pairing and "Drink pairing" not in labels:
+            labels.append("Drink pairing")
+        if len(labels) >= 3:
+            badges[key] = labels[:3]
+    return badges
+
+
+def _apply_community_badges(data: dict) -> dict:
+    badge_lookup = _community_menu_badges()
+    if not badge_lookup:
+        return data
+    for category in data.get("categories", []):
+        for item in category.get("items", []):
+            item_name = item.get("name", "")
+            matched: list[str] = []
+            for shared_name, labels in badge_lookup.items():
+                if shared_name in item_name.lower() or item_name.lower() in shared_name:
+                    matched.extend(labels)
+            if matched:
+                item["community_badges"] = list(dict.fromkeys(matched))[:3]
+    return data
 
 
 @public_bp.get("/")
@@ -78,12 +113,13 @@ def menu() -> str:
 @public_bp.get("/api/menu")
 def api_menu():
     data = load_enriched_menu(_menu_path())
-    return jsonify(data)
+    return jsonify(_apply_community_badges(data))
 
 
 @public_bp.get("/menu/item/<item_id>")
 def menu_item_detail(item_id: str) -> str:
     data = load_enriched_menu(_menu_path())
+    data = _apply_community_badges(data)
     found = find_item(data, item_id)
     if not found:
         abort(404)

@@ -578,6 +578,10 @@
             <button type="button" class="button button--secondary" onclick="window.print()">Print receipt</button>
             <a href="{{ url_for('orders.order_detail', order_number=order.order_number) }}" class="button button--secondary">Open order detail</a>
             <a href="{{ url_for('orders.orders') }}" class="button button--secondary">View order history</a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number) }}" class="button button--secondary">Share this meal</a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='best_part') }}" class="button button--secondary">Share best part</a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='tip') }}" class="button button--secondary">Share a tip</a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='pairing') }}" class="button button--secondary">Share pairing</a>
             <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
               <button type="submit" class="button button--secondary button--inline">Order again</button>
             </form>

@@ -2,22 +2,28 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import secrets
 from collections import Counter
 from pathlib import Path
 
 import requests
-from flask import Blueprint, Response, current_app, jsonify, render_template, request, session
+from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import format_aud, load_enriched_menu
-from models import Order
+from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, db
 from routes.auth import current_user
 from routes.helpers import render_feature_page
 
 
 user_bp = Blueprint("user", __name__)
 SUPPORT_CHAT_HISTORY_KEY = "support_chat_history"
+COMMUNITY_IDENTITY_KEY = "community_identity_key"
 LOGGER = logging.getLogger(__name__)
 _ROOT_DIR = Path(__file__).resolve().parent.parent
+_REACTION_TYPES = ("love", "want_to_try", "saved_for_later")
+_COMMENT_FOCUS = ("taste", "portion_size", "spice_level", "drink_pairing", "pickup_timing")
+_POST_TYPES = ("meal_review", "usual_combo", "pickup_tip")
+_COMMENT_VOTE_TYPES = ("helpful", "tried_this", "good_tip")
 
 _MEMBERSHIP_TIERS = (
     {"name": "Lantern Starter", "min_points": 0, "accent": "amber"},
@@ -110,6 +116,167 @@ def _menu_item_lookup() -> dict[str, dict]:
                 "href": f"/menu/item/{item['id']}",
             }
     return lookup
+
+
+def _community_identity() -> tuple[str, str, str | None]:
+    user = current_user()
+    if user:
+        return f"user:{user['email'].lower()}", user["name"], user["email"].lower()
+    identity = session.get(COMMUNITY_IDENTITY_KEY)
+    if not isinstance(identity, str) or not identity:
+        identity = f"guest:{secrets.token_hex(12)}"
+        session[COMMUNITY_IDENTITY_KEY] = identity
+        session.modified = True
+    return identity, "Guest member", None
+
+
+def _clean_text(value: str | None, *, limit: int, default: str = "") -> str:
+    if not isinstance(value, str):
+        return default
+    return " ".join(value.strip().split())[:limit]
+
+
+def _community_post_image(post: CommunityPost, menu_lookup: dict[str, dict]) -> str:
+    if post.photo_url:
+        return post.photo_url
+    if post.order and post.order.line_items:
+        first_item = menu_lookup.get(post.order.line_items[0].item_id)
+        if first_item:
+            return first_item["image"]
+    lowered = post.meal_name.lower()
+    for item in menu_lookup.values():
+        if item["name"].lower() in lowered or lowered in item["name"].lower():
+            return item["image"]
+    return "images/inspiration/street-food-life.jpg"
+
+
+def _share_order_context(order_number: str | None, menu_lookup: dict[str, dict]) -> dict | None:
+    if not order_number:
+        return None
+    order = Order.query.filter_by(order_number=order_number.strip()).first()
+    if not order:
+        return None
+    meal_items = [f"{line.quantity}x {line.item_name}" for line in order.line_items]
+    image = None
+    if order.line_items:
+        image = menu_lookup.get(order.line_items[0].item_id, {}).get("image")
+    return {
+        "order_number": order.order_number,
+        "meal_name": order.line_items[0].item_name if order.line_items else f"Order {order.order_number}",
+        "meal_items": ", ".join(meal_items),
+        "total_display": format_aud(order.total_cents),
+        "pickup_type": "Instant counter pickup" if order.fulfillment_type == "instant" else "Scheduled pickup",
+        "caption": _share_prompt_caption(request.args.get("prompt"), order, meal_items),
+        "image": image or "images/inspiration/street-food-life.jpg",
+    }
+
+
+def _share_prompt_caption(prompt: str | None, order: Order, meal_items: list[str]) -> str:
+    meal_text = ", ".join(meal_items[:3])
+    prompt_key = (prompt or "").strip().lower()
+    if prompt_key == "best_part":
+        return f"The best part of my {order.order_number} pickup was {meal_text}."
+    if prompt_key == "tip":
+        return f"Tip for the next customer ordering {meal_text}: "
+    if prompt_key == "pairing":
+        return f"I would pair {meal_text} with "
+    return f"Sharing my {order.order_number} pickup: {meal_text}."
+
+
+def _remix_context(post_id: str | None) -> dict | None:
+    if not post_id:
+        return None
+    try:
+        post = CommunityPost.query.get(int(post_id))
+    except (TypeError, ValueError):
+        return None
+    if not post:
+        return None
+    return {
+        "post_id": post.id,
+        "meal_name": post.meal_name,
+        "meal_items": post.meal_items or post.meal_name,
+        "caption": f"Remixing {post.author_name}'s combo: {post.meal_items or post.meal_name}. I would change ",
+        "tip": post.tip or "",
+        "spice_level": post.spice_level or "",
+        "portion_note": post.portion_note or "",
+        "drink_pairing": post.drink_pairing or "",
+        "pickup_timing_note": post.pickup_timing_note or "",
+    }
+
+
+def _serialize_community_post(post: CommunityPost, menu_lookup: dict[str, dict], identity_key: str) -> dict:
+    reaction_counts: Counter[str] = Counter(reaction.reaction_type for reaction in post.reactions)
+    viewer_reactions = {
+        reaction.reaction_type
+        for reaction in post.reactions
+        if reaction.identity_key == identity_key
+    }
+    viewer_saved = any(save.identity_key == identity_key for save in post.saves)
+    helpful_notes = [
+        {
+            "id": comment.id,
+            "focus": comment.focus.replace("_", " ").title(),
+            "body": comment.body,
+            "author": comment.author_name,
+            "helpful_count": sum(1 for vote in comment.votes if vote.vote_type == "helpful"),
+            "tried_count": sum(1 for vote in comment.votes if vote.vote_type == "tried_this"),
+            "good_tip_count": sum(1 for vote in comment.votes if vote.vote_type == "good_tip"),
+        }
+        for comment in post.comments[-3:]
+    ]
+    return {
+        "id": post.id,
+        "author": post.author_name,
+        "type_label": post.post_type.replace("_", " ").title(),
+        "meal": post.meal_name,
+        "meal_items": post.meal_items,
+        "caption": post.caption,
+        "tip": post.tip,
+        "image": _community_post_image(post, menu_lookup),
+        "order_number": post.order_number,
+        "order_total_display": format_aud(post.order_total_cents) if post.order_total_cents else None,
+        "pickup_type": post.pickup_type,
+        "spice_level": post.spice_level,
+        "portion_note": post.portion_note,
+        "drink_pairing": post.drink_pairing,
+        "pickup_timing_note": post.pickup_timing_note,
+        "created_label": post.created_at.strftime("%d %b %Y"),
+        "love_count": reaction_counts["love"],
+        "want_count": reaction_counts["want_to_try"],
+        "saved_reaction_count": reaction_counts["saved_for_later"],
+        "like_count": len(post.reactions),
+        "comment_count": len(post.comments),
+        "save_count": len(post.saves),
+        "viewer_reactions": viewer_reactions,
+        "viewer_saved": viewer_saved,
+        "comments": helpful_notes,
+    }
+
+
+def _community_stats(identity_key: str, posts: list[CommunityPost], orders: list[Order]) -> dict:
+    own_posts = [post for post in posts if post.identity_key == identity_key]
+    likes_received = sum(len(post.reactions) for post in own_posts)
+    shared_dishes: Counter[str] = Counter(post.meal_name for post in own_posts)
+    ordered_combos: Counter[str] = Counter()
+    for order in orders:
+        combo = " + ".join(line.item_name for line in order.line_items[:2])
+        if combo:
+            ordered_combos[combo] += 1
+    badges = ["Lantern Member"]
+    if len(own_posts) >= 3:
+        badges.append("Top Sharer")
+    if any("pho" in dish.lower() for dish in shared_dishes):
+        badges.append("Pho Lover")
+    if likes_received >= 5:
+        badges.append("Community Pick")
+    return {
+        "posts_shared": len(own_posts),
+        "likes_received": likes_received,
+        "most_shared_dish": shared_dishes.most_common(1)[0][0] if shared_dishes else "No shared dishes yet",
+        "favorite_combo": ordered_combos.most_common(1)[0][0] if ordered_combos else "Place an order to build a combo",
+        "badges": badges,
+    }
 
 
 def _active_customer_orders() -> list[Order]:
@@ -239,7 +406,47 @@ def _membership_summary(orders: list[Order]) -> dict:
     }
 
 
+def _mission_progress(identity_key: str, posts: list[CommunityPost], orders: list[Order]) -> list[dict]:
+    own_posts = [post for post in posts if post.identity_key == identity_key]
+    own_comments = CommunityComment.query.filter_by(identity_key=identity_key).count()
+    own_saves = CommunitySave.query.filter_by(identity_key=identity_key).count()
+    pho_posts = sum(1 for post in own_posts if "pho" in post.meal_name.lower() or "pho" in (post.meal_items or "").lower())
+    tip_posts = sum(1 for post in own_posts if post.tip or post.spice_level or post.pickup_timing_note)
+    return [
+        {"title": "Share a pho combo", "progress": min(pho_posts, 1), "target": 1},
+        {"title": "Post a useful food tip", "progress": min(tip_posts, 1), "target": 1},
+        {"title": "Save 3 customer meal ideas", "progress": min(own_saves, 3), "target": 3},
+        {"title": "Comment on 2 pickup or taste tips", "progress": min(own_comments, 2), "target": 2},
+        {"title": "Share from an order receipt", "progress": min(sum(1 for post in own_posts if post.order_number), 1), "target": 1},
+    ]
+
+
+def _featured_tip(posts: list[CommunityPost]) -> dict | None:
+    comments = [comment for post in posts for comment in post.comments]
+    if not comments:
+        return None
+    best = max(comments, key=lambda comment: (len(comment.votes), comment.created_at))
+    if not best.votes:
+        return None
+    return {
+        "focus": best.focus.replace("_", " ").title(),
+        "body": best.body,
+        "author": best.author_name,
+        "votes": len(best.votes),
+        "post_id": best.post_id,
+    }
+
+
+def _all_community_posts() -> list[CommunityPost]:
+    return (
+        CommunityPost.query.order_by(CommunityPost.created_at.desc(), CommunityPost.id.desc())
+        .limit(60)
+        .all()
+    )
+
+
 def _saved_meals_context() -> dict:
+    identity_key, _name, _email = _community_identity()
     menu_lookup = _menu_item_lookup()
     orders = _active_customer_orders()
     counts: Counter[str] = Counter()
@@ -274,59 +481,68 @@ def _saved_meals_context() -> dict:
 
     collections = [
         {"title": "Late-lunch repeat tray", "text": "A neat cluster for people who rotate between pho, rice, and fast pickup drinks.", "accent": "amber"},
-        {"title": "Shareable meal board", "text": "Prepared as a future bridge into community sharing and collaborative meal picks.", "accent": "teal"},
+        {"title": "Shareable meal board", "text": "Saved community posts and pickup ideas collected from other customers.", "accent": "teal"},
         {"title": "Weekend comfort stack", "text": "A saved lane for rich bowls, hot plates, and dessert add-ons.", "accent": "plum"},
     ]
+    saved_posts = (
+        CommunityPost.query.join(CommunitySave)
+        .filter(CommunitySave.identity_key == identity_key)
+        .order_by(CommunitySave.created_at.desc())
+        .limit(6)
+        .all()
+    )
     return {
         "saved_items": saved_items[:6],
+        "saved_community_posts": [
+            _serialize_community_post(post, menu_lookup, identity_key)
+            for post in saved_posts
+        ],
         "collections": collections,
     }
 
 
 def _community_context() -> dict:
-    user = current_user()
+    identity_key, member_name, _email = _community_identity()
     menu_lookup = _menu_item_lookup()
-    featured_items = list(menu_lookup.values())[:4]
-    member_name = user["name"] if user else "Lantern Guest"
-    stories = [
-        {
-            "author": member_name,
-            "handle": "@mcq.member",
-            "lane": "Tonight's pickup story",
-            "title": "Building a comfort tray for the late shift",
-            "body": "A shareable meal note, favourite pairings, and a quick pickup story can all live here once the social backend is connected.",
-            "meal": featured_items[0]["name"],
-            "image": featured_items[0]["image"],
-            "badge": "Member voice",
-        },
-        {
-            "author": "Saigon Supper Club",
-            "handle": "@supperclub",
-            "lane": "Street-food board",
-            "title": "Three dishes we would post to the MCQ community this week",
-            "body": "The layout is prepared for meal photos, tasting notes, short captions, and future likes or comments.",
-            "meal": featured_items[1]["name"],
-            "image": featured_items[1]["image"],
-            "badge": "Meal board",
-        },
-        {
-            "author": "Pickup Regulars",
-            "handle": "@pickupregulars",
-            "lane": "Weekend story",
-            "title": "Best combinations for a shared Friday pickup",
-            "body": "This feed card is a connector for future shared favourites, story posts, and community challenges.",
-            "meal": featured_items[2]["name"],
-            "image": featured_items[2]["image"],
-            "badge": "Shared tray",
-        },
-    ]
+    raw_posts = _all_community_posts()
+    posts = [_serialize_community_post(post, menu_lookup, identity_key) for post in raw_posts]
+    orders = _active_customer_orders()
+    shared_order = _share_order_context(request.args.get("order"), menu_lookup)
+    remix_post = _remix_context(request.args.get("remix"))
+    today = raw_posts[0].created_at.date() if raw_posts else None
+    today_posts = [post for post in posts if today and post["created_label"] == today.strftime("%d %b %Y")][:4]
+    most_liked = sorted(posts, key=lambda post: (post["like_count"], post["comment_count"]), reverse=True)[:4]
+    quick_lunch = [
+        post for post in posts
+        if any(keyword in f"{post['meal']} {post['caption']}".lower() for keyword in ("banh mi", "rice", "roll", "quick", "lunch"))
+    ][:4]
+    pickup_combos = [post for post in posts if post["order_number"] or "combo" in post["caption"].lower()][:4]
     return {
         "member_name": member_name,
-        "stories": stories,
-        "community_cards": [
-            {"title": "Share meals", "text": "Prepared for future posting, tagging, and shared favourite collections."},
-            {"title": "Share stories", "text": "Ready for food journals, pickup reflections, and short customer stories."},
-            {"title": "Challenge boards", "text": "Supports future seasonal prompts such as staff picks or community tray themes."},
+        "posts": posts,
+        "shared_order": shared_order,
+        "remix_post": remix_post,
+        "recent_orders": [
+            {
+                "order_number": order.order_number,
+                "label": f"{order.order_number} · {format_aud(order.total_cents)}",
+                "href": url_for("user.shared_meals", order=order.order_number),
+            }
+            for order in orders[:5]
+        ],
+        "community_stats": _community_stats(identity_key, raw_posts, orders),
+        "missions": _mission_progress(identity_key, raw_posts, orders),
+        "featured_tip": _featured_tip(raw_posts),
+        "boards": [
+            {"title": "Today's shared meals", "items": today_posts},
+            {"title": "Most liked this week", "items": most_liked},
+            {"title": "Quick lunch ideas", "items": quick_lunch},
+            {"title": "Best pickup combos", "items": pickup_combos},
+        ],
+        "challenges": [
+            "Share your best pho combo this week",
+            "Most liked meal post gets featured",
+            "Late-night pickup favorites",
         ],
     }
 
@@ -493,6 +709,8 @@ def _support_ai_reply(message: str, history: list[dict[str, str]]) -> tuple[str 
 def profile() -> str:
     orders = _active_customer_orders()
     membership = _membership_summary(orders)
+    identity_key, _name, _email = _community_identity()
+    community_posts = _all_community_posts()
     recent_orders = []
     for order in orders[:3]:
         recent_orders.append(
@@ -507,6 +725,7 @@ def profile() -> str:
     return render_template(
         "user/profile.html",
         membership=membership,
+        community_stats=_community_stats(identity_key, community_posts, orders),
         recent_orders=recent_orders,
         is_member=bool(current_user()),
     )
@@ -539,6 +758,154 @@ def shared_meals() -> str:
         membership=_membership_summary(_active_customer_orders()),
         **_community_context(),
     )
+
+
+@user_bp.post("/community/posts")
+def create_community_post():
+    identity_key, default_name, email = _community_identity()
+    order_number = _clean_text(request.form.get("order_number"), limit=32)
+    order = Order.query.filter_by(order_number=order_number).first() if order_number else None
+    post_type = request.form.get("post_type", "meal_review")
+    if post_type not in _POST_TYPES:
+        post_type = "meal_review"
+
+    author_name = _clean_text(request.form.get("author_name"), limit=120, default=default_name)
+    meal_name = _clean_text(request.form.get("meal_name"), limit=255)
+    caption = _clean_text(request.form.get("caption"), limit=900)
+    if order:
+        meal_items = ", ".join(f"{line.quantity}x {line.item_name}" for line in order.line_items)
+        meal_name = meal_name or (order.line_items[0].item_name if order.line_items else f"Order {order.order_number}")
+    else:
+        meal_items = _clean_text(request.form.get("meal_items"), limit=500)
+
+    if not meal_name or not caption:
+        session["community_error"] = "Add a meal name and a short caption before sharing."
+        session.modified = True
+        return redirect(url_for("user.shared_meals", order=order_number) if order_number else url_for("user.shared_meals"))
+
+    post = CommunityPost(
+        author_name=author_name,
+        author_email=email,
+        identity_key=identity_key,
+        post_type=post_type,
+        meal_name=meal_name,
+        meal_items=meal_items,
+        caption=caption,
+        tip=_clean_text(request.form.get("tip"), limit=255),
+        photo_url=_clean_text(request.form.get("photo_url"), limit=500),
+        order_number=order.order_number if order else None,
+        order_total_cents=order.total_cents if order else None,
+        pickup_type=(
+            "Instant counter pickup" if order and order.fulfillment_type == "instant"
+            else "Scheduled pickup" if order
+            else _clean_text(request.form.get("pickup_type"), limit=40)
+        ),
+        spice_level=_clean_text(request.form.get("spice_level"), limit=40),
+        portion_note=_clean_text(request.form.get("portion_note"), limit=120),
+        drink_pairing=_clean_text(request.form.get("drink_pairing"), limit=120),
+        pickup_timing_note=_clean_text(request.form.get("pickup_timing_note"), limit=160),
+    )
+    db.session.add(post)
+    db.session.commit()
+    session["community_notice"] = "Your meal post is now live in the community feed."
+    session.modified = True
+    return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+@user_bp.post("/community/posts/<int:post_id>/react")
+def react_to_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    reaction_type = request.form.get("reaction_type", "love")
+    if reaction_type not in _REACTION_TYPES:
+        reaction_type = "love"
+    identity_key, author_name, _email = _community_identity()
+    existing = CommunityReaction.query.filter_by(
+        post_id=post.id,
+        identity_key=identity_key,
+        reaction_type=reaction_type,
+    ).first()
+    if existing:
+        db.session.delete(existing)
+    else:
+        db.session.add(
+            CommunityReaction(
+                post_id=post.id,
+                identity_key=identity_key,
+                author_name=author_name,
+                reaction_type=reaction_type,
+            )
+        )
+    db.session.commit()
+    return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+@user_bp.post("/community/posts/<int:post_id>/comments")
+def comment_on_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    identity_key, author_name, _email = _community_identity()
+    focus = request.form.get("focus", "taste")
+    if focus not in _COMMENT_FOCUS:
+        focus = "taste"
+    body = _clean_text(request.form.get("body"), limit=500)
+    if body:
+        db.session.add(
+            CommunityComment(
+                post_id=post.id,
+                identity_key=identity_key,
+                author_name=author_name,
+                focus=focus,
+                body=body,
+            )
+        )
+        db.session.commit()
+    return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+@user_bp.post("/community/posts/<int:post_id>/save")
+def save_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    identity_key, author_name, _email = _community_identity()
+    existing = CommunitySave.query.filter_by(post_id=post.id, identity_key=identity_key).first()
+    if existing:
+        db.session.delete(existing)
+    else:
+        db.session.add(
+            CommunitySave(
+                post_id=post.id,
+                identity_key=identity_key,
+                author_name=author_name,
+                save_type="favorite_board",
+            )
+        )
+    db.session.commit()
+    return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+@user_bp.post("/community/comments/<int:comment_id>/vote")
+def vote_community_comment(comment_id: int):
+    comment = CommunityComment.query.get_or_404(comment_id)
+    vote_type = request.form.get("vote_type", "helpful")
+    if vote_type not in _COMMENT_VOTE_TYPES:
+        vote_type = "helpful"
+    identity_key, author_name, _email = _community_identity()
+    existing = CommunityCommentVote.query.filter_by(
+        comment_id=comment.id,
+        identity_key=identity_key,
+        vote_type=vote_type,
+    ).first()
+    if existing:
+        db.session.delete(existing)
+    else:
+        db.session.add(
+            CommunityCommentVote(
+                comment_id=comment.id,
+                identity_key=identity_key,
+                author_name=author_name,
+                vote_type=vote_type,
+            )
+        )
+    db.session.commit()
+    return redirect(url_for("user.shared_meals", _anchor=f"post-{comment.post_id}"))
 
 
 @user_bp.get("/support")

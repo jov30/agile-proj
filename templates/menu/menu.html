@@ -527,6 +527,23 @@
     color: var(--brand-red);
   }
 
+  .menu-card__community-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .menu-card__community-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.42rem 0.62rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+  }
+
   .menu-card__heading h3 {
     margin: 0;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
@@ -989,6 +1006,7 @@
         <h3></h3>
         <p class="menu-card__summary"></p>
       </div>
+      <div class="menu-card__community-badges" hidden></div>
       <div class="menu-card__sections"></div>
       <div class="menu-card__actions">
         <a class="button button--secondary menu-card__detail" href="#" aria-label="View item details">Details</a>
@@ -1032,6 +1050,16 @@ const searchInput = document.getElementById('menu-search');
 let activeCategoryIndex = 0;
 let searchTimer = null;
 const cartQtyById = new Map();
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
 
 function cacheCartQuantities(cartPayload) {
   cartQtyById.clear();
@@ -1242,6 +1270,7 @@ function buildCard(item, categoryTitle) {
   const summary = clone.querySelector('.menu-card__summary');
   const priceEl = clone.querySelector('.menu-card__price');
   const sectionsWrapper = clone.querySelector('.menu-card__sections');
+  const communityBadges = clone.querySelector('.menu-card__community-badges');
   const detail = clone.querySelector('.menu-card__detail');
   const addBtn = clone.querySelector('.menu-card__add');
   const qtyWrap = clone.querySelector('.menu-card__qty');
@@ -1255,6 +1284,12 @@ function buildCard(item, categoryTitle) {
   label.textContent = categoryTitle;
   title.textContent = item.name;
   summary.textContent = item.summary || '';
+  if (communityBadges && item.community_badges && item.community_badges.length) {
+    communityBadges.hidden = false;
+    communityBadges.innerHTML = item.community_badges
+      .map((badge) => `<span class="menu-card__community-badge">${escapeHtml(badge)}</span>`)
+      .join('');
+  }
 
   if (item.price) {
     priceEl.hidden = false;
