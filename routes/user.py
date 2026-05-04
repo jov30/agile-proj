@@ -80,6 +80,19 @@ _CODE39_MAP = {
     "*": "nwnnwnwnn",
 }
 
+def _sync_user_community_stats(email: str) -> None:
+    """Recount and persist community stats for a logged-in user."""
+    db_user = User.query.filter_by(email=email).first()
+    if not db_user:
+        return
+    identity_key = f"user:{email.lower()}"
+    posts = CommunityPost.query.filter_by(identity_key=identity_key).all()
+    db_user.posts_shared = len(posts)
+    db_user.likes_received = sum(len(post.reactions) for post in posts)
+    dish_counts: Counter[str] = Counter(post.meal_name for post in posts)
+    if dish_counts:
+        db_user.most_shared_dish = dish_counts.most_common(1)[0][0]
+    db.session.commit()
 
 def _support_history() -> list[dict[str, str]]:
     raw_history = session.get(SUPPORT_CHAT_HISTORY_KEY)
@@ -815,6 +828,9 @@ def create_community_post():
     )
     db.session.add(post)
     db.session.commit()
+    _identity, _name, email = _community_identity()
+    if email:
+        _sync_user_community_stats(email)
     session["community_notice"] = "Your meal post is now live in the community feed."
     session.modified = True
     return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
@@ -844,6 +860,8 @@ def react_to_community_post(post_id: int):
             )
         )
     db.session.commit()
+    if post.author_email:
+        _sync_user_community_stats(post.author_email)
     return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
 
 
