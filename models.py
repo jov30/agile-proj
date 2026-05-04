@@ -183,6 +183,7 @@ class User(db.Model):
     email = db.Column(db.String(255), nullable=False, unique=True, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default="customer")
+    points_balance = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(
         db.DateTime,
         nullable=False,
@@ -395,6 +396,10 @@ def _sync_legacy_schema() -> None:
                 conn.execute(text("ALTER TABLE vouchers ADD COLUMN expires_at VARCHAR(40)"))
             if "footer_note" not in voucher_columns:
                 conn.execute(text("ALTER TABLE vouchers ADD COLUMN footer_note TEXT"))
+            if "users" in tables:
+                user_columns = {col["name"] for col in inspector.get_columns("users")}
+                if "points_balance" not in user_columns:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN points_balance INTEGER NOT NULL DEFAULT 0"))
     if "orders" not in tables:
         return
 
@@ -488,16 +493,21 @@ def init_db(app: Flask) -> None:
 def _seed_demo_users() -> None:
     """Insert demo customer accounts if they don't already exist."""
     demo_users = [
-        {"name": "Linh Nguyen",   "email": "linh@gmail.com",   "password": "demo123"},
-        {"name": "Minh Tran",     "email": "minh@demo.local",   "password": "demo123"},
-        {"name": "Anh Pham",      "email": "anh@demo.local",    "password": "demo123"},
+        {"name": "Linh Nguyen", "email": "linh@gmail.com",  "password": "demo123", "points": 2700},
+        {"name": "Minh Tran",   "email": "minh@demo.local", "password": "demo123", "points": 620},
+        {"name": "Anh Pham",    "email": "anh@demo.local",  "password": "demo123", "points": 85},
     ]
     for data in demo_users:
-        if not User.query.filter_by(email=data["email"]).first():
+        existing = User.query.filter_by(email=data["email"]).first()
+        if not existing:
             db.session.add(User(
                 name=data["name"],
                 email=data["email"],
                 password_hash=generate_password_hash(data["password"]),
                 role="customer",
+                points_balance=data["points"],
             ))
+        elif existing.points_balance == 0 and data["points"] > 0:
+            # Backfill points for already-seeded users that have 0
+            existing.points_balance = data["points"]
     db.session.commit()

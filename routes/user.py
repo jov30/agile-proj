@@ -10,7 +10,7 @@ import requests
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import format_aud, load_enriched_menu
-from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, db
+from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, User, db
 from routes.auth import current_user
 from routes.helpers import render_feature_page
 
@@ -348,8 +348,16 @@ def _membership_barcode_svg(value: str) -> str:
 def _membership_summary(orders: list[Order]) -> dict:
     user = current_user()
     seed_source = user["email"] if user else "guest-member-preview"
+
+    # Points: stored on User for logged-in accounts, derived from orders for guests
+    if user:
+        db_user = User.query.filter_by(email=user["email"]).first()
+        points_balance = db_user.points_balance if db_user else 0
+    else:
+        total_spend_cents = sum(order.total_cents for order in orders)
+        points_balance = total_spend_cents // 100
+
     total_spend_cents = sum(order.total_cents for order in orders)
-    points_balance = total_spend_cents // 100
     total_orders = len(orders)
     instant_orders = sum(1 for order in orders if order.fulfillment_type == "instant")
     scheduled_orders = max(0, total_orders - instant_orders)
