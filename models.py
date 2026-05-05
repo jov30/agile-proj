@@ -183,12 +183,15 @@ class User(db.Model):
     email = db.Column(db.String(255), nullable=False, unique=True, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default="customer")
-    created_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=utc_now_naive,
-    )
-
+    username = db.Column(db.String(40), nullable=True, unique=True, index=True)
+    phone = db.Column(db.String(40), nullable=True)
+    date_of_birth = db.Column(db.Date, nullable=True)
+    dietary_preferences = db.Column(db.String(255), nullable=True)
+    default_pickup_mode = db.Column(db.String(20), nullable=True, default="scheduled")
+    notification_email = db.Column(db.Boolean, nullable=False, default=True)
+    notification_sms = db.Column(db.Boolean, nullable=False, default=False)
+    marketing_opt_in = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive)
 
 class Voucher(db.Model):
     __tablename__ = "vouchers"
