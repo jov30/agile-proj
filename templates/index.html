@@ -18,6 +18,12 @@
     z-index: 1;
   }
 
+  .landing-hero__visual {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 3.3rem;
+  }
+
   .landing-hero__content .section-title {
     margin: 0;
     font-size: clamp(1.75rem, 3.8vw, 2.85rem);
@@ -51,22 +57,14 @@
     border: 1px solid rgba(255, 180, 54, 0.22);
   }
 
-  .hero-trust-badge::before {
-    content: "";
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
-    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.12);
-  }
-
   .hero-visual {
     position: relative;
     width: 100%;
     max-width: 400px;
     margin: 0;
     justify-self: end;
+    isolation: isolate;
+    cursor: pointer;
   }
 
   .hero-visual__accent {
@@ -85,13 +83,48 @@
 
   .hero-visual__frame {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     border-radius: var(--radius-xl);
     overflow: hidden;
     aspect-ratio: 4 / 5;
     max-height: min(380px, 48vh);
     border: 1px solid var(--line-soft);
     box-shadow: var(--shadow-soft);
+    transition: transform 320ms ease, box-shadow 320ms ease, filter 320ms ease, opacity 320ms ease, border-color 320ms ease;
+  }
+
+  .hero-visual__frame--back {
+    position: absolute;
+    z-index: 1;
+    top: 0.95rem;
+    right: -2rem;
+    width: 100%;
+    border: 2px solid rgba(255, 180, 54, 0.58);
+    box-shadow:
+      0 24px 40px rgba(53, 30, 20, 0.14),
+      0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+    transform: rotate(4deg);
+    filter: saturate(0.92) contrast(0.96);
+    opacity: 0.9;
+  }
+
+  .hero-visual.hero-visual--swapped .hero-visual__frame--back {
+    z-index: 4;
+    right: -0.65rem;
+    top: 0.2rem;
+    transform: rotate(0deg) scale(1.01);
+    opacity: 1;
+    filter: saturate(1.02) contrast(1.01);
+    box-shadow:
+      0 28px 42px rgba(53, 30, 20, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.78) inset;
+  }
+
+  .hero-visual.hero-visual--swapped .hero-visual__frame:not(.hero-visual__frame--back) {
+    z-index: 2;
+    transform: translate(-0.35rem, 0.25rem) rotate(-1deg) scale(0.99);
+    opacity: 0.95;
+    filter: saturate(0.96);
   }
 
   .hero-visual__frame img {
@@ -502,6 +535,11 @@
       margin-top: 0.25rem;
     }
 
+    .landing-hero__visual {
+      width: 100%;
+      padding-right: 1.1rem;
+    }
+
     .hero-visual__accent {
       left: -0.65rem;
       top: -0.65rem;
@@ -509,6 +547,13 @@
 
     .hero-visual__frame {
       max-height: min(340px, 42vh);
+    }
+
+    .hero-visual__frame--back {
+      top: 0.65rem;
+      right: -0.65rem;
+      width: 100%;
+      transform: rotate(2.4deg);
     }
 
     .launchpad__grid {
@@ -534,7 +579,7 @@
 {% block content %}
 <section class="landing-hero landing-hero--minimal section-panel">
   <div class="landing-hero__content">
-    <p class="hero-trust-badge">Uber Star Rating Here</p>
+    <p class="hero-trust-badge">Uber Eats ★★★★★ 4.9</p>
     <h1 class="section-title">Fresh Vietnamese street food</h1>
     <p class="section-copy">
       Order for the counter queue or book a pickup slot from our menu.
@@ -546,8 +591,16 @@
   </div>
 
   <div class="landing-hero__visual">
-    <figure class="hero-visual">
+    <figure class="hero-visual" role="button" tabindex="0" aria-label="Swap hero photos">
       <div class="hero-visual__accent" aria-hidden="true"></div>
+      <div class="hero-visual__frame hero-visual__frame--back">
+        <img
+          src="{{ url_for('static', filename='images/inspiration/streetfood-1.jpg') }}"
+          alt="Vietnamese street-food table setting"
+          width="900"
+          height="900"
+        />
+      </div>
       <div class="hero-visual__frame">
         <img
           src="{{ url_for('static', filename='images/inspiration/hem-street-food-dzuks.webp') }}"
@@ -889,6 +942,20 @@
 {% block scripts %}
 <script>
   (() => {
+    const heroVisual = document.querySelector('.hero-visual');
+    if (heroVisual) {
+      const toggleSwap = () => {
+        heroVisual.classList.toggle('hero-visual--swapped');
+      };
+      heroVisual.addEventListener('click', toggleSwap);
+      heroVisual.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggleSwap();
+        }
+      });
+    }
+
     const galleryRail = document.getElementById('street-gallery-rail');
     const galleryButtons = document.querySelectorAll('[data-gallery-shift]');
 
