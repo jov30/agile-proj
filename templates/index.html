@@ -4,16 +4,103 @@
 
 {% block head %}
 <style>
-  .landing-hero {
+  .landing-hero--minimal {
     display: grid;
-    grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
-    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.76fr);
+    gap: clamp(1.25rem, 3vw, 2rem);
     align-items: center;
-    padding: clamp(1.4rem, 3vw, 3rem);
+    padding: clamp(1.15rem, 2.5vw, 1.85rem) clamp(1.25rem, 3vw, 2.25rem);
   }
 
   .landing-hero__content,
-  .landing-hero__visual,
+  .landing-hero__visual {
+    position: relative;
+    z-index: 1;
+  }
+
+  .landing-hero__content .section-title {
+    margin: 0;
+    font-size: clamp(1.75rem, 3.8vw, 2.85rem);
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
+
+  .landing-hero__content .section-copy {
+    margin: 0.6rem 0 0;
+    max-width: 36ch;
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  .landing-hero--minimal .button-row {
+    margin-top: 1rem;
+  }
+
+  .hero-trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.65rem;
+    padding: 0.38rem 0.88rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.1);
+    border: 1px solid rgba(255, 180, 54, 0.22);
+  }
+
+  .hero-trust-badge::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
+    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.12);
+  }
+
+  .hero-visual {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0;
+    justify-self: end;
+  }
+
+  .hero-visual__accent {
+    position: absolute;
+    left: -0.95rem;
+    top: -0.95rem;
+    width: 72%;
+    height: 72%;
+    border-radius: 26px;
+    background:
+      linear-gradient(145deg, rgba(255, 216, 115, 0.55), rgba(255, 106, 19, 0.22)),
+      rgba(255, 180, 54, 0.12);
+    border: 1px solid rgba(255, 208, 138, 0.35);
+    z-index: 0;
+  }
+
+  .hero-visual__frame {
+    position: relative;
+    z-index: 1;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    max-height: min(380px, 48vh);
+    border: 1px solid var(--line-soft);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .hero-visual__frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
   .launchpad__header,
   .support-story__copy,
   .support-story__panel {
@@ -21,137 +108,27 @@
     z-index: 1;
   }
 
-  .landing-hero__visual {
-    min-height: 100%;
+  .hero-subtle-links {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: var(--text-muted);
   }
 
-  .hero-stage {
-    position: relative;
-    min-height: 640px;
-    padding: 1rem;
-    border-radius: 34px;
-    background:
-      linear-gradient(180deg, rgba(33, 23, 19, 0.96), rgba(61, 38, 28, 0.92)),
-      rgba(32, 23, 19, 0.94);
-    box-shadow: var(--shadow-strong);
-    overflow: hidden;
+  .hero-subtle-links a {
+    color: var(--brand-teal);
+    font-weight: 600;
+    text-decoration: none;
   }
 
-  .hero-stage::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(circle at 82% 16%, rgba(255, 216, 115, 0.2), transparent 14rem),
-      radial-gradient(circle at 12% 88%, rgba(217, 76, 121, 0.16), transparent 18rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 24%);
-    pointer-events: none;
+  .hero-subtle-links a:hover {
+    text-decoration: underline;
   }
 
-  .hero-stage__sign {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 3;
-    padding: 0.5rem 0.9rem;
-    border-radius: 999px;
-    font-family: "Bebas Neue", sans-serif;
-    font-size: 1.15rem;
-    letter-spacing: 0.18em;
-    color: #2a160b;
-    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
-    box-shadow: 0 12px 26px rgba(255, 106, 19, 0.3);
-  }
-
-  .hero-stage__ticket {
-    position: absolute;
-    right: 1.15rem;
-    top: 1.1rem;
-    z-index: 3;
-    max-width: 190px;
-    padding: 0.85rem 0.95rem;
-    border-radius: 22px;
-    font-size: 0.88rem;
-    line-height: 1.55;
-    color: rgba(255, 247, 239, 0.88);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(12px);
-  }
-
-  .hero-stage__panel {
-    position: absolute;
-    overflow: hidden;
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 251, 245, 0.14);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.24);
-    backdrop-filter: blur(14px);
-  }
-
-  .hero-stage__panel img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .hero-stage__panel--market {
-    left: 1.1rem;
-    right: 8.8rem;
-    top: 4.8rem;
-    height: 300px;
-  }
-
-  .hero-stage__panel--street {
-    right: 1.2rem;
-    top: 9rem;
-    width: 180px;
-    height: 250px;
-    transform: rotate(4deg);
-  }
-
-  .hero-stage__panel--noodle {
-    left: 1.3rem;
-    bottom: 1.35rem;
-    width: min(310px, 56%);
-    height: 230px;
-    background: rgba(255, 247, 237, 0.96);
-  }
-
-  .hero-stage__panel--city {
-    right: 1.4rem;
-    bottom: 1.5rem;
-    width: 225px;
-    height: 220px;
-    transform: rotate(-5deg);
-  }
-
-  .hero-stage__label {
-    position: absolute;
-    left: 1rem;
-    right: 1rem;
-    bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.85rem 1rem;
-    border-radius: 20px;
-    color: var(--text-inverse);
-    background: linear-gradient(180deg, rgba(22, 16, 15, 0.2), rgba(22, 16, 15, 0.8));
-  }
-
-  .hero-stage__label span {
-    font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 0.16em;
-    color: rgba(255, 216, 115, 0.9);
-  }
-
-  .hero-stage__label strong {
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: 1.02rem;
-    text-align: right;
+  .hero-subtle-links .sep {
+    margin: 0 0.55rem;
+    color: rgba(112, 85, 66, 0.45);
+    font-weight: 400;
+    user-select: none;
   }
 
   .launchpad {
@@ -522,7 +499,7 @@
   }
 
   @media (max-width: 1080px) {
-    .landing-hero,
+    .landing-hero--minimal,
     .live-ops__grid,
     .support-story,
     .launchpad__header,
@@ -534,51 +511,27 @@
   }
 
   @media (max-width: 720px) {
-    .landing-hero,
+    .landing-hero--minimal,
     .live-ops,
     .launchpad,
     .street-gallery,
     .support-story {
-      padding: 1.2rem;
+      padding: 1rem;
     }
 
-    .hero-stage {
-      min-height: 560px;
+    .hero-visual {
+      max-width: 100%;
+      justify-self: stretch;
+      margin-top: 0.25rem;
     }
 
-    .hero-stage__ticket {
-      display: none;
+    .hero-visual__accent {
+      left: -0.65rem;
+      top: -0.65rem;
     }
 
-    .hero-stage__panel--market {
-      right: 1rem;
-      height: 240px;
-    }
-
-    .hero-stage__panel--street {
-      width: 120px;
-      height: 170px;
-      top: 7rem;
-    }
-
-    .hero-stage__panel--noodle {
-      width: calc(100% - 9rem);
-      height: 180px;
-    }
-
-    .hero-stage__panel--city {
-      width: 120px;
-      height: 150px;
-      bottom: 1.2rem;
-    }
-
-    .hero-stage__label {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .hero-stage__label strong {
-      text-align: left;
+    .hero-visual__frame {
+      max-height: min(340px, 42vh);
     }
 
     .launchpad__grid {
@@ -602,59 +555,31 @@
 {% endblock %}
 
 {% block content %}
-<section class="landing-hero section-panel">
+<section class="landing-hero landing-hero--minimal section-panel">
   <div class="landing-hero__content">
-    <p class="eyebrow">Vietnam street food online</p>
-    <h1 class="section-title">Instant queue or scheduled pickup, with live order tracking from the homepage.</h1>
+    <p class="hero-trust-badge">Uber Star Rating Here</p>
+    <h1 class="section-title">Fresh Vietnamese street food</h1>
     <p class="section-copy">
-      The storefront now splits the two real ordering journeys clearly: order now for a live counter queue, or book a
-      scheduled pickup slot. Tracking, notifications, receipts, and history all connect back to the same order data.
+      Order for the counter queue or book a pickup slot from our menu.
     </p>
     <div class="button-row">
-      <a href="/menu?fulfillment=instant" class="button button--primary">Start Instant Order</a>
-      <a href="/menu?fulfillment=scheduled" class="button button--secondary">Build Scheduled Order</a>
-      <a href="/orders" class="button button--secondary">Track Existing Order</a>
-      <a href="/login" class="button button--secondary">Login</a>
-    </div>
-    <div class="pill-row">
-      <span class="pill"><strong>Instant queue</strong> start from the menu, add dishes, then check out into the live pickup line.</span>
-      <span class="pill"><strong>Scheduled pickup</strong> build the cart first, then reserve the best available pickup slot.</span>
-      <span class="pill"><strong>Track order</strong> jump straight to detail or receipt from the homepage.</span>
+      <a href="/menu?fulfillment=instant" class="button button--primary">Order now</a>
+      <a href="/menu" class="button button--secondary">Explore menu</a>
     </div>
   </div>
 
   <div class="landing-hero__visual">
-    <div class="hero-stage">
-      <div class="hero-stage__sign">SAIGON STREETFOOD</div>
-      <div class="hero-stage__ticket">
-        Live routing: instant queue, scheduled pickup, admin queue controls, receipt history, and website notifications now run on the same order data.
-      </div>
-      <div class="hero-stage__panel hero-stage__panel--market">
-        <img src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}" alt="Ben Thanh Market illustration" />
-      </div>
-      <div class="hero-stage__panel hero-stage__panel--street">
+    <figure class="hero-visual">
+      <div class="hero-visual__accent" aria-hidden="true"></div>
+      <div class="hero-visual__frame">
         <img
-          src="{{ url_for('static', filename='images/inspiration/hero-new-world-gourmet.avif') }}"
-          alt="MCQ gourmet storefront inspiration"
+          src="{{ url_for('static', filename='images/inspiration/hem-street-food-dzuks.webp') }}"
+          alt="Vietnamese banh mi sandwich with fresh herbs and pickles"
+          width="900"
+          height="900"
         />
       </div>
-      <div class="hero-stage__panel hero-stage__panel--noodle">
-        <img
-          src="{{ url_for('static', filename='images/inspiration/saigon-street-food-scene-detail.jpg') }}"
-          alt="Saigon street food scene detail"
-        />
-      </div>
-      <div class="hero-stage__panel hero-stage__panel--city">
-        <img
-          src="{{ url_for('static', filename='images/inspiration/saigon-skyline.webp') }}"
-          alt="Ho Chi Minh City skyline illustration"
-        />
-      </div>
-      <div class="hero-stage__label">
-        <span>MCQ digital storefront</span>
-        <strong>From market inspiration to practical ordering flow for real customer use.</strong>
-      </div>
-    </div>
+    </figure>
   </div>
 </section>
 
