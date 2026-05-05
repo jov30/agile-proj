@@ -479,12 +479,32 @@ def _sync_legacy_schema() -> None:
                     {"counter_date": queue_date, "last_number": max_number or 0},
                 )
 
+def _sync_users_schema() -> None:
+    inspector = inspect(db.engine)
+    tables = set(inspector.get_table_names())
+    if "users" not in tables:
+        return
+    user_cols = {col["name"] for col in inspector.get_columns("users")}
+    with db.engine.begin() as conn:
+        for col, typedef in [
+            ("username",             "VARCHAR(40)"),
+            ("phone",                "VARCHAR(40)"),
+            ("date_of_birth",        "DATE"),
+            ("dietary_preferences",  "VARCHAR(255)"),
+            ("default_pickup_mode",  "VARCHAR(20)"),
+            ("notification_email",   "BOOLEAN NOT NULL DEFAULT 1"),
+            ("notification_sms",     "BOOLEAN NOT NULL DEFAULT 0"),
+            ("marketing_opt_in",     "BOOLEAN NOT NULL DEFAULT 0"),
+        ]:
+            if col not in user_cols:
+                conn.execute(text(f"ALTER TABLE users ADD COLUMN {col} {typedef}"))
 
 def init_db(app: Flask) -> None:
     db.init_app(app)
     with app.app_context():
         db.create_all()
         _sync_legacy_schema()
+        _sync_users_schema()
         _seed_demo_users()
 
 
