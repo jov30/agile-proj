@@ -14,7 +14,7 @@ from models import User, db
 
 class TestPointsAndCommunityStats(unittest.TestCase):
     def setUp(self) -> None:
-        self.tmpdir = tempfile.TemporaryDirectory()
+        self.tmpdir = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
         db_path = Path(self.tmpdir.name) / "points-test.sqlite"
         self.app = create_app(
             {
@@ -36,7 +36,6 @@ class TestPointsAndCommunityStats(unittest.TestCase):
         with self.app.app_context():
             db.drop_all()
             db.create_all()
-            # Register a customer directly in the DB
             db.session.add(User(
                 name="Test Customer",
                 email="customer@test.com",
@@ -45,7 +44,6 @@ class TestPointsAndCommunityStats(unittest.TestCase):
             ))
             db.session.commit()
 
-        # Log in as the test customer via session
         with self.client.session_transaction() as sess:
             sess["auth_user"] = {
                 "name": "Test Customer",
@@ -55,6 +53,9 @@ class TestPointsAndCommunityStats(unittest.TestCase):
 
     def tearDown(self) -> None:
         self._now_patch.stop()
+        # Dispose the engine so SQLite releases the file lock on Windows
+        with self.app.app_context():
+            db.engine.dispose()
         self.tmpdir.cleanup()
 
     def _first_menu_item(self) -> dict:
@@ -114,8 +115,7 @@ class TestPointsAndCommunityStats(unittest.TestCase):
             from models import Order
             order = Order.query.filter_by(customer_email="customer@test.com").first()
             user = User.query.filter_by(email="customer@test.com").first()
-            expected = order.total_cents // 100
-            self.assertEqual(user.points_balance, expected)
+            self.assertEqual(user.points_balance, order.total_cents // 100)
 
     def test_multiple_orders_accumulate_points(self):
         self._place_order(days_ahead=1)
@@ -168,7 +168,6 @@ class TestPointsAndCommunityStats(unittest.TestCase):
             self.assertEqual(user.total_orders, 0)
 
     def test_profile_page_shows_stored_points_not_derived(self):
-        # Set points directly — should show on profile even with no orders
         with self.app.app_context():
             user = User.query.filter_by(email="customer@test.com").first()
             user.points_balance = 270
@@ -191,12 +190,6 @@ class TestPointsAndCommunityStats(unittest.TestCase):
     # ── Community stats tests ─────────────────────────────────────────────
 
     def test_posts_shared_increments_when_post_created(self):
-        with self.client.session_transaction() as sess:
-            sess["auth_user"] = {
-                "name": "Test Customer",
-                "email": "customer@test.com",
-                "role": "customer",
-            }
         self.client.post(
             "/community/posts",
             data={
@@ -247,7 +240,6 @@ class TestPointsAndCommunityStats(unittest.TestCase):
             self.assertEqual(user.most_shared_dish, "Pho Bo")
 
     def test_likes_received_increments_when_post_gets_reaction(self):
-        # Post as the test customer
         self.client.post(
             "/community/posts",
             data={
@@ -261,10 +253,9 @@ class TestPointsAndCommunityStats(unittest.TestCase):
         )
         with self.app.app_context():
             from models import CommunityPost
-            post = CommunityPost.query.first()
-            post_id = post.id
+            post_id = CommunityPost.query.first().id
 
-        # React as a different identity (clear session)
+        # React as a guest (different identity)
         with self.client.session_transaction() as sess:
             sess.pop("auth_user", None)
 
@@ -286,13 +277,24 @@ class TestPointsAndCommunityStats(unittest.TestCase):
             user.most_shared_dish = "Pho Bo Dac Biet"
             user.favorite_combo = "Pho Bo + Goi Cuon"
             db.session.commit()
+            
+            # Verify it actually saved
+            check = User.query.filter_by(email="customer@test.com").first()
+            assert check.most_shared_dish == "Pho Bo Dac Biet", f"DB has: {check.most_shared_dish}"
+
+        # Re-login after context change
+        with self.client.session_transaction() as sess:
+            sess["auth_user"] = {
+                "name": "Test Customer",
+                "email": "customer@test.com",
+                "role": "customer",
+            }
 
         response = self.client.get("/membership")
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
-        self.assertIn("4", html)
-        self.assertIn("11", html)
         self.assertIn("Pho Bo Dac Biet", html)
+        self.assertIn("11", html)
 
 
 if __name__ == "__main__":

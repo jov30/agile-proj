@@ -268,6 +268,27 @@ def _serialize_community_post(post: CommunityPost, menu_lookup: dict[str, dict],
 
 
 def _community_stats(identity_key: str, posts: list[CommunityPost], orders: list[Order]) -> dict:
+    user = current_user()
+
+    if user:
+        db_user = User.query.filter_by(email=user["email"].lower()).first()
+        if db_user:
+            badges = ["Lantern Member"]
+            if db_user.posts_shared >= 3:
+                badges.append("Top Sharer")
+            if db_user.most_shared_dish and "pho" in db_user.most_shared_dish.lower():
+                badges.append("Pho Lover")
+            if db_user.likes_received >= 5:
+                badges.append("Community Pick")
+            return {
+                "posts_shared": db_user.posts_shared,
+                "likes_received": db_user.likes_received,
+                "most_shared_dish": db_user.most_shared_dish or "No shared dishes yet",
+                "favorite_combo": db_user.favorite_combo or "Place an order to build a combo",
+                "badges": badges,
+            }
+
+    # Guest fallback — derive from live data
     own_posts = [post for post in posts if post.identity_key == identity_key]
     likes_received = sum(len(post.reactions) for post in own_posts)
     shared_dishes: Counter[str] = Counter(post.meal_name for post in own_posts)
