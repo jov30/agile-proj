@@ -1,12 +1,12 @@
 import tempfile
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import Mock, patch
 from zoneinfo import ZoneInfo
 
 from app import create_app
-from models import Order, OrderLineItem, db
+from models import CommunityPost, CommunityReaction, CommunitySave, Order, OrderLineItem, db
 
 
 class TestSupportChat(unittest.TestCase):
@@ -139,6 +139,68 @@ class TestSupportChat(unittest.TestCase):
         self.assertIn("MCQ Community", community_html)
         self.assertIn("Share Meal Story", community_html)
         self.assertIn("Story composer", community_html)
+
+    def test_community_feed_filters_sorts_and_paginates(self):
+        with self.app.app_context():
+            base_time = datetime(2026, 5, 1, 12, 0, 0)
+            posts = []
+            for index in range(8):
+                post_type = ("meal_review", "usual_combo", "pickup_tip")[index % 3]
+                post = CommunityPost(
+                    author_name=f"Customer {index}",
+                    identity_key=f"guest:{index}",
+                    post_type=post_type,
+                    meal_name=f"{post_type} meal {index}",
+                    caption=f"Caption {index}",
+                    created_at=base_time + timedelta(minutes=index),
+                )
+                db.session.add(post)
+                posts.append(post)
+            db.session.flush()
+            db.session.add_all(
+                CommunityReaction(
+                    post_id=posts[0].id,
+                    identity_key=f"fan:{index}",
+                    author_name=f"Fan {index}",
+                    reaction_type="love",
+                )
+                for index in range(4)
+            )
+            db.session.add_all(
+                CommunitySave(
+                    post_id=posts[1].id,
+                    identity_key=f"saver:{index}",
+                    author_name=f"Saver {index}",
+                )
+                for index in range(3)
+            )
+            db.session.commit()
+
+        response = self.client.get("/community")
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn("Showing 1-6 of 8", html)
+        self.assertIn("Load more", html)
+        self.assertIn("Page 1 of 2", html)
+
+        filtered = self.client.get("/community?type=pickup_tip")
+        filtered_html = filtered.get_data(as_text=True)
+        self.assertIn("<h3>pickup_tip meal 2</h3>", filtered_html)
+        self.assertNotIn("<h3>meal_review meal 0</h3>", filtered_html)
+
+        liked = self.client.get("/community?sort=most_liked")
+        liked_html = liked.get_data(as_text=True)
+        self.assertLess(
+            liked_html.index("meal_review meal 0"),
+            liked_html.index("usual_combo meal 7"),
+        )
+
+        saved = self.client.get("/community?sort=most_saved")
+        saved_html = saved.get_data(as_text=True)
+        self.assertLess(
+            saved_html.index("usual_combo meal 1"),
+            saved_html.index("usual_combo meal 7"),
+        )
 
     @patch("routes.user.requests.post")
     def test_support_chat_uses_openai_when_configured(self, mock_post):

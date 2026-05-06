@@ -134,6 +134,74 @@
     gap: 0.5rem;
     margin-top: 0.8rem;
   }
+  .community-feed-controls {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem;
+    border: 1px solid rgba(112, 85, 66, 0.14);
+    border-radius: 22px;
+    background: rgba(255, 252, 247, 0.96);
+    box-shadow: 0 18px 38px rgba(53, 30, 20, 0.07);
+  }
+  .community-feed-controls__header,
+  .community-filter-row,
+  .community-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .community-feed-controls__header h2 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.25rem;
+  }
+  .community-feed-count {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .community-filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .community-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0.48rem 0.72rem;
+    border-radius: 999px;
+    border: 1px solid rgba(112, 85, 66, 0.16);
+    background: rgba(255, 255, 255, 0.74);
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.84rem;
+  }
+  .community-filter-tab.is-active {
+    color: var(--brand-red);
+    border-color: rgba(255, 106, 19, 0.36);
+    background: rgba(255, 106, 19, 0.1);
+  }
+  .community-sort-form {
+    display: inline-flex;
+    gap: 0.45rem;
+    align-items: center;
+  }
+  .community-sort-form select {
+    min-height: 40px;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    border-radius: 999px;
+    padding: 0 2.2rem 0 0.85rem;
+    font: inherit;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.88);
+  }
+  .community-pagination {
+    justify-content: center;
+    margin-top: 0.2rem;
+  }
   .community-comments { display: grid; gap: 0.45rem; margin-top: 0.8rem; }
   .community-comment {
     border-left: 3px solid rgba(0, 111, 116, 0.28);
@@ -190,6 +258,32 @@
   @media (max-width: 720px) {
     .community-post,
     .community-comment-form { grid-template-columns: 1fr; }
+
+    .community-feed-controls {
+      border-radius: 18px;
+      padding: 0.85rem;
+    }
+
+    .community-feed-controls__header,
+    .community-filter-row,
+    .community-sort-form {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .community-filter-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+
+    .community-filter-tab,
+    .community-sort-form select,
+    .community-sort-form button,
+    .community-pagination .button {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
 {% endblock %}
@@ -272,6 +366,42 @@
           </form>
         </article>
 
+        <section class="community-feed-controls" aria-label="Community feed controls">
+          <div class="community-feed-controls__header">
+            <div>
+              <p class="eyebrow">Community feed</p>
+              <h2>Browse posts</h2>
+            </div>
+            <span class="community-feed-count">
+              {% if community_pagination.total_posts %}
+                Showing {{ community_pagination.visible_from }}-{{ community_pagination.visible_to }} of {{ community_pagination.total_posts }}
+              {% else %}
+                No matching posts
+              {% endif %}
+            </span>
+          </div>
+          <div class="community-filter-row">
+            <nav class="community-filter-tabs" aria-label="Post type filters">
+              {% for filter_value, filter_label in community_filter_options %}
+                <a
+                  class="community-filter-tab {% if community_filters.type == filter_value %}is-active{% endif %}"
+                  href="{{ url_for('user.shared_meals', type=filter_value, sort=community_filters.sort) }}"
+                >{{ filter_label }}</a>
+              {% endfor %}
+            </nav>
+            <form class="community-sort-form" method="get" action="{{ url_for('user.shared_meals') }}">
+              <input type="hidden" name="type" value="{{ community_filters.type }}">
+              <label for="community-sort">Sort</label>
+              <select id="community-sort" name="sort">
+                {% for sort_value, sort_label in community_sort_options %}
+                  <option value="{{ sort_value }}" {% if community_filters.sort == sort_value %}selected{% endif %}>{{ sort_label }}</option>
+                {% endfor %}
+              </select>
+              <button class="button button--secondary" type="submit">Apply</button>
+            </form>
+          </div>
+        </section>
+
         {% if posts %}
           {% for post in posts %}
             <article class="community-post" id="post-{{ post.id }}">
@@ -344,8 +474,19 @@
           {% endfor %}
         {% else %}
           <div class="community-empty">
-            No community posts yet. Share a meal from a recent order or write the first customer tip.
+            No community posts match this filter yet. Try another post type or share the first matching story.
           </div>
+        {% endif %}
+        {% if community_pagination.total_pages > 1 %}
+          <nav class="community-pagination" aria-label="Community feed pages">
+            {% if community_pagination.has_previous %}
+              <a class="button button--secondary" href="{{ url_for('user.shared_meals', type=community_filters.type, sort=community_filters.sort, page=community_pagination.previous_page) }}">Previous</a>
+            {% endif %}
+            <span class="community-feed-count">Page {{ community_pagination.page }} of {{ community_pagination.total_pages }}</span>
+            {% if community_pagination.has_next %}
+              <a class="button button--primary" href="{{ url_for('user.shared_meals', type=community_filters.type, sort=community_filters.sort, page=community_pagination.next_page) }}">Load more</a>
+            {% endif %}
+          </nav>
         {% endif %}
       </div>
 
