@@ -13,6 +13,8 @@ from menu_catalog import format_aud, load_enriched_menu
 from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, User, db
 from routes.auth import current_user
 from routes.helpers import render_feature_page
+from datetime import date as date_type
+from routes.auth import SESSION_USER_KEY
 
 
 user_bp = Blueprint("user", __name__)
@@ -772,6 +774,151 @@ def profile() -> str:
         is_member=bool(current_user()),
     )
 
+_DIETARY_OPTIONS = (
+    "No restrictions",
+    "Vegetarian",
+    "Vegan",
+    "Gluten-free",
+    "Dairy-free",
+    "Halal",
+    "No pork",
+    "No shellfish",
+)
+_MIN_AGE_YEARS = 13
+_MAX_AGE_YEARS = 120
+def _validate_settings_form(form: dict) -> list[str]:
+    errors: list[str] = []
+
+    name = form.get("name", "").strip()
+    if len(name) < 2:
+        errors.append("Full name must be at least 2 characters.")
+
+    username = form.get("username", "").strip()
+    if username:
+        if len(username) < 3:
+            errors.append("Username must be at least 3 characters.")
+        elif not username.replace("_", "").replace(".", "").replace("-", "").isalnum():
+            errors.append("Username may only contain letters, numbers, dots, hyphens, and underscores.")
+
+    phone = form.get("phone", "").strip()
+    if phone:
+        digits = [c for c in phone if c.isdigit()]
+        if len(digits) < 8:
+            errors.append("Enter a valid phone number.")
+
+    dob_raw = form.get("date_of_birth", "").strip()
+    if dob_raw:
+        try:
+            dob = date_type.fromisoformat(dob_raw)
+            today = date_type.today()
+            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+            if age < _MIN_AGE_YEARS:
+                errors.append(f"You must be at least {_MIN_AGE_YEARS} years old.")
+            elif age > _MAX_AGE_YEARS:
+                errors.append("Enter a valid date of birth.")
+        except ValueError:
+            errors.append("Enter a valid date of birth (YYYY-MM-DD).")
+
+    pickup_mode = form.get("default_pickup_mode", "scheduled")
+    if pickup_mode not in ("instant", "scheduled"):
+        errors.append("Choose a valid default pickup mode.")
+
+    return errors
+
+
+@user_bp.get("/profile/settings")
+def profile_settings() -> str:
+    user = current_user()
+    if not user:
+        return redirect(url_for("auth.login", next="/profile/settings"))
+
+    db_user = User.query.filter_by(email=user["email"].lower()).first_or_404()
+    form_data = {
+        "name": db_user.name,
+        "username": db_user.username or "",
+        "phone": db_user.phone or "",
+        "date_of_birth": db_user.date_of_birth.isoformat() if db_user.date_of_birth else "",
+        "dietary_preferences": db_user.dietary_preferences or "",
+        "default_pickup_mode": db_user.default_pickup_mode or "scheduled",
+        "notification_email": db_user.notification_email,
+        "notification_sms": db_user.notification_sms,
+        "marketing_opt_in": db_user.marketing_opt_in,
+    }
+    return render_template(
+        "user/settings.html",
+        form_data=form_data,
+        errors=[],
+        saved=False,
+        dietary_options=_DIETARY_OPTIONS,
+        membership=_membership_summary(_active_customer_orders()),
+    )
+
+
+@user_bp.post("/profile/settings")
+def save_profile_settings() -> str:
+    user = current_user()
+    if not user:
+        return redirect(url_for("auth.login", next="/profile/settings"))
+
+    db_user = User.query.filter_by(email=user["email"].lower()).first_or_404()
+
+    form = {
+        "name": request.form.get("name", "").strip(),
+        "username": request.form.get("username", "").strip().lower(),
+        "phone": request.form.get("phone", "").strip(),
+        "date_of_birth": request.form.get("date_of_birth", "").strip(),
+        "dietary_preferences": request.form.get("dietary_preferences", "").strip(),
+        "default_pickup_mode": request.form.get("default_pickup_mode", "scheduled"),
+        "notification_email": request.form.get("notification_email") == "on",
+        "notification_sms": request.form.get("notification_sms") == "on",
+        "marketing_opt_in": request.form.get("marketing_opt_in") == "on",
+    }
+
+    errors = _validate_settings_form(form)
+
+    # Username uniqueness check (skip if unchanged)
+    if not errors and form["username"] and form["username"] != (db_user.username or ""):
+        clash = User.query.filter_by(username=form["username"]).first()
+        if clash and clash.id != db_user.id:
+            errors.append("That username is already taken.")
+
+    if errors:
+        return render_template(
+            "user/settings.html",
+            form_data=form,
+            errors=errors,
+            saved=False,
+            dietary_options=_DIETARY_OPTIONS,
+            membership=_membership_summary(_active_customer_orders()),
+        ), 400
+
+    # Persist
+    db_user.name = form["name"]
+    db_user.username = form["username"] or None
+    db_user.phone = form["phone"] or None
+    db_user.date_of_birth = (
+        date_type.fromisoformat(form["date_of_birth"]) if form["date_of_birth"] else None
+    )
+    db_user.dietary_preferences = form["dietary_preferences"] or None
+    db_user.default_pickup_mode = form["default_pickup_mode"]
+    db_user.notification_email = form["notification_email"]
+    db_user.notification_sms = form["notification_sms"]
+    db_user.marketing_opt_in = form["marketing_opt_in"]
+    db.session.commit()
+
+    # Refresh session name if it changed
+    if form["name"] != user["name"]:
+        session[SESSION_USER_KEY] = {**session[SESSION_USER_KEY], "name": form["name"]}
+        session.modified = True
+
+    return render_template(
+        "user/settings.html",
+        form_data={**form, "date_of_birth": db_user.date_of_birth.isoformat() if db_user.date_of_birth else ""},
+        errors=[],
+        saved=True,
+        dietary_options=_DIETARY_OPTIONS,
+        membership=_membership_summary(_active_customer_orders()),
+    )
 
 @user_bp.get("/membership/barcode.svg")
 def membership_barcode() -> Response:

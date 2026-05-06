@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Settings | MCQ Vietnamese Street Food{% endblock %}
+
+{% block head %}
+<style>
+  .settings-shell { display: grid; gap: 1.2rem; }
+
+  .settings-panel { padding: clamp(1.2rem, 3vw, 2rem); }
+
+  .settings-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .settings-form-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.4rem;
+    border-radius: 28px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.07);
+  }
+
+  .settings-form-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.24), transparent 24%),
+      radial-gradient(circle at 88% 10%, rgba(255,216,115,0.12), transparent 12rem);
+  }
+
+  .settings-form-card > * { position: relative; z-index: 1; }
+
+  .settings-form-card h1 {
+    margin: 0.2rem 0 0.1rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.8rem, 2.8vw, 2.6rem);
+  }
+
+  .settings-form-card > p {
+    margin: 0 0 1.4rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .settings-form { display: grid; gap: 1.1rem; }
+
+  .settings-section {
+    display: grid;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .settings-section:first-child { border-top: 0; padding-top: 0; }
+
+  .settings-section__title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    color: var(--brand-red);
+  }
+
+  .field { display: grid; gap: 0.42rem; }
+
+  .field label { font-weight: 700; font-size: 0.92rem; }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    border: 1px solid rgba(112, 85, 66, 0.18);
+    border-radius: 18px;
+    padding: 0.88rem 0.98rem;
+    font: inherit;
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: 0;
+    border-color: rgba(255, 106, 19, 0.38);
+    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.12);
+    background: #fff;
+  }
+
+  .field__hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .toggle-row__label { font-weight: 700; font-size: 0.92rem; }
+  .toggle-row__desc { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+  .toggle-row input[type="checkbox"] {
+    width: 44px;
+    height: 24px;
+    appearance: none;
+    border-radius: 999px;
+    background: rgba(112, 85, 66, 0.18);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+
+  .toggle-row input[type="checkbox"]::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 999px;
+    background: #fff;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  }
+
+  .toggle-row input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, var(--brand-amber), var(--brand-orange));
+  }
+
+  .toggle-row input[type="checkbox"]:checked::after {
+    transform: translateX(20px);
+  }
+
+  .settings-alert {
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(179, 48, 64, 0.2);
+    background: rgba(179, 48, 64, 0.08);
+    color: #7f2040;
+  }
+
+  .settings-alert ul { margin: 0; padding-left: 1.1rem; line-height: 1.65; }
+
+  .settings-success {
+    padding: 0.95rem 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(40, 114, 77, 0.22);
+    background: rgba(40, 114, 77, 0.08);
+    color: #1a5c35;
+    font-weight: 700;
+  }
+
+  .settings-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 0.5rem;
+  }
+
+  /* ── Side panel ── */
+  .settings-side { display: grid; gap: 0.85rem; }
+
+  .settings-card {
+    padding: 1.1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow: 0 12px 28px rgba(53, 30, 20, 0.06);
+  }
+
+  .settings-card h3 {
+    margin: 0 0 0.35rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1rem;
+  }
+
+  .settings-card p {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .settings-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #2b170d;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-amber));
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .settings-grid { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-shell">
+  <section class="settings-panel section-panel">
+    <div class="settings-grid">
+
+      <article class="settings-form-card">
+        <p class="eyebrow">Account</p>
+        <h1>Profile Settings</h1>
+        <p>Update your personal details, pickup preferences, and notification options.</p>
+
+        {% if saved %}
+          <div class="settings-success" role="status">Profile updated successfully.</div>
+        {% endif %}
+
+        {% if errors %}
+          <div class="settings-alert" role="alert">
+            <ul>
+              {% for error in errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <form method="post" action="/profile/settings" class="settings-form" novalidate>
+
+          {# ── Personal information ── #}
+          <div class="settings-section">
+            <div class="settings-section__title">Personal information</div>
+
+            <div class="field">
+              <label for="name">Full name</label>
+              <input id="name" name="name" type="text"
+                     value="{{ form_data.name }}" autocomplete="name" required />
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="username">Username <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+                <input id="username" name="username" type="text"
+                       value="{{ form_data.username }}" autocomplete="username"
+                       placeholder="e.g. linh.nguyen" />
+                <span class="field__hint">Letters, numbers, dots, hyphens, underscores only.</span>
+              </div>
+              <div class="field">
+                <label for="phone">Phone <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+                <input id="phone" name="phone" type="tel"
+                       value="{{ form_data.phone }}" autocomplete="tel"
+                       placeholder="e.g. 0412 345 678" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="date_of_birth">Date of birth <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+              <input id="date_of_birth" name="date_of_birth" type="date"
+                     value="{{ form_data.date_of_birth }}" autocomplete="bday" />
+              <span class="field__hint">Must be at least 13 years old. Not shared publicly.</span>
+            </div>
+          </div>
+
+          {# ── Preferences ── #}
+          <div class="settings-section">
+            <div class="settings-section__title">Preferences</div>
+
+            <div class="field">
+              <label for="dietary_preferences">Dietary preferences <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+              <select id="dietary_preferences" name="dietary_preferences">
+                <option value="">No preference selected</option>
+                {% for option in dietary_options %}
+                  <option value="{{ option }}"
+                    {% if form_data.dietary_preferences == option %}selected{% endif %}>
+                    {{ option }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="default_pickup_mode">Default pickup mode</label>
+              <select id="default_pickup_mode" name="default_pickup_mode">
+                <option value="scheduled" {% if form_data.default_pickup_mode == "scheduled" %}selected{% endif %}>
+                  Scheduled pickup
+                </option>
+                <option value="instant" {% if form_data.default_pickup_mode == "instant" %}selected{% endif %}>
+                  Instant counter queue
+                </option>
+              </select>
+              <span class="field__hint">Pre-selects this mode when you open checkout.</span>
+            </div>
+          </div>
+
+          {# ── Notifications ── #}
+          <div class="settings-section">
+            <div class="settings-section__title">Notifications &amp; marketing</div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Email notifications</div>
+                <div class="toggle-row__desc">Order ready alerts and receipt links sent to your email.</div>
+              </div>
+              <input type="checkbox" name="notification_email" id="notification_email"
+                     {% if form_data.notification_email %}checked{% endif %} />
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">SMS notifications</div>
+                <div class="toggle-row__desc">Text message alerts when your order is ready for pickup.</div>
+              </div>
+              <input type="checkbox" name="notification_sms" id="notification_sms"
+                     {% if form_data.notification_sms %}checked{% endif %} />
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Marketing emails</div>
+                <div class="toggle-row__desc">Seasonal menus, promotions, and community highlights from MCQ.</div>
+              </div>
+              <input type="checkbox" name="marketing_opt_in" id="marketing_opt_in"
+                     {% if form_data.marketing_opt_in %}checked{% endif %} />
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button type="submit" class="button button--primary">Save changes</button>
+            <a href="/membership" class="button button--secondary">Back to profile</a>
+          </div>
+
+        </form>
+      </article>
+
+      {# Side panel — membership snapshot #}
+      <aside class="settings-side">
+        <div class="settings-card">
+          <p class="eyebrow" style="margin-bottom:0.5rem;">Loyalty</p>
+          <span class="settings-tier-badge">{{ membership.current_tier.name }}</span>
+          <h3>{{ membership.points_display }} points</h3>
+          <p>{{ membership.points_rule_display }} · {{ membership.voucher_rule_display }}</p>
+        </div>
+        <div class="settings-card">
+          <h3>Your member ID</h3>
+          <p style="font-family:'Menlo','Monaco',monospace;font-size:0.88rem;">{{ membership.member_code }}</p>
+          <p style="margin-top:0.4rem;">Show this at the pickup counter or use the barcode on your membership card.</p>
+        </div>
+        <div class="settings-card">
+          <h3>Email address</h3>
+          <p>{{ membership.member_email }}</p>
+          <p style="margin-top:0.4rem;">Email cannot be changed here. Contact support if you need to update it.</p>
+        </div>
+        <div class="settings-card">
+          <h3>Password</h3>
+          <p>Password changes are not yet available in the app. Contact support for help.</p>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+</div>
+{% endblock %}

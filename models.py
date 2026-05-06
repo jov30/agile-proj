@@ -183,6 +183,14 @@ class User(db.Model):
     email = db.Column(db.String(255), nullable=False, unique=True, index=True)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default="customer")
+    username = db.Column(db.String(40), nullable=True, unique=True, index=True)
+    phone = db.Column(db.String(40), nullable=True)
+    date_of_birth = db.Column(db.Date, nullable=True)
+    dietary_preferences = db.Column(db.String(255), nullable=True)
+    default_pickup_mode = db.Column(db.String(20), nullable=True, default="scheduled")
+    notification_email = db.Column(db.Boolean, nullable=False, default=True)
+    notification_sms = db.Column(db.Boolean, nullable=False, default=False)
+    marketing_opt_in = db.Column(db.Boolean, nullable=False, default=False)
     points_balance = db.Column(db.Integer, nullable=False, default=0)
     total_spend_cents = db.Column(db.Integer, nullable=False, default=0)
     total_orders = db.Column(db.Integer, nullable=False, default=0)
@@ -193,7 +201,6 @@ class User(db.Model):
     most_shared_dish = db.Column(db.String(255), nullable=True)
     favorite_combo = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive)
-
 
 class Voucher(db.Model):
     __tablename__ = "vouchers"
@@ -499,12 +506,32 @@ def _sync_legacy_schema() -> None:
                     {"counter_date": queue_date, "last_number": max_number or 0},
                 )
 
+def _sync_users_schema() -> None:
+    inspector = inspect(db.engine)
+    tables = set(inspector.get_table_names())
+    if "users" not in tables:
+        return
+    user_cols = {col["name"] for col in inspector.get_columns("users")}
+    with db.engine.begin() as conn:
+        for col, typedef in [
+            ("username",             "VARCHAR(40)"),
+            ("phone",                "VARCHAR(40)"),
+            ("date_of_birth",        "DATE"),
+            ("dietary_preferences",  "VARCHAR(255)"),
+            ("default_pickup_mode",  "VARCHAR(20)"),
+            ("notification_email",   "BOOLEAN NOT NULL DEFAULT 1"),
+            ("notification_sms",     "BOOLEAN NOT NULL DEFAULT 0"),
+            ("marketing_opt_in",     "BOOLEAN NOT NULL DEFAULT 0"),
+        ]:
+            if col not in user_cols:
+                conn.execute(text(f"ALTER TABLE users ADD COLUMN {col} {typedef}"))
 
 def init_db(app: Flask) -> None:
     db.init_app(app)
     with app.app_context():
         db.create_all()
         _sync_legacy_schema()
+        _sync_users_schema()
         _seed_demo_users()
 
 
