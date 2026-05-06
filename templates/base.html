@@ -66,7 +66,7 @@
             <span class="brand-subtitle">Lantern glow, mural colour, and fresh-hall energy.</span>
           </span>
         </a>
-        <nav class="main-nav">
+        <nav class="main-nav" id="main-nav">
           <a href="/" class="{% if request.path == '/' %}is-active{% endif %}">Home</a>
           <a href="/menu" class="{% if request.path.startswith('/menu') %}is-active{% endif %}">Menu</a>
           <a href="/cart" class="{% if request.path.startswith('/cart') %}is-active{% endif %}">Cart</a>
@@ -200,9 +200,35 @@
         </div>
       </div>
     </aside>
+    <button
+      class="main-nav-toggle"
+      id="main-nav-toggle"
+      type="button"
+      aria-label="Open navigation menu"
+      aria-expanded="false"
+      aria-controls="main-nav"
+    >
+      ⋮
+    </button>
     <script>
       (() => {
+        const nav = document.getElementById('main-nav');
+        const navToggle = document.getElementById('main-nav-toggle');
+        const navMobileQuery = window.matchMedia('(max-width: 720px)');
         const dock = document.getElementById('support-dock');
+        function setNavOpenState(isOpen) {
+          if (!nav || !navToggle) return;
+          nav.classList.toggle('is-open', isOpen);
+          navToggle.setAttribute('aria-expanded', String(isOpen));
+          navToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+        }
+
+        function syncNavForViewport() {
+          if (!navMobileQuery.matches) {
+            setNavOpenState(false);
+          }
+        }
+
         const launcher = document.getElementById('support-launcher');
         const closeButton = document.getElementById('support-close');
         const chatLog = document.getElementById('support-chat-log');
@@ -344,6 +370,25 @@
         if (window.matchMedia('(max-width: 720px)').matches) {
           setOpenState(false);
         }
+
+        navToggle?.addEventListener('click', () => {
+          const shouldOpen = !nav.classList.contains('is-open');
+          setNavOpenState(shouldOpen);
+        });
+
+        document.addEventListener('click', (event) => {
+          if (!navMobileQuery.matches || !nav.classList.contains('is-open')) return;
+          if (nav.contains(event.target) || navToggle?.contains(event.target)) return;
+          setNavOpenState(false);
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && nav.classList.contains('is-open')) {
+            setNavOpenState(false);
+          }
+        });
+
+        navMobileQuery.addEventListener('change', syncNavForViewport);
       })();
     </script>
     {% block scripts %}{% endblock %}

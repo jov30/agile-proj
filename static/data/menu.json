@@ -37,9 +37,10 @@
               ]
             }
           ],
-          "price": "$15",
+          "price": "$14",
           "summary": "Pho Noodle Soup favourite featuring rice noodles, beef broth, raw beef slices.",
-          "image": "images/menu/items/raw-beef-pho.jpg"
+          "image": "images/menu/items/raw-beef-pho.jpg",
+          "available": true
         },
         {
           "name": "Raw Beef and Beef Balls Pho",
