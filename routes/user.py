@@ -7,7 +7,7 @@ from collections import Counter
 from pathlib import Path
 
 import requests
-from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, Response, abort, current_app, jsonify, redirect, render_template, request, session, url_for
 
 from menu_catalog import format_aud, load_enriched_menu
 from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, User, db
@@ -151,6 +151,31 @@ def _clean_text(value: str | None, *, limit: int, default: str = "") -> str:
     return " ".join(value.strip().split())[:limit]
 
 
+def _viewer_owns_community_post(post: CommunityPost) -> bool:
+    identity_key, _name, _email = _community_identity()
+    return post.identity_key == identity_key
+
+
+def _community_post_forbidden_response():
+    if request.path.startswith("/api/") or request.accept_mimetypes.best == "application/json":
+        return jsonify(
+            {
+                "error": "You can only modify your own community posts.",
+                "code": "community_post_forbidden",
+                "status": 403,
+            }
+        ), 403
+    abort(403)
+
+
+def _community_post_validation_error(message: str):
+    if request.path.startswith("/api/") or request.accept_mimetypes.best == "application/json":
+        return jsonify({"error": message, "code": "invalid_community_post", "status": 400}), 400
+    session["community_error"] = message
+    session.modified = True
+    return redirect(url_for("user.shared_meals"))
+
+
 def _community_post_image(post: CommunityPost, menu_lookup: dict[str, dict]) -> str:
     if post.photo_url:
         return post.photo_url
@@ -222,11 +247,11 @@ def _remix_context(post_id: str | None) -> dict | None:
 
 def _serialize_community_post(post: CommunityPost, menu_lookup: dict[str, dict], identity_key: str) -> dict:
     reaction_counts: Counter[str] = Counter(reaction.reaction_type for reaction in post.reactions)
-    viewer_reactions = {
+    viewer_reactions = sorted({
         reaction.reaction_type
         for reaction in post.reactions
         if reaction.identity_key == identity_key
-    }
+    })
     viewer_saved = any(save.identity_key == identity_key for save in post.saves)
     helpful_notes = [
         {
@@ -265,6 +290,7 @@ def _serialize_community_post(post: CommunityPost, menu_lookup: dict[str, dict],
         "save_count": len(post.saves),
         "viewer_reactions": viewer_reactions,
         "viewer_saved": viewer_saved,
+        "viewer_can_edit": post.identity_key == identity_key,
         "comments": helpful_notes,
     }
 
@@ -1002,6 +1028,110 @@ def create_community_post():
     session["community_notice"] = "Your meal post is now live in the community feed."
     session.modified = True
     return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+def _community_post_update_payload() -> dict[str, str]:
+    if request.is_json:
+        body = request.get_json(silent=True) or {}
+        get_value = body.get
+    else:
+        get_value = request.form.get
+    return {
+        "author_name": _clean_text(get_value("author_name"), limit=120),
+        "post_type": get_value("post_type") or "meal_review",
+        "meal_name": _clean_text(get_value("meal_name"), limit=255),
+        "meal_items": _clean_text(get_value("meal_items"), limit=500),
+        "caption": _clean_text(get_value("caption"), limit=900),
+        "tip": _clean_text(get_value("tip"), limit=255),
+        "photo_url": _clean_text(get_value("photo_url"), limit=500),
+        "pickup_type": _clean_text(get_value("pickup_type"), limit=40),
+        "spice_level": _clean_text(get_value("spice_level"), limit=40),
+        "portion_note": _clean_text(get_value("portion_note"), limit=120),
+        "drink_pairing": _clean_text(get_value("drink_pairing"), limit=120),
+        "pickup_timing_note": _clean_text(get_value("pickup_timing_note"), limit=160),
+    }
+
+
+def _update_community_post_from_request(post: CommunityPost):
+    if not _viewer_owns_community_post(post):
+        return _community_post_forbidden_response()
+
+    payload = _community_post_update_payload()
+    post_type = payload["post_type"]
+    if post_type not in _POST_TYPES:
+        post_type = "meal_review"
+    if not payload["meal_name"] or not payload["caption"]:
+        return _community_post_validation_error("Add a meal name and a short caption before saving.")
+
+    post.author_name = payload["author_name"] or post.author_name
+    post.post_type = post_type
+    post.meal_name = payload["meal_name"]
+    post.meal_items = payload["meal_items"] or None
+    post.caption = payload["caption"]
+    post.tip = payload["tip"] or None
+    post.photo_url = payload["photo_url"] or None
+    post.pickup_type = payload["pickup_type"] or None
+    post.spice_level = payload["spice_level"] or None
+    post.portion_note = payload["portion_note"] or None
+    post.drink_pairing = payload["drink_pairing"] or None
+    post.pickup_timing_note = payload["pickup_timing_note"] or None
+    db.session.commit()
+    if post.author_email:
+        _sync_user_community_stats(post.author_email)
+    return None
+
+
+@user_bp.post("/community/posts/<int:post_id>/edit")
+def edit_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    response = _update_community_post_from_request(post)
+    if response is not None:
+        return response
+    session["community_notice"] = "Your community post has been updated."
+    session.modified = True
+    return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+@user_bp.patch("/api/community/posts/<int:post_id>")
+def api_edit_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    response = _update_community_post_from_request(post)
+    if response is not None:
+        return response
+    identity_key, _name, _email = _community_identity()
+    return jsonify(_serialize_community_post(post, _menu_item_lookup(), identity_key))
+
+
+def _delete_community_post(post: CommunityPost):
+    if not _viewer_owns_community_post(post):
+        return _community_post_forbidden_response()
+    author_email = post.author_email
+    post_id = post.id
+    db.session.delete(post)
+    db.session.commit()
+    if author_email:
+        _sync_user_community_stats(author_email)
+    return post_id
+
+
+@user_bp.post("/community/posts/<int:post_id>/delete")
+def delete_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    response = _delete_community_post(post)
+    if not isinstance(response, int):
+        return response
+    session["community_notice"] = "Your community post has been deleted."
+    session.modified = True
+    return redirect(url_for("user.shared_meals"))
+
+
+@user_bp.delete("/api/community/posts/<int:post_id>")
+def api_delete_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    response = _delete_community_post(post)
+    if not isinstance(response, int):
+        return response
+    return jsonify({"deleted": True, "post_id": response})
 
 
 @user_bp.post("/community/posts/<int:post_id>/react")
