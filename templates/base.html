@@ -72,8 +72,6 @@
           <a href="/cart" class="{% if request.path.startswith('/cart') %}is-active{% endif %}">Cart</a>
           <a href="/checkout?fulfillment=instant" class="{% if request.path.startswith('/checkout') or request.path.startswith('/payment') or request.path.startswith('/pickup-planner') %}is-active{% endif %}">Checkout</a>
           <a href="/orders" class="{% if request.path.startswith('/orders') %}is-active{% endif %}">Orders</a>
-          <a href="/membership" class="{% if request.path.startswith('/membership') or request.path.startswith('/profile') %}is-active{% endif %}">Membership</a>
-          <a href="/community" class="{% if request.path.startswith('/community') or request.path.startswith('/shared-meals') or request.path.startswith('/favorites') %}is-active{% endif %}">Community</a>
           {% if is_admin %}
             <a href="{{ url_for('admin.admin_dashboard') }}" class="{% if request.path == '/admin/' %}is-active{% endif %}">Admin</a>
             <a href="/admin/orders/queue" class="{% if request.path.startswith('/admin/orders/queue') %}is-active{% endif %}">Admin Queue</a>
@@ -135,6 +133,8 @@
         <div class="footer-meta">
           <span>Ben Thanh inspired accent</span>
           <span>Modern food hall palette</span>
+          <span><a href="/membership">Membership</a></span>
+          <span><a href="/community">Community</a></span>
           <span><a href="/support">Customer Support</a></span>
           <span><a href="tel:+61892485623">08 9248 5623</a></span>
           <span>&copy; {{ current_year|default(2026, true) }} MCQ</span>
