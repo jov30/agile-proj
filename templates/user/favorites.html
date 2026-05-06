@@ -189,6 +189,83 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media (max-width: 720px) {
+    .saved-shell {
+      gap: 1rem;
+    }
+
+    .saved-hero,
+    .saved-board,
+    .saved-collections {
+      padding: 1rem;
+    }
+
+    .saved-hero__grid,
+    .saved-meals,
+    .saved-collection-grid {
+      gap: 0.8rem;
+    }
+
+    .saved-panel,
+    .saved-meal,
+    .saved-collection {
+      border-radius: 18px;
+      padding: 0.9rem;
+    }
+
+    .saved-panel h1 {
+      font-size: clamp(1.85rem, 10vw, 2.5rem);
+      line-height: 1.05;
+    }
+
+    .saved-panel p,
+    .saved-meal p,
+    .saved-collection p {
+      line-height: 1.45;
+    }
+
+    .saved-visual {
+      display: none;
+    }
+
+    .saved-summary {
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+    }
+
+    .saved-pill,
+    .saved-meal__badge {
+      padding: 0.45rem 0.6rem;
+      font-size: 0.78rem;
+    }
+
+    .saved-meal {
+      gap: 0.65rem;
+    }
+
+    .saved-meal__media {
+      aspect-ratio: 1.5 / 1;
+      border-radius: 16px;
+    }
+
+    .saved-meal__header {
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .saved-meal__actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .saved-meal__actions .button,
+    .saved-panel .button-row .button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 </style>
 {% endblock %}
 
