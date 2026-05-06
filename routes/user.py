@@ -82,6 +82,19 @@ _CODE39_MAP = {
     "*": "nwnnwnwnn",
 }
 
+def _sync_user_community_stats(email: str) -> None:
+    """Recount and persist community stats for a logged-in user."""
+    db_user = User.query.filter_by(email=email).first()
+    if not db_user:
+        return
+    identity_key = f"user:{email.lower()}"
+    posts = CommunityPost.query.filter_by(identity_key=identity_key).all()
+    db_user.posts_shared = len(posts)
+    db_user.likes_received = sum(len(post.reactions) for post in posts)
+    dish_counts: Counter[str] = Counter(post.meal_name for post in posts)
+    if dish_counts:
+        db_user.most_shared_dish = dish_counts.most_common(1)[0][0]
+    db.session.commit()
 
 def _support_history() -> list[dict[str, str]]:
     raw_history = session.get(SUPPORT_CHAT_HISTORY_KEY)
@@ -257,6 +270,27 @@ def _serialize_community_post(post: CommunityPost, menu_lookup: dict[str, dict],
 
 
 def _community_stats(identity_key: str, posts: list[CommunityPost], orders: list[Order]) -> dict:
+    user = current_user()
+
+    if user:
+        db_user = User.query.filter_by(email=user["email"].lower()).first()
+        if db_user:
+            badges = ["Lantern Member"]
+            if db_user.posts_shared >= 3:
+                badges.append("Top Sharer")
+            if db_user.most_shared_dish and "pho" in db_user.most_shared_dish.lower():
+                badges.append("Pho Lover")
+            if db_user.likes_received >= 5:
+                badges.append("Community Pick")
+            return {
+                "posts_shared": db_user.posts_shared,
+                "likes_received": db_user.likes_received,
+                "most_shared_dish": db_user.most_shared_dish or "No shared dishes yet",
+                "favorite_combo": db_user.favorite_combo or "Place an order to build a combo",
+                "badges": badges,
+            }
+
+    # Guest fallback — derive from live data
     own_posts = [post for post in posts if post.identity_key == identity_key]
     likes_received = sum(len(post.reactions) for post in own_posts)
     shared_dishes: Counter[str] = Counter(post.meal_name for post in own_posts)
@@ -350,8 +384,16 @@ def _membership_barcode_svg(value: str) -> str:
 def _membership_summary(orders: list[Order]) -> dict:
     user = current_user()
     seed_source = user["email"] if user else "guest-member-preview"
+
+    # Points: stored on User for logged-in accounts, derived from orders for guests
+    if user:
+        db_user = User.query.filter_by(email=user["email"]).first()
+        points_balance = db_user.points_balance if db_user else 0
+    else:
+        total_spend_cents = sum(order.total_cents for order in orders)
+        points_balance = total_spend_cents // 100
+
     total_spend_cents = sum(order.total_cents for order in orders)
-    points_balance = total_spend_cents // 100
     total_orders = len(orders)
     instant_orders = sum(1 for order in orders if order.fulfillment_type == "instant")
     scheduled_orders = max(0, total_orders - instant_orders)
@@ -954,6 +996,9 @@ def create_community_post():
     )
     db.session.add(post)
     db.session.commit()
+    _identity, _name, email = _community_identity()
+    if email:
+        _sync_user_community_stats(email)
     session["community_notice"] = "Your meal post is now live in the community feed."
     session.modified = True
     return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
@@ -983,6 +1028,8 @@ def react_to_community_post(post_id: int):
             )
         )
     db.session.commit()
+    if post.author_email:
+        _sync_user_community_stats(post.author_email)
     return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
 
 

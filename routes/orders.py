@@ -22,6 +22,7 @@ from models import (
     OrderLineItem,
     OrderNotification,
     PaymentAttempt,
+    User,
     db,
 )
 from receipt_pdf import build_receipt_pdf
@@ -1003,8 +1004,22 @@ def _create_order_with_retries(
 
     raise RuntimeError("Could not store the instant order after retrying queue assignment.")
 
+def _update_user_order_stats(order: Order) -> None:
+    """Increment stored order stats on the User row when an order is placed."""
+    db_user = User.query.filter_by(email=order.customer_email.lower()).first()
+    if not db_user:
+        return
+    earned_points = order.total_cents // 100
+    db_user.points_balance += earned_points
+    db_user.total_spend_cents += order.total_cents
+    db_user.total_orders += 1
+    if order.fulfillment_type == FULFILLMENT_TYPES[0]:
+        db_user.instant_orders += 1
+    else:
+        db_user.scheduled_orders += 1
 
 def _finalize_successful_order(order: Order) -> None:
+    _update_user_order_stats(order)
     db.session.commit()
     _save_lines([])
     session[SESSION_LINES_KEY] = []

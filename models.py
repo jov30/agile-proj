@@ -191,6 +191,15 @@ class User(db.Model):
     notification_email = db.Column(db.Boolean, nullable=False, default=True)
     notification_sms = db.Column(db.Boolean, nullable=False, default=False)
     marketing_opt_in = db.Column(db.Boolean, nullable=False, default=False)
+    points_balance = db.Column(db.Integer, nullable=False, default=0)
+    total_spend_cents = db.Column(db.Integer, nullable=False, default=0)
+    total_orders = db.Column(db.Integer, nullable=False, default=0)
+    instant_orders = db.Column(db.Integer, nullable=False, default=0)
+    scheduled_orders = db.Column(db.Integer, nullable=False, default=0)
+    posts_shared = db.Column(db.Integer, nullable=False, default=0)
+    likes_received = db.Column(db.Integer, nullable=False, default=0)
+    most_shared_dish = db.Column(db.String(255), nullable=True)
+    favorite_combo = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive)
 
 class Voucher(db.Model):
@@ -383,23 +392,41 @@ class CommunitySave(db.Model):
 def _sync_legacy_schema() -> None:
     inspector = inspect(db.engine)
     tables = set(inspector.get_table_names())
+
+    if "users" in tables:
+        user_cols = {col["name"] for col in inspector.get_columns("users")}
+        with db.engine.begin() as conn:
+            for col, typedef in [
+                ("points_balance",   "INTEGER NOT NULL DEFAULT 0"),
+                ("total_spend_cents","INTEGER NOT NULL DEFAULT 0"),
+                ("total_orders",     "INTEGER NOT NULL DEFAULT 0"),
+                ("instant_orders",   "INTEGER NOT NULL DEFAULT 0"),
+                ("scheduled_orders", "INTEGER NOT NULL DEFAULT 0"),
+                ("posts_shared",     "INTEGER NOT NULL DEFAULT 0"),
+                ("likes_received",   "INTEGER NOT NULL DEFAULT 0"),
+                ("most_shared_dish", "VARCHAR(255)"),
+                ("favorite_combo",   "VARCHAR(255)"),
+            ]:
+                if col not in user_cols:
+                    conn.execute(text(f"ALTER TABLE users ADD COLUMN {col} {typedef}"))
+
     if "vouchers" in tables:
         voucher_columns = {column["name"] for column in inspector.get_columns("vouchers")}
         with db.engine.begin() as conn:
-            if "description" not in voucher_columns:
-                conn.execute(text("ALTER TABLE vouchers ADD COLUMN description TEXT"))
-            if "subtitle" not in voucher_columns:
-                conn.execute(text("ALTER TABLE vouchers ADD COLUMN subtitle VARCHAR(180)"))
-            if "terms" not in voucher_columns:
-                conn.execute(text("ALTER TABLE vouchers ADD COLUMN terms TEXT"))
-            if "included_items" not in voucher_columns:
-                conn.execute(text("ALTER TABLE vouchers ADD COLUMN included_items TEXT"))
-            if "expires_at" not in voucher_columns:
-                conn.execute(text("ALTER TABLE vouchers ADD COLUMN expires_at VARCHAR(40)"))
-            if "footer_note" not in voucher_columns:
-                conn.execute(text("ALTER TABLE vouchers ADD COLUMN footer_note TEXT"))
+            for col, typedef in [
+                ("description",   "TEXT"),
+                ("subtitle",      "VARCHAR(180)"),
+                ("terms",         "TEXT"),
+                ("included_items","TEXT"),
+                ("expires_at",    "VARCHAR(40)"),
+                ("footer_note",   "TEXT"),
+            ]:
+                if col not in voucher_columns:
+                    conn.execute(text(f"ALTER TABLE vouchers ADD COLUMN {col} {typedef}"))
+
     if "orders" not in tables:
         return
+
 
     order_columns = {column["name"] for column in inspector.get_columns("orders")}
     with db.engine.begin() as conn:
@@ -509,18 +536,54 @@ def init_db(app: Flask) -> None:
 
 
 def _seed_demo_users() -> None:
-    """Insert demo customer accounts if they don't already exist."""
     demo_users = [
-        {"name": "Linh Nguyen",   "email": "linh@gmail.com",   "password": "demo123"},
-        {"name": "Minh Tran",     "email": "minh@demo.local",   "password": "demo123"},
-        {"name": "Anh Pham",      "email": "anh@demo.local",    "password": "demo123"},
+        {
+            "name": "Linh Nguyen", "email": "linh@gmail.com", "password": "demo123",
+            "points": 270, "spend": 27000, "orders": 9, "instant": 5, "scheduled": 4,
+            "posts": 4, "likes": 11,
+            "dish": "Pho Bo Dac Biet", "combo": "Pho Bo + Goi Cuon",
+        },
+        {
+            "name": "Minh Tran", "email": "minh@demo.local", "password": "demo123",
+            "points": 620, "spend": 62000, "orders": 21, "instant": 8, "scheduled": 13,
+            "posts": 9, "likes": 34,
+            "dish": "Banh Mi Thit Nuong", "combo": "Banh Mi + Ca Phe Sua Da",
+        },
+        {
+            "name": "Anh Pham", "email": "anh@demo.local", "password": "demo123",
+            "points": 85, "spend": 8500, "orders": 3, "instant": 3, "scheduled": 0,
+            "posts": 1, "likes": 2,
+            "dish": "Com Tam Suon Bi", "combo": "Com Tam + Che Ba Mau",
+        },
     ]
     for data in demo_users:
-        if not User.query.filter_by(email=data["email"]).first():
+        existing = User.query.filter_by(email=data["email"]).first()
+        if not existing:
             db.session.add(User(
                 name=data["name"],
                 email=data["email"],
                 password_hash=generate_password_hash(data["password"]),
                 role="customer",
+                points_balance=data["points"],
+                total_spend_cents=data["spend"],
+                total_orders=data["orders"],
+                instant_orders=data["instant"],
+                scheduled_orders=data["scheduled"],
+                posts_shared=data["posts"],
+                likes_received=data["likes"],
+                most_shared_dish=data["dish"],
+                favorite_combo=data["combo"],
             ))
+        else:
+            if existing.points_balance == 0:
+                existing.points_balance = data["points"]
+            if existing.total_orders == 0:
+                existing.total_orders = data["orders"]
+                existing.total_spend_cents = data["spend"]
+                existing.instant_orders = data["instant"]
+                existing.scheduled_orders = data["scheduled"]
+                existing.posts_shared = data["posts"]
+                existing.likes_received = data["likes"]
+                existing.most_shared_dish = data["dish"]
+                existing.favorite_combo = data["combo"]
     db.session.commit()
