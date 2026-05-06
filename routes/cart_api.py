@@ -8,6 +8,7 @@ from flask import Blueprint, current_app, jsonify, request, session
 
 from menu_catalog import find_item, format_aud, load_enriched_menu, price_to_cents
 from models import FULFILLMENT_TYPES
+from routes.api_errors import api_error_response
 
 cart_api_bp = Blueprint("cart_api", __name__, url_prefix="/api/cart")
 
@@ -114,18 +115,22 @@ def add_item():
     item_id = body.get("item_id")
     qty = _parse_quantity(body.get("quantity"), default=1)
     if not item_id or not isinstance(item_id, str):
-        return jsonify({"error": "item_id is required"}), 400
+        return api_error_response("item_id is required", status=400, code="missing_item_id")
     if qty is None:
-        return jsonify({"error": "quantity must be a whole number"}), 400
+        return api_error_response("quantity must be a whole number", status=400, code="invalid_quantity")
     if qty < 1:
-        return jsonify({"error": "quantity must be at least 1"}), 400
+        return api_error_response("quantity must be at least 1", status=400, code="invalid_quantity")
     menu = _menu()
     found = find_item(menu, item_id)
     if not found:
-        return jsonify({"error": "Unknown menu item"}), 404
+        return api_error_response("Unknown menu item", status=404, code="unknown_menu_item")
     _, item = found
     if item.get("available", True) is False:
-        return jsonify({"error": "This menu item is currently unavailable"}), 409
+        return api_error_response(
+            "This menu item is currently unavailable",
+            status=409,
+            code="menu_item_unavailable",
+        )
     lines = _get_lines()
     merged = False
     for row in lines:
@@ -144,7 +149,7 @@ def update_line(item_id: str):
     body = request.get_json(silent=True) or {}
     qty = _parse_quantity(body.get("quantity"))
     if qty is None:
-        return jsonify({"error": "quantity must be a whole number"}), 400
+        return api_error_response("quantity must be a whole number", status=400, code="invalid_quantity")
     lines = _get_lines()
     new_lines: list[dict] = []
     for row in lines:

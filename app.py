@@ -3,9 +3,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from flask import Flask, has_request_context, session, url_for
+from werkzeug.exceptions import HTTPException
 
 from config import Config
 from models import Order, init_db
+from routes.api_errors import handle_api_http_exception
 from routes.auth import current_user, is_admin_user
 from routes import register_blueprints
 
@@ -68,6 +70,7 @@ def create_app(test_config: dict | None = None) -> Flask:
         }
 
     register_blueprints(app)
+    app.register_error_handler(HTTPException, handle_api_http_exception)
     return app
 
 

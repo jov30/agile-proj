@@ -26,6 +26,7 @@ from models import (
     db,
 )
 from receipt_pdf import build_receipt_pdf
+from routes.api_errors import api_error_response
 from routes.auth import admin_required
 from routes.cart_api import SESSION_LINES_KEY, _build_cart_payload, _menu, _save_lines
 
@@ -1428,28 +1429,33 @@ def api_update_order_status(order_number: str):
     kitchen_notes = body.get("kitchen_notes")
 
     if next_status not in ORDER_STATUS_SEQUENCE:
-        return (
-            jsonify(
-                {
-                    "error": "status must be one of the supported order states",
-                    "allowed_statuses": list(ORDER_STATUS_SEQUENCE),
-                }
-            ),
-            400,
-    )
+        return api_error_response(
+            "status must be one of the supported order states",
+            status=400,
+            code="invalid_order_status",
+            details={"allowed_statuses": list(ORDER_STATUS_SEQUENCE)},
+            extra={"allowed_statuses": list(ORDER_STATUS_SEQUENCE)},
+        )
     if kitchen_notes is not None and not isinstance(kitchen_notes, str):
-        return jsonify({"error": "kitchen_notes must be a string when provided"}), 400
+        return api_error_response(
+            "kitchen_notes must be a string when provided",
+            status=400,
+            code="invalid_kitchen_notes",
+        )
     allowed_next_status = _next_order_status(order.order_status)
     if next_status != allowed_next_status:
-        return (
-            jsonify(
-                {
-                    "error": "status transitions must move forward one step at a time",
-                    "current_status": order.order_status,
-                    "allowed_next_status": allowed_next_status,
-                }
-            ),
-            400,
+        return api_error_response(
+            "status transitions must move forward one step at a time",
+            status=400,
+            code="invalid_status_transition",
+            details={
+                "current_status": order.order_status,
+                "allowed_next_status": allowed_next_status,
+            },
+            extra={
+                "current_status": order.order_status,
+                "allowed_next_status": allowed_next_status,
+            },
         )
 
     order.order_status = next_status
