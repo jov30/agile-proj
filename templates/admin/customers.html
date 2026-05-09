@@ -354,6 +354,72 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media (max-width: 720px) {
+    .admin-customers {
+      gap: 0.85rem;
+    }
+
+    .admin-panel,
+    .admin-section,
+    .admin-stat,
+    .admin-customer {
+      border-radius: 16px;
+      padding: 0.85rem;
+    }
+
+    .admin-hero__grid,
+    .admin-hero__stats,
+    .admin-customer-list {
+      gap: 0.65rem;
+    }
+
+    .admin-section__header p,
+    .admin-stat span,
+    .admin-empty {
+      line-height: 1.4;
+    }
+
+    .admin-search-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .admin-search-form input[type="search"],
+    .admin-search-form select,
+    .admin-search-form .button {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .admin-stat--link.is-active::after {
+      position: static;
+      display: inline-flex;
+      margin-top: 0.45rem;
+    }
+
+    .admin-customer__email,
+    .admin-customer__meta {
+      overflow-wrap: anywhere;
+    }
+
+    .admin-customer__meta {
+      gap: 0.3rem 0.65rem;
+      line-height: 1.35;
+    }
+
+    .admin-customer__actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      justify-content: stretch;
+      width: 100%;
+    }
+
+    .admin-row-action {
+      width: 100%;
+    }
+  }
 </style>
 {% endblock %}
 

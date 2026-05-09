@@ -780,6 +780,11 @@ img {
     z-index: 0;
   }
 
+  .section-panel {
+    border-radius: 22px;
+    padding: 1.05rem;
+  }
+
   .brand {
     align-items: flex-start;
   }
@@ -830,6 +835,27 @@ img {
   .main-nav a {
     width: 100%;
     text-align: left;
+    min-height: 44px;
+    justify-content: flex-start;
+    white-space: normal;
+  }
+
+  .button-row,
+  .pill-row {
+    gap: 0.55rem;
+  }
+
+  .button-row .button,
+  .header-actions .button,
+  .header-actions form .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .button,
+  .pill {
+    white-space: normal;
+    min-width: 0;
   }
 
   .header-cta {
@@ -842,7 +868,9 @@ img {
   }
 
   .section-title {
-    font-size: clamp(2rem, 10vw, 3.3rem);
+    font-size: clamp(1.9rem, 9vw, 2.7rem);
+    line-height: 1;
+  }
   }
 
   .app-footer {

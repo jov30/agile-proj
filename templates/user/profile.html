@@ -621,9 +621,126 @@
   }
 
   @media (max-width: 640px) {
+    .profile-shell {
+      gap: 1rem;
+    }
+
+    .profile-hero,
+    .profile-lower {
+      padding: 1rem;
+    }
+
+    .profile-identity {
+      gap: 0.9rem;
+    }
+
+    .profile-nameplate {
+      align-items: flex-start;
+      gap: 0.85rem;
+    }
+
+    .profile-avatar {
+      width: 58px;
+      height: 58px;
+      font-size: 1.25rem;
+    }
+
+    .profile-nameplate__text h1 {
+      font-size: clamp(1.55rem, 8vw, 2rem);
+    }
+
+    .profile-nameplate__text p {
+      line-height: 1.4;
+    }
+
+    .profile-tags {
+      gap: 0.45rem;
+    }
+
+    .profile-tag {
+      padding: 0.45rem 0.62rem;
+      font-size: 0.78rem;
+    }
+
+    .profile-tier-legend {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(8.5rem, 1fr);
+      overflow-x: auto;
+      gap: 0.5rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .profile-tier-legend__label {
+      grid-column: 1 / -1;
+    }
+
+    .tier-pip {
+      min-width: 0;
+      justify-content: center;
+      text-align: center;
+    }
+
     .profile-stats-row { grid-template-columns: 1fr 1fr; }
     .profile-points__top { flex-direction: column; }
     .profile-voucher-box { min-width: 0; width: 100%; }
+
+    .profile-points,
+    .member-card-face,
+    .profile-stat,
+    .profile-benefit,
+    .profile-orders,
+    .profile-empty {
+      border-radius: 18px;
+      padding: 0.9rem;
+    }
+
+    .profile-points__number {
+      font-size: clamp(2.1rem, 14vw, 3rem);
+    }
+
+    .profile-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+    }
+
+    .profile-actions .button {
+      padding-inline: 0.65rem;
+      justify-content: center;
+    }
+
+    .profile-stat__value {
+      font-size: clamp(1.15rem, 6vw, 1.55rem);
+      overflow-wrap: anywhere;
+    }
+
+    .profile-stat__label,
+    .profile-benefit p,
+    .profile-orders > p {
+      line-height: 1.4;
+    }
+
+    .profile-benefits {
+      gap: 0.55rem;
+      margin-top: 0.8rem;
+    }
+
+    .profile-benefit {
+      gap: 0.65rem;
+    }
+
+    .profile-benefit p {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .profile-order-item {
+      gap: 0.7rem;
+      padding: 0.75rem;
+    }
   }
 </style>
 {% endblock %}
