@@ -8,6 +8,7 @@ from pathlib import Path
 
 import requests
 from flask import Blueprint, Response, abort, current_app, jsonify, redirect, render_template, request, session, url_for
+from sqlalchemy import func
 
 from menu_catalog import format_aud, load_enriched_menu
 from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, User, db
@@ -25,6 +26,18 @@ _ROOT_DIR = Path(__file__).resolve().parent.parent
 _REACTION_TYPES = ("love", "want_to_try", "saved_for_later")
 _COMMENT_FOCUS = ("taste", "portion_size", "spice_level", "drink_pairing", "pickup_timing")
 _POST_TYPES = ("meal_review", "usual_combo", "pickup_tip")
+_POST_TYPE_FILTERS = (
+    ("all", "All posts"),
+    ("meal_review", "Reviews"),
+    ("usual_combo", "Combos"),
+    ("pickup_tip", "Pickup tips"),
+)
+_COMMUNITY_SORTS = (
+    ("newest", "Newest"),
+    ("most_liked", "Most liked"),
+    ("most_saved", "Most saved"),
+)
+_COMMUNITY_PAGE_SIZE = 6
 _COMMENT_VOTE_TYPES = ("helpful", "tried_this", "good_tip")
 
 _MEMBERSHIP_TIERS = (
@@ -515,6 +528,100 @@ def _all_community_posts() -> list[CommunityPost]:
     )
 
 
+def _community_page_number() -> int:
+    try:
+        return max(1, int(request.args.get("page", "1")))
+    except (TypeError, ValueError):
+        return 1
+
+
+def _community_feed_query(post_type: str, sort_key: str):
+    query = CommunityPost.query
+    if post_type in _POST_TYPES:
+        query = query.filter(CommunityPost.post_type == post_type)
+
+    if sort_key == "most_liked":
+        reaction_counts = (
+            db.session.query(
+                CommunityReaction.post_id.label("post_id"),
+                func.count(CommunityReaction.id).label("reaction_count"),
+            )
+            .group_by(CommunityReaction.post_id)
+            .subquery()
+        )
+        return (
+            query.outerjoin(reaction_counts, CommunityPost.id == reaction_counts.c.post_id)
+            .order_by(
+                func.coalesce(reaction_counts.c.reaction_count, 0).desc(),
+                CommunityPost.created_at.desc(),
+                CommunityPost.id.desc(),
+            )
+        )
+
+    if sort_key == "most_saved":
+        save_counts = (
+            db.session.query(
+                CommunitySave.post_id.label("post_id"),
+                func.count(CommunitySave.id).label("save_count"),
+            )
+            .group_by(CommunitySave.post_id)
+            .subquery()
+        )
+        return (
+            query.outerjoin(save_counts, CommunityPost.id == save_counts.c.post_id)
+            .order_by(
+                func.coalesce(save_counts.c.save_count, 0).desc(),
+                CommunityPost.created_at.desc(),
+                CommunityPost.id.desc(),
+            )
+        )
+
+    return query.order_by(CommunityPost.created_at.desc(), CommunityPost.id.desc())
+
+
+def _community_feed_context(menu_lookup: dict[str, dict], identity_key: str) -> dict:
+    post_type = request.args.get("type", "all")
+    if post_type != "all" and post_type not in _POST_TYPES:
+        post_type = "all"
+
+    sort_key = request.args.get("sort", "newest")
+    if sort_key not in {key for key, _label in _COMMUNITY_SORTS}:
+        sort_key = "newest"
+
+    query = _community_feed_query(post_type, sort_key)
+    total_posts = query.count()
+    total_pages = max(1, (total_posts + _COMMUNITY_PAGE_SIZE - 1) // _COMMUNITY_PAGE_SIZE)
+    page = min(_community_page_number(), total_pages)
+    raw_posts = (
+        query.offset((page - 1) * _COMMUNITY_PAGE_SIZE)
+        .limit(_COMMUNITY_PAGE_SIZE)
+        .all()
+    )
+    visible_from = ((page - 1) * _COMMUNITY_PAGE_SIZE + 1) if total_posts else 0
+    visible_to = min(page * _COMMUNITY_PAGE_SIZE, total_posts)
+    return {
+        "posts": [_serialize_community_post(post, menu_lookup, identity_key) for post in raw_posts],
+        "community_filters": {
+            "type": post_type,
+            "sort": sort_key,
+        },
+        "community_filter_options": _POST_TYPE_FILTERS,
+        "community_sort_options": _COMMUNITY_SORTS,
+        "community_pagination": {
+            "page": page,
+            "page_size": _COMMUNITY_PAGE_SIZE,
+            "total_posts": total_posts,
+            "total_pages": total_pages,
+            "has_previous": page > 1,
+            "has_next": page < total_pages,
+            "previous_page": max(1, page - 1),
+            "next_page": min(total_pages, page + 1),
+            "visible_from": visible_from,
+            "visible_to": visible_to,
+        },
+    }
+
+
 def _saved_meals_context() -> dict:
     identity_key, _name, _email = _community_identity()
     menu_lookup = _menu_item_lookup()
@@ -592,21 +699,22 @@ def _community_context() -> dict:
     identity_key, member_name, _email = _community_identity()
     menu_lookup = _menu_item_lookup()
     raw_posts = _all_community_posts()
-    posts = [_serialize_community_post(post, menu_lookup, identity_key) for post in raw_posts]
+    feed_context = _community_feed_context(menu_lookup, identity_key)
+    board_posts = [_serialize_community_post(post, menu_lookup, identity_key) for post in raw_posts]
     orders = _active_customer_orders()
     shared_order = _share_order_context(request.args.get("order"), menu_lookup)
     remix_post = _remix_context(request.args.get("remix"))
     today = raw_posts[0].created_at.date() if raw_posts else None
-    today_posts = [post for post in posts if today and post["created_label"] == today.strftime("%d %b %Y")][:4]
-    most_liked = sorted(posts, key=lambda post: (post["like_count"], post["comment_count"]), reverse=True)[:4]
+    today_posts = [post for post in board_posts if today and post["created_label"] == today.strftime("%d %b %Y")][:4]
+    most_liked = sorted(board_posts, key=lambda post: (post["like_count"], post["comment_count"]), reverse=True)[:4]
     quick_lunch = [
-        post for post in posts
+        post for post in board_posts
         if any(keyword in f"{post['meal']} {post['caption']}".lower() for keyword in ("banh mi", "rice", "roll", "quick", "lunch"))
     ][:4]
-    pickup_combos = [post for post in posts if post["order_number"] or "combo" in post["caption"].lower()][:4]
+    pickup_combos = [post for post in board_posts if post["order_number"] or "combo" in post["caption"].lower()][:4]
     return {
         "member_name": member_name,
-        "posts": posts,
+        **feed_context,
         "shared_order": shared_order,
         "remix_post": remix_post,
         "recent_orders": [
