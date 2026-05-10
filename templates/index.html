@@ -393,68 +393,96 @@
   }
 
   .street-gallery {
-    padding: clamp(1.35rem, 3vw, 2rem);
+    position: relative;
+    padding: clamp(1.15rem, 2.4vw, 1.85rem);
+    border-radius: 32px;
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255, 223, 146, 0.2), transparent 42%),
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(247, 236, 220, 0.92)),
+      #fff;
+    box-shadow: 0 20px 40px rgba(53, 30, 20, 0.08);
   }
 
   .street-gallery__header {
     position: relative;
     z-index: 1;
     display: flex;
-    justify-content: space-between;
-    gap: 1.25rem;
-    align-items: end;
-    margin-bottom: 1.2rem;
+    justify-content: center;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
   }
 
   .street-gallery__header-copy {
-    max-width: 60ch;
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 
   .street-gallery__header h2 {
-    margin: 0.3rem 0 0;
-    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: clamp(1.8rem, 2.5vw, 2.8rem);
-  }
-
-  .street-gallery__header p {
-    margin: 0.85rem 0 0;
-    color: var(--text-muted);
-    line-height: 1.7;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.42rem 0.92rem 0.34rem;
+    border-radius: 10px;
+    border: 1px solid rgba(41, 28, 55, 0.42);
+    font-family: "Bebas Neue", "Bricolage Grotesque", sans-serif;
+    font-size: clamp(2.05rem, 4.2vw, 3rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: #1f1528;
+    background: linear-gradient(180deg, #d8b6ed 0%, #c89ee8 100%);
+    box-shadow:
+      0 5px 0 rgba(41, 28, 55, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
   }
 
   .street-gallery__controls {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.45rem;
     flex-shrink: 0;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .street-gallery__hint {
-    font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 0.14em;
-    color: var(--brand-orange);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
     white-space: nowrap;
+    margin-right: 0.12rem;
   }
 
   .street-gallery__control {
-    width: 48px;
-    height: 48px;
-    border: 0;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(112, 85, 66, 0.2);
     border-radius: 999px;
     font: inherit;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 800;
-    color: var(--text-inverse);
-    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
-    box-shadow: 0 16px 28px rgba(255, 106, 19, 0.22);
+    color: #28170f;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 10px 18px rgba(53, 30, 20, 0.12);
     cursor: pointer;
+    transition: transform 160ms ease, box-shadow 220ms ease;
+  }
+
+  .street-gallery__control:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 22px rgba(53, 30, 20, 0.16);
   }
 
   .street-gallery__rail {
     position: relative;
     z-index: 1;
     overflow-x: auto;
-    padding-bottom: 0.55rem;
+    padding-bottom: 0.45rem;
     scroll-behavior: smooth;
     scroll-snap-type: x proximity;
     scrollbar-width: thin;
@@ -478,18 +506,18 @@
   .street-gallery__grid {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(285px, 340px);
-    gap: 1rem;
+    grid-auto-columns: minmax(248px, 270px);
+    gap: 0.85rem;
     width: max-content;
   }
 
   .gallery-card {
-    width: min(340px, calc(100vw - 3.4rem));
+    width: min(270px, calc(100vw - 3.2rem));
     overflow: hidden;
-    border-radius: 26px;
-    border: 1px solid rgba(112, 85, 66, 0.12);
-    background: rgba(255, 255, 255, 0.72);
-    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.08);
+    border-radius: 14px;
+    border: 1px solid rgba(53, 30, 20, 0.35);
+    background: #fbf7ee;
+    box-shadow: 0 10px 24px rgba(53, 30, 20, 0.08);
     scroll-snap-align: start;
   }
 
@@ -497,36 +525,47 @@
     width: 100%;
     height: 250px;
     object-fit: cover;
+    object-position: center;
     display: block;
   }
 
   .gallery-card__body {
-    padding: 1rem 1rem 1.1rem;
+    padding: 0.8rem 0.86rem 0.9rem;
+    background: #fbf7ee;
+    border-top: 1px solid rgba(53, 30, 20, 0.22);
+    display: block;
   }
 
   .gallery-card__title-row {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 0.7rem;
+    gap: 0.5rem;
   }
 
   .gallery-card h3 {
-    margin: 0 0 0.45rem;
+    margin: 0;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.06rem;
+    line-height: 1.22;
+    letter-spacing: -0.01em;
   }
 
   .gallery-card__price {
-    font-weight: 800;
+    font-size: 0.96rem;
+    font-weight: 700;
     color: var(--brand-red);
     white-space: nowrap;
   }
 
   .gallery-card p {
-    margin: 0;
+    margin: 0.35rem 0 0;
+    font-size: 0.88rem;
     color: var(--text-muted);
-    line-height: 1.45;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .support-story {
@@ -575,9 +614,14 @@
     .support-story,
     .launchpad__header,
     .street-gallery__header {
-      grid-template-columns: 1fr;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .street-gallery__controls {
+      position: static;
+      transform: none;
     }
   }
 
@@ -648,7 +692,7 @@
     }
 
     .street-gallery__grid {
-      grid-auto-columns: minmax(82vw, 300px);
+      grid-auto-columns: minmax(78vw, 260px);
     }
   }
 </style>
