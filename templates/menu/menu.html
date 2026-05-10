@@ -506,7 +506,7 @@
   .menu-card__topline {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 1rem;
   }
 
@@ -802,7 +802,28 @@
       gap: 0.65rem;
     }
 
-    .menu-card__title {
+    .menu-card__topline {
+      gap: 0.45rem;
+      min-width: 0;
+    }
+
+    .menu-card__label {
+      min-width: 0;
+      font-size: 0.62rem;
+      letter-spacing: 0.05em;
+      padding: 0.26rem 0.48rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .menu-card__price {
+      flex: 0 0 auto;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    .menu-card__heading h3 {
       font-size: 1.05rem;
       line-height: 1.2;
     }
@@ -1007,6 +1028,7 @@
         <span class="menu-card__label"></span>
         <p class="menu-card__price" hidden></p>
       </div>
+      <p class="menu-card__price" hidden></p>
       <div class="menu-card__heading">
         <h3></h3>
         <p class="menu-card__summary"></p>
