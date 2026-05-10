@@ -462,23 +462,43 @@
   }
 
   .street-gallery__control {
-    width: 44px;
-    height: 44px;
-    border: 1px solid rgba(112, 85, 66, 0.2);
-    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid rgba(112, 85, 66, 0.18);
+    border-radius: 10px;
     font: inherit;
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #28170f;
-    background: rgba(255, 255, 255, 0.94);
-    box-shadow: 0 10px 18px rgba(53, 30, 20, 0.12);
+    font-size: 0;
+    color: #3d2518;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(53, 30, 20, 0.08);
     cursor: pointer;
-    transition: transform 160ms ease, box-shadow 220ms ease;
+    transition: background 180ms ease, border-color 180ms ease, transform 140ms ease, box-shadow 180ms ease;
   }
 
   .street-gallery__control:hover {
+    background: rgba(235, 81, 48, 0.08);
+    border-color: rgba(235, 81, 48, 0.4);
     transform: translateY(-1px);
-    box-shadow: 0 14px 22px rgba(53, 30, 20, 0.16);
+    box-shadow: 0 4px 12px rgba(235, 81, 48, 0.12);
+  }
+
+  .street-gallery__control:active {
+    transform: scale(0.94);
+    box-shadow: 0 1px 4px rgba(53, 30, 20, 0.1);
+  }
+
+  .street-gallery__control svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
   }
 
   .street-gallery__rail {
@@ -521,11 +541,23 @@
   .gallery-card {
     width: min(270px, calc(100vw - 3.2rem));
     overflow: hidden;
-    border-radius: 14px;
-    border: 1px solid rgba(53, 30, 20, 0.35);
-    background: #fbf7ee;
-    box-shadow: 0 10px 24px rgba(53, 30, 20, 0.08);
+    border-radius: var(--radius-xl, 18px);
+    border: 1px solid var(--line-soft, rgba(112, 85, 66, 0.12));
+    background:
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      #fff;
+    box-shadow:
+      0 18px 36px rgba(53, 30, 20, 0.07),
+      0 0 0 1px rgba(255, 255, 255, 0.6) inset;
     scroll-snap-align: start;
+    transition: transform 280ms ease, box-shadow 280ms ease;
+  }
+
+  .gallery-card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 24px 44px rgba(53, 30, 20, 0.11),
+      0 0 0 1px rgba(255, 255, 255, 0.7) inset;
   }
 
   .gallery-card img {
@@ -534,12 +566,11 @@
     object-fit: cover;
     object-position: center;
     display: block;
+    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
   }
 
   .gallery-card__body {
-    padding: 0.8rem 0.86rem 0.9rem;
-    background: #fbf7ee;
-    border-top: 1px solid rgba(53, 30, 20, 0.22);
+    padding: 0.85rem 0.95rem 1rem;
     display: block;
   }
 
@@ -559,9 +590,13 @@
   }
 
   .gallery-card__price {
-    font-size: 0.96rem;
+    font-size: 0.82rem;
     font-weight: 700;
     color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.09);
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 180, 54, 0.2);
     white-space: nowrap;
   }
 
@@ -694,13 +729,40 @@
     }
 
     .street-gallery__controls {
-      width: 100%;
-      justify-content: space-between;
+      width: auto;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .street-gallery__hint {
+      display: none;
+    }
+
+    .street-gallery__control {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .street-gallery__control svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .street-gallery__rail {
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 0;
+      padding-right: 0;
     }
 
     .street-gallery__grid {
       gap: 0.75rem;
-      grid-auto-columns: minmax(78vw, 260px);
+      grid-auto-columns: minmax(200px, 240px);
+    }
+
+    .gallery-card {
+      width: 240px;
     }
 
     .street-gallery {
@@ -763,7 +825,7 @@
         data-gallery-shift="-1"
         aria-label="Scroll best sellers left"
       >
-        &larr;
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <button
         class="street-gallery__control"
@@ -771,7 +833,7 @@
         data-gallery-shift="1"
         aria-label="Scroll best sellers right"
       >
-        &rarr;
+        <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
       </button>
     </div>
   </div>
