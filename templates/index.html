@@ -539,6 +539,7 @@
   }
 
   .gallery-card {
+    display: block;
     width: min(270px, calc(100vw - 3.2rem));
     overflow: hidden;
     border-radius: var(--radius-xl, 18px);
@@ -551,6 +552,8 @@
       0 0 0 1px rgba(255, 255, 255, 0.6) inset;
     scroll-snap-align: start;
     transition: transform 280ms ease, box-shadow 280ms ease;
+    color: inherit;
+    text-decoration: none;
   }
 
   .gallery-card:hover {
@@ -839,7 +842,7 @@
   </div>
   <div class="street-gallery__rail" id="street-gallery-rail">
   <div class="street-gallery__grid">
-    <article class="gallery-card">
+    <a class="gallery-card" href="/menu/item/pho-noodle-soup__mcq-special-pho">
       <img src="{{ url_for('static', filename='images/menu/items/mcq-special-pho.jpg') }}" alt="MCQ Special Pho in broth with herbs" />
       <div class="gallery-card__body">
         <div class="gallery-card__title-row">
@@ -848,8 +851,8 @@
         </div>
         <p>Signature mixed-beef pho with rich broth.</p>
       </div>
-    </article>
-    <article class="gallery-card">
+    </a>
+    <a class="gallery-card" href="/menu/item/pho-noodle-soup__slow-cooked-beef-rib-pho">
       <img
         src="{{ url_for('static', filename='images/menu/items/slow-cooked-beef-rib-pho.jpg') }}"
         alt="Slow-cooked beef rib pho with fresh garnish"
@@ -861,8 +864,8 @@
         </div>
         <p>Deep, slow-simmered broth with tender rib.</p>
       </div>
-    </article>
-    <article class="gallery-card">
+    </a>
+    <a class="gallery-card" href="/menu/item/rice-dishes__grilled-pork-chop-with-broken-rice">
       <img
         src="{{ url_for('static', filename='images/menu/items/grilled-pork-chop-with-broken-rice.jpg') }}"
         alt="Grilled pork chop with broken rice and sides"
@@ -874,8 +877,8 @@
         </div>
         <p>Classic lunch plate with full savory sides.</p>
       </div>
-    </article>
-    <article class="gallery-card">
+    </a>
+    <a class="gallery-card" href="/menu/item/mcq-sizzling-hot-plates__mcq-sizzling-beef-with-bread">
       <img
         src="{{ url_for('static', filename='images/menu/items/mcq-sizzling-beef-with-bread.jpg') }}"
         alt="Sizzling beef with bread and sunny side egg"
@@ -887,8 +890,8 @@
         </div>
         <p>Hotplate favorite with steak, egg, and bread.</p>
       </div>
-    </article>
-    <article class="gallery-card">
+    </a>
+    <a class="gallery-card" href="/menu/item/banh-mi__roast-pork-b-nh-m">
       <img
         src="{{ url_for('static', filename='images/menu/items/roast-pork-banh-mi.jpg') }}"
         alt="Roast pork banh mi on crusty bread"
@@ -900,8 +903,8 @@
         </div>
         <p>Crispy roast pork with classic banh mi crunch.</p>
       </div>
-    </article>
-    <article class="gallery-card">
+    </a>
+    <a class="gallery-card" href="/menu/item/mcq-sizzling-hot-plates__chicken-sizzling-hot-plate">
       <img
         src="{{ url_for('static', filename='images/menu/items/chicken-sizzling-hot-plate.jpg') }}"
         alt="Chicken sizzling hot plate with egg"
@@ -913,8 +916,8 @@
         </div>
         <p>Sizzling chicken plate with savory house sauce.</p>
       </div>
-    </article>
-    <article class="gallery-card">
+    </a>
+    <a class="gallery-card" href="/menu/item/desserts__thai-dessert-che-thai">
       <img
         src="{{ url_for('static', filename='images/menu/items/thai-dessert-che-thai.jpg') }}"
         alt="Thai dessert che thai with fruits and jelly"
@@ -926,8 +929,8 @@
         </div>
         <p>Chilled coconut dessert with fruit and jelly.</p>
       </div>
-    </article>
-    <article class="gallery-card">
+    </a>
+    <a class="gallery-card" href="/menu/item/vietnamese-coffee__milk-coffee">
       <img
         src="{{ url_for('static', filename='images/menu/items/milk-coffee.jpg') }}"
         alt="Vietnamese milk coffee with ice"
@@ -939,7 +942,7 @@
         </div>
         <p>Bold Vietnamese coffee with condensed milk.</p>
       </div>
-    </article>
+    </a>
   </div>
   </div>
 </section>
