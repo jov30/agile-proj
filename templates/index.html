@@ -197,20 +197,22 @@
   }
 
   .homepage-flow {
+    position: relative;
     padding: clamp(1rem, 2.2vw, 1.45rem);
     background:
-      linear-gradient(135deg, rgba(255, 252, 247, 0.98), rgba(247, 236, 219, 0.92)),
+      linear-gradient(135deg, rgba(255, 252, 247, 0.98), rgba(247, 236, 219, 0.92) 58%, rgba(231, 244, 241, 0.92)),
       #fffaf4;
-    border-color: rgba(112, 85, 66, 0.1);
+    border-color: rgba(255, 106, 19, 0.14);
+    box-shadow: 0 20px 48px rgba(53, 30, 20, 0.09);
   }
 
   .homepage-flow__header {
     position: relative;
     z-index: 1;
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 1rem;
+    align-items: end;
     margin-bottom: 0.95rem;
   }
 
@@ -223,9 +225,53 @@
 
   .homepage-flow__header p {
     margin: 0;
-    max-width: 42ch;
+    max-width: 50ch;
     color: var(--text-muted);
     line-height: 1.55;
+  }
+
+  .homepage-flow__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .homepage-flow__quick {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0.62rem 0.9rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 800;
+    color: #2b170d;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+    border: 1px solid rgba(255, 106, 19, 0.22);
+    box-shadow: 0 10px 20px rgba(255, 106, 19, 0.16);
+  }
+
+  .homepage-flow__summary {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .homepage-flow__summary span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0.5rem 0.65rem;
+    border-radius: 999px;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(112, 85, 66, 0.1);
+    font-weight: 800;
+    font-size: 0.82rem;
+    text-align: center;
   }
 
   .homepage-flow__grid {
@@ -249,6 +295,27 @@
     border: 1px solid rgba(112, 85, 66, 0.12);
     box-shadow: 0 12px 24px rgba(53, 30, 20, 0.06);
     transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .homepage-flow__step::after {
+    content: "";
+    position: absolute;
+    top: 2rem;
+    right: -0.58rem;
+    width: 0.72rem;
+    height: 2px;
+    background: rgba(255, 106, 19, 0.24);
+  }
+
+  .homepage-flow__step:last-child::after {
+    content: none;
+  }
+
+  .homepage-flow__step--member {
+    background:
+      linear-gradient(180deg, rgba(255, 247, 232, 0.96), rgba(255, 236, 205, 0.9)),
+      #fff8ed;
+    border-color: rgba(255, 106, 19, 0.22);
   }
 
   .homepage-flow__step:hover,
@@ -288,6 +355,17 @@
     color: var(--brand-red);
     font-weight: 800;
     font-size: 0.84rem;
+  }
+
+  .homepage-flow__result {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0.28rem 0.5rem;
+    border-radius: 999px;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+    font-size: 0.75rem;
+    font-weight: 800;
   }
 
   .homepage-flow + .street-gallery {
@@ -992,6 +1070,7 @@
     .homepage-flow__header {
       align-items: flex-start;
       text-align: left;
+      grid-template-columns: 1fr;
       margin-bottom: 0.8rem;
     }
 
@@ -1002,6 +1081,17 @@
     .homepage-flow__header p {
       max-width: none;
       line-height: 1.45;
+    }
+
+    .homepage-flow__actions,
+    .homepage-flow__quick {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .homepage-flow__summary {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
     }
 
     .homepage-flow__grid {
@@ -1019,6 +1109,10 @@
       padding: 0.9rem;
       border-radius: 18px;
       scroll-snap-align: start;
+    }
+
+    .homepage-flow__step::after {
+      content: none;
     }
 
     .homepage-flow__step p {
@@ -1179,38 +1273,51 @@
     <div>
       <p class="eyebrow">Start here</p>
       <h2 id="homepage-flow-title">A quick path from membership to pickup.</h2>
+      <p>Join once, earn rewards, then move through menu, pickup, checkout, and tracking without hunting around.</p>
     </div>
-    <p>Start with an account, earn points, then move through ordering without hunting around.</p>
+    <div class="homepage-flow__actions">
+      <a class="homepage-flow__quick" href="/register">Create account</a>
+    </div>
+  </div>
+  <div class="homepage-flow__summary" aria-label="Ordering flow benefits">
+    <span>Points and rewards stay linked</span>
+    <span>Pickup choice happens before checkout</span>
+    <span>Receipts and order tracking stay easy</span>
   </div>
   <div class="homepage-flow__grid">
-    <a class="homepage-flow__step" href="/register">
+    <a class="homepage-flow__step homepage-flow__step--member" href="/register">
       <span class="homepage-flow__number">1</span>
       <h3>Join membership</h3>
-      <p>Create an account first so points, orders, and rewards stay connected.</p>
+      <p>Create an account so points, orders, and rewards stay connected.</p>
+      <span class="homepage-flow__result">Earn points</span>
       <span class="homepage-flow__meta">Register</span>
     </a>
     <a class="homepage-flow__step" href="/menu">
       <span class="homepage-flow__number">2</span>
       <h3>Pick a favorite</h3>
       <p>Open the full menu or jump into the best sellers below.</p>
+      <span class="homepage-flow__result">Save time</span>
       <span class="homepage-flow__meta">Browse menu</span>
     </a>
     <a class="homepage-flow__step" href="/menu?fulfillment=scheduled">
       <span class="homepage-flow__number">3</span>
       <h3>Choose pickup</h3>
       <p>Order now for the counter or schedule a time that fits.</p>
+      <span class="homepage-flow__result">Pick your slot</span>
       <span class="homepage-flow__meta">Instant or scheduled</span>
     </a>
     <a class="homepage-flow__step" href="/checkout">
       <span class="homepage-flow__number">4</span>
       <h3>Checkout cleanly</h3>
       <p>Confirm contact, payment, receipt, and pickup notes.</p>
+      <span class="homepage-flow__result">Get receipt</span>
       <span class="homepage-flow__meta">Checkout</span>
     </a>
     <a class="homepage-flow__step" href="/orders">
       <span class="homepage-flow__number">5</span>
       <h3>Track and save</h3>
       <p>Follow order status, repeat meals, or share a community tip.</p>
+      <span class="homepage-flow__result">Repeat faster</span>
       <span class="homepage-flow__meta">Track order</span>
     </a>
   </div>
