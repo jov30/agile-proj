@@ -221,15 +221,18 @@
     background: rgba(255, 106, 19, 0.08);
   }
 
-  .item-detail__section {
+  .item-detail__sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
     margin-top: 1.2rem;
     padding-top: 1.2rem;
     border-top: 1px solid rgba(112, 85, 66, 0.08);
   }
 
   .item-detail__section h2 {
-    margin: 0 0 0.4rem;
-    font-size: 0.8rem;
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -238,10 +241,19 @@
 
   .item-detail__section ul {
     margin: 0;
-    padding-left: 1.1rem;
-    line-height: 1.7;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .item-detail__section li {
+    padding: 0.28rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
     color: var(--text-main);
-    font-size: 0.92rem;
+    background: rgba(112, 85, 66, 0.06);
   }
 
   .item-detail__toast {
@@ -332,19 +344,21 @@
         </a>
       </div>
       <p class="item-detail__toast" id="detail-cart-toast" aria-live="polite"></p>
-      {% for section in item.sections or [] %}
-        {% set ing = section["items"] %}
-        {% if ing and ing|length > 0 %}
-          <div class="item-detail__section">
-            <h2>{{ section.label }}</h2>
-            <ul>
-              {% for line in ing %}
-                <li>{{ line }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-      {% endfor %}
+      <div class="item-detail__sections">
+        {% for section in item.sections or [] %}
+          {% set ing = section["items"] %}
+          {% if ing and ing|length > 0 %}
+            <div class="item-detail__section">
+              <h2>{{ section.label }}</h2>
+              <ul>
+                {% for line in ing %}
+                  <li>{{ line }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
     </div>
   </div>
 </article>
