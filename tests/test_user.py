@@ -201,6 +201,50 @@ class TestSupportChat(unittest.TestCase):
             saved_html.index("usual_combo meal 1"),
             saved_html.index("usual_combo meal 7"),
         )
+    def test_favorites_can_manage_saved_community_posts(self):
+        self._login_customer()
+        with self.app.app_context():
+            post = CommunityPost(
+                author_name="Community Fan",
+                identity_key="guest:fan",
+                post_type="pickup_tip",
+                meal_name="Crispy pork banh mi",
+                caption="Ask for extra herbs and keep the sauce separate for pickup.",
+                tip="Best within 10 minutes of pickup.",
+            )
+            db.session.add(post)
+            db.session.flush()
+            db.session.add(
+                CommunitySave(
+                    post_id=post.id,
+                    identity_key="user:member@example.com",
+                    author_name="Lantern Member",
+                    save_type="favorite_board",
+                )
+            )
+            db.session.commit()
+            post_id = post.id
+
+        favorites = self.client.get("/favorites")
+        self.assertEqual(favorites.status_code, 200)
+        html = favorites.get_data(as_text=True)
+        self.assertIn("Crispy pork banh mi", html)
+        self.assertIn("Remove Saved Post", html)
+        self.assertIn("1 pickup tips", html)
+        self.assertIn("Saved to meal board", html)
+
+        response = self.client.post(
+            f"/favorites/community/{post_id}/remove",
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        removed_html = response.get_data(as_text=True)
+        self.assertIn("Favorites updated", removed_html)
+        self.assertIn("Removed Crispy pork banh mi", removed_html)
+        self.assertNotIn("Remove Saved Post", removed_html)
+
+        with self.app.app_context():
+            self.assertEqual(CommunitySave.query.count(), 0)
 
     @patch("routes.user.requests.post")
     def test_support_chat_uses_openai_when_configured(self, mock_post):

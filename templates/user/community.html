@@ -256,6 +256,61 @@
     .community-board__grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 720px) {
+    .community-shell {
+      gap: 1rem;
+    }
+
+    .community-hero,
+    .community-main,
+    .community-board {
+      padding: 1rem;
+    }
+
+    .community-hero__grid,
+    .community-main__grid,
+    .community-board__grid,
+    .community-feed,
+    .community-side {
+      gap: 0.8rem;
+    }
+
+    .community-panel,
+    .community-composer,
+    .community-post,
+    .community-card,
+    .community-board-card {
+      border-radius: 18px;
+      padding: 0.85rem;
+    }
+
+    .community-panel h1 {
+      font-size: clamp(1.9rem, 10vw, 2.55rem);
+      line-height: 1.02;
+    }
+
+    .community-copy,
+    .community-card p,
+    .community-post p,
+    .community-board-card p {
+      line-height: 1.45;
+    }
+
+    .community-visual {
+      display: none;
+    }
+
+    .community-stats,
+    .community-pills {
+      gap: 0.45rem;
+    }
+
+    .community-stat,
+    .community-pill,
+    .community-tag {
+      padding: 0.45rem 0.6rem;
+      font-size: 0.78rem;
+    }
+
     .community-post,
     .community-comment-form { grid-template-columns: 1fr; }
 
@@ -283,6 +338,50 @@
     .community-pagination .button {
       width: 100%;
       justify-content: center;
+    .community-post__media {
+      min-height: 150px;
+      max-height: 185px;
+    }
+
+    .community-composer textarea {
+      min-height: 88px;
+    }
+
+    .community-form-row {
+      gap: 0.55rem;
+    }
+
+    .community-actions,
+    .community-reactions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+    }
+
+    .community-actions form,
+    .community-reactions form,
+    .community-actions button,
+    .community-reactions button {
+      width: 100%;
+    }
+
+    .community-actions button,
+    .community-reactions button {
+      justify-content: center;
+      padding: 0.55rem 0.5rem;
+      white-space: normal;
+    }
+
+    .community-comment-form button {
+      width: 100%;
+    }
+
+    .community-side .community-card:nth-child(n + 2) p,
+    .community-board-card p {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   }
 </style>

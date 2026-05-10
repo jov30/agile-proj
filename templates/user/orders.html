@@ -379,17 +379,113 @@
   }
 
   @media (max-width: 820px) {
+    .orders-shell {
+      gap: 1rem;
+    }
+
+    .orders-hero,
+    .orders-empty,
+    .orders-list {
+      padding: 1rem;
+    }
+
+    .orders-hero__grid,
+    .order-card__grid,
+    .order-card__timeline {
+      gap: 0.8rem;
+    }
+
+    .orders-hero .section-title {
+      font-size: clamp(1.95rem, 10vw, 2.65rem);
+    }
+
+    .orders-hero .section-copy,
+    .orders-stat span,
+    .orders-highlight p,
+    .orders-filter p,
+    .order-card__header p {
+      line-height: 1.45;
+    }
+
+    .orders-visual {
+      display: none;
+    }
+
     .orders-hero__stats,
     .orders-filter__grid {
       grid-template-columns: 1fr;
+      gap: 0.55rem;
+    }
+
+    .orders-stat,
+    .orders-filter,
+    .orders-highlight,
+    .orders-ready-banner,
+    .order-card {
+      border-radius: 20px;
+      padding: 0.9rem;
+    }
+
+    .orders-filter__grid {
+      margin-top: 0.75rem;
+    }
+
+    .orders-filter__actions,
+    .order-card__actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.55rem;
+    }
+
+    .orders-filter__actions .button,
+    .orders-filter__actions button,
+    .order-card__actions .button,
+    .order-card__actions button,
+    .inline-form {
+      width: 100%;
     }
 
     .order-card__header {
       flex-direction: column;
+      gap: 0.65rem;
     }
 
     .order-card__badges {
       justify-content: start;
+      gap: 0.4rem;
+    }
+
+    .order-badge {
+      padding: 0.48rem 0.62rem;
+      font-size: 0.78rem;
+    }
+
+    .order-lines,
+    .order-side,
+    .order-card__timeline {
+      gap: 0.55rem;
+    }
+
+    .order-side__card,
+    .order-card__timeline-item {
+      border-radius: 16px;
+      padding: 0.78rem;
+    }
+
+    .order-card__timeline {
+      grid-template-columns: repeat(4, minmax(9rem, 1fr));
+      overflow-x: auto;
+      padding-bottom: 0.3rem;
+      scroll-snap-type: x proximity;
+    }
+
+    .order-card__timeline-item {
+      scroll-snap-align: start;
+    }
+
+    .order-card__timeline-item p,
+    .order-side__card li {
+      line-height: 1.4;
     }
   }
 </style>

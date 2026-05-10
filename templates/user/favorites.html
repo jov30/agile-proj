@@ -160,6 +160,43 @@
     margin-top: auto;
   }
 
+  .saved-status {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.85rem;
+    border-radius: 18px;
+    color: var(--brand-teal);
+    background: rgba(0, 111, 116, 0.08);
+    border: 1px solid rgba(0, 111, 116, 0.14);
+  }
+
+  .saved-status strong {
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+  }
+
+  .saved-status span {
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .saved-notice {
+    margin-top: 1rem;
+    border-color: rgba(255, 106, 19, 0.2);
+    color: var(--brand-red);
+    background: rgba(255, 106, 19, 0.08);
+  }
+
+  .saved-remove-form {
+    display: inline-flex;
+  }
+
+  .saved-remove-button {
+    border: 1px solid rgba(179, 48, 64, 0.22);
+    color: #b33040;
+    background: rgba(179, 48, 64, 0.06);
+    cursor: pointer;
+  }
+
   .saved-collection-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -189,10 +226,88 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media (max-width: 720px) {
+    .saved-shell {
+      gap: 1rem;
+    }
+
+    .saved-hero,
+    .saved-board,
+    .saved-collections {
+      padding: 1rem;
+    }
+
+    .saved-hero__grid,
+    .saved-meals,
+    .saved-collection-grid {
+      gap: 0.8rem;
+    }
+
+    .saved-panel,
+    .saved-meal,
+    .saved-collection {
+      border-radius: 18px;
+      padding: 0.9rem;
+    }
+
+    .saved-panel h1 {
+      font-size: clamp(1.85rem, 10vw, 2.5rem);
+      line-height: 1.05;
+    }
+
+    .saved-panel p,
+    .saved-meal p,
+    .saved-collection p {
+      line-height: 1.45;
+    }
+
+    .saved-visual {
+      display: none;
+    }
+
+    .saved-summary {
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+    }
+
+    .saved-pill,
+    .saved-meal__badge {
+      padding: 0.45rem 0.6rem;
+      font-size: 0.78rem;
+    }
+
+    .saved-meal {
+      gap: 0.65rem;
+    }
+
+    .saved-meal__media {
+      aspect-ratio: 1.5 / 1;
+      border-radius: 16px;
+    }
+
+    .saved-meal__header {
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .saved-meal__actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .saved-meal__actions .button,
+    .saved-panel .button-row .button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
+{% set favorites_notice = session.pop('favorites_notice', None) %}
 <div class="saved-shell">
   <section class="saved-hero section-panel">
     <div class="saved-hero__grid">
@@ -206,8 +321,15 @@
           <span class="saved-pill">{{ membership.current_tier.name }}</span>
           <span class="saved-pill saved-pill--muted">{{ membership.points_display }} points</span>
           <span class="saved-pill saved-pill--muted">{{ saved_items|length }} saved meal cards on screen</span>
-          <span class="saved-pill saved-pill--muted">{{ saved_community_posts|length }} community saves</span>
+          <span class="saved-pill saved-pill--muted">{{ saved_community_summary.total }} community saves</span>
+          <span class="saved-pill saved-pill--muted">Latest: {{ saved_community_summary.latest }}</span>
         </div>
+        {% if favorites_notice %}
+          <div class="saved-status saved-notice">
+            <strong>Favorites updated</strong>
+            <span>{{ favorites_notice }}</span>
+          </div>
+        {% endif %}
         <div class="button-row" style="margin-top: 1rem;">
           <a href="/community" class="button button--primary">Share in MCQ Community</a>
           <a href="/menu" class="button button--secondary">Browse Menu</a>
@@ -224,9 +346,15 @@
     </div>
   </section>
 
-  <section class="saved-board section-panel">
+  <section class="saved-board section-panel" id="community-saves">
     <p class="eyebrow">Community saves</p>
     <h2>Meal ideas saved from customer posts</h2>
+    <div class="saved-summary">
+      <span class="saved-pill">{{ saved_community_summary.total }} saved posts</span>
+      <span class="saved-pill saved-pill--muted">{{ saved_community_summary.reviews }} reviews</span>
+      <span class="saved-pill saved-pill--muted">{{ saved_community_summary.combos }} combos</span>
+      <span class="saved-pill saved-pill--muted">{{ saved_community_summary.pickup_tips }} pickup tips</span>
+    </div>
     {% if saved_community_posts %}
       <div class="saved-meals">
         {% for post in saved_community_posts %}
@@ -236,15 +364,25 @@
             </div>
             <div class="saved-meal__header">
               <div>
-                <p class="saved-meal__meta">{{ post.author }} · {{ post.type_label }}</p>
+                <p class="saved-meal__meta">{{ post.author }} · {{ post.type_label }} · saved {{ post.saved_label }}</p>
                 <h3 class="saved-meal__title">{{ post.meal }}</h3>
               </div>
               <span class="saved-meal__badge">{{ post.save_count }} saves</span>
             </div>
+            <div class="saved-status">
+              <strong>{{ post.save_status }}</strong>
+              <span>{{ post.like_count }} reactions · {{ post.comment_count }} comments · {{ post.save_type_label }}</span>
+            </div>
             <p>{{ post.caption }}</p>
+            {% if post.tip %}
+              <p><strong>Saved tip:</strong> {{ post.tip }}</p>
+            {% endif %}
             <div class="saved-meal__actions">
               <a href="{{ url_for('user.shared_meals') }}#post-{{ post.id }}" class="button button--secondary">Open Post</a>
               <a href="/menu" class="button button--secondary">Build Similar Order</a>
+              <form class="saved-remove-form" method="post" action="{{ url_for('user.remove_favorite_community_post', post_id=post.id) }}">
+                <button class="button saved-remove-button" type="submit">Remove Saved Post</button>
+              </form>
             </div>
           </article>
         {% endfor %}
