@@ -196,6 +196,100 @@
     display: block;
   }
 
+  .homepage-flow {
+    padding: clamp(1rem, 2.2vw, 1.45rem);
+    background:
+      linear-gradient(135deg, rgba(255, 252, 247, 0.98), rgba(247, 236, 219, 0.92)),
+      #fffaf4;
+    border-color: rgba(112, 85, 66, 0.1);
+  }
+
+  .homepage-flow__header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.95rem;
+  }
+
+  .homepage-flow__header h2 {
+    margin: 0.2rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.35rem, 2.2vw, 2rem);
+    line-height: 1.05;
+  }
+
+  .homepage-flow__header p {
+    margin: 0;
+    max-width: 42ch;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .homepage-flow__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .homepage-flow__step {
+    position: relative;
+    display: grid;
+    gap: 0.45rem;
+    min-height: 9.4rem;
+    padding: 1rem;
+    border-radius: 22px;
+    text-decoration: none;
+    color: inherit;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(112, 85, 66, 0.12);
+    box-shadow: 0 12px 24px rgba(53, 30, 20, 0.06);
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .homepage-flow__step:hover,
+  .homepage-flow__step:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(255, 106, 19, 0.26);
+    box-shadow: 0 16px 30px rgba(53, 30, 20, 0.1);
+    outline: 0;
+  }
+
+  .homepage-flow__number {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    font-weight: 800;
+    color: #2b170d;
+    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+  }
+
+  .homepage-flow__step h3 {
+    margin: 0.15rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.08rem;
+  }
+
+  .homepage-flow__step p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.45;
+    font-size: 0.92rem;
+  }
+
+  .homepage-flow__meta {
+    margin-top: auto;
+    color: var(--brand-red);
+    font-weight: 800;
+    font-size: 0.84rem;
+  }
+
   .launchpad__header,
   .support-story__copy,
   .support-story__panel {
@@ -1031,6 +1125,42 @@
         />
       </div>
     </figure>
+  </div>
+</section>
+
+<section class="homepage-flow section-panel" aria-labelledby="homepage-flow-title">
+  <div class="homepage-flow__header">
+    <div>
+      <p class="eyebrow">Start here</p>
+      <h2 id="homepage-flow-title">A quick path from craving to pickup.</h2>
+    </div>
+    <p>Move through the site in a simple order, with the main actions kept close to the top.</p>
+  </div>
+  <div class="homepage-flow__grid">
+    <a class="homepage-flow__step" href="/menu">
+      <span class="homepage-flow__number">1</span>
+      <h3>Pick a favorite</h3>
+      <p>Open the full menu or jump into the best sellers below.</p>
+      <span class="homepage-flow__meta">Browse menu</span>
+    </a>
+    <a class="homepage-flow__step" href="/menu?fulfillment=instant">
+      <span class="homepage-flow__number">2</span>
+      <h3>Choose pickup</h3>
+      <p>Order now for the counter or schedule a time that fits.</p>
+      <span class="homepage-flow__meta">Instant or scheduled</span>
+    </a>
+    <a class="homepage-flow__step" href="/checkout">
+      <span class="homepage-flow__number">3</span>
+      <h3>Checkout cleanly</h3>
+      <p>Confirm contact, payment, receipt, and pickup notes.</p>
+      <span class="homepage-flow__meta">Checkout</span>
+    </a>
+    <a class="homepage-flow__step" href="/orders">
+      <span class="homepage-flow__number">4</span>
+      <h3>Track and save</h3>
+      <p>Follow order status, repeat meals, or share a community tip.</p>
+      <span class="homepage-flow__meta">Track order</span>
+    </a>
   </div>
 </section>
 
