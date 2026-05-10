@@ -554,19 +554,36 @@ def _saved_meals_context() -> dict:
         {"title": "Shareable meal board", "text": "Saved community posts and pickup ideas collected from other customers.", "accent": "teal"},
         {"title": "Weekend comfort stack", "text": "A saved lane for rich bowls, hot plates, and dessert add-ons.", "accent": "plum"},
     ]
-    saved_posts = (
-        CommunityPost.query.join(CommunitySave)
+    saved_records = (
+        CommunitySave.query.join(CommunityPost)
         .filter(CommunitySave.identity_key == identity_key)
-        .order_by(CommunitySave.created_at.desc())
-        .limit(6)
+        .order_by(CommunitySave.created_at.desc(), CommunitySave.id.desc())
+        .limit(12)
         .all()
     )
+    saved_posts = []
+    for save in saved_records:
+        serialized = _serialize_community_post(save.post, menu_lookup, identity_key)
+        saved_posts.append(
+            {
+                **serialized,
+                "save_id": save.id,
+                "saved_label": save.created_at.strftime("%d %b %Y"),
+                "save_status": "Saved to meal board",
+                "save_type_label": save.save_type.replace("_", " ").title(),
+            }
+        )
+    saved_type_counts = Counter(post["type_label"] for post in saved_posts)
     return {
         "saved_items": saved_items[:6],
-        "saved_community_posts": [
-            _serialize_community_post(post, menu_lookup, identity_key)
-            for post in saved_posts
-        ],
+        "saved_community_posts": saved_posts,
+        "saved_community_summary": {
+            "total": len(saved_posts),
+            "reviews": saved_type_counts["Meal Review"],
+            "combos": saved_type_counts["Usual Combo"],
+            "pickup_tips": saved_type_counts["Pickup Tip"],
+            "latest": saved_posts[0]["saved_label"] if saved_posts else "Nothing saved yet",
+        },
         "collections": collections,
     }
 
@@ -1192,6 +1209,7 @@ def save_community_post(post_id: int):
     existing = CommunitySave.query.filter_by(post_id=post.id, identity_key=identity_key).first()
     if existing:
         db.session.delete(existing)
+        session["favorites_notice"] = f"Removed {post.meal_name} from Favorites."
     else:
         db.session.add(
             CommunitySave(
@@ -1201,8 +1219,25 @@ def save_community_post(post_id: int):
                 save_type="favorite_board",
             )
         )
+        session["favorites_notice"] = f"Saved {post.meal_name} to Favorites."
     db.session.commit()
+    session.modified = True
     return redirect(url_for("user.shared_meals", _anchor=f"post-{post.id}"))
+
+
+@user_bp.post("/favorites/community/<int:post_id>/remove")
+def remove_favorite_community_post(post_id: int):
+    post = CommunityPost.query.get_or_404(post_id)
+    identity_key, _author_name, _email = _community_identity()
+    existing = CommunitySave.query.filter_by(post_id=post.id, identity_key=identity_key).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        session["favorites_notice"] = f"Removed {post.meal_name} from your saved community posts."
+    else:
+        session["favorites_notice"] = "That community post was already removed from your Favorites."
+    session.modified = True
+    return redirect(url_for("user.favorites", _anchor="community-saves"))
 
 
 @user_bp.post("/community/comments/<int:comment_id>/vote")
