@@ -504,29 +504,29 @@
     padding: 1rem 1rem 1.1rem;
   }
 
-  .gallery-card__tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.34rem 0.66rem;
-    border-radius: 999px;
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--brand-teal);
-    background: rgba(0, 111, 116, 0.08);
+  .gallery-card__title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.7rem;
   }
 
   .gallery-card h3 {
-    margin: 0.75rem 0 0.45rem;
+    margin: 0 0 0.45rem;
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
     font-size: 1.2rem;
+  }
+
+  .gallery-card__price {
+    font-weight: 800;
+    color: var(--brand-red);
+    white-space: nowrap;
   }
 
   .gallery-card p {
     margin: 0;
     color: var(--text-muted);
-    line-height: 1.65;
+    line-height: 1.45;
   }
 
   .support-story {
@@ -693,20 +693,15 @@
 <section class="street-gallery section-panel">
   <div class="street-gallery__header">
     <div class="street-gallery__header-copy">
-      <p class="eyebrow">Street food inspiration</p>
-      <h2>Ben Thanh character plus your street-food photo set</h2>
-      <p>
-        The refreshed visual direction now mixes your supplied Ben Thanh artwork with your new street-food images and a
-        small amount of appetite imagery already in the project to keep the interface varied and more lived-in.
-      </p>
+      <h2>Best Sellers</h2>
     </div>
-    <div class="street-gallery__controls" aria-label="Street food inspiration controls">
+    <div class="street-gallery__controls" aria-label="Best seller controls">
       <span class="street-gallery__hint">Swipe or slide</span>
       <button
         class="street-gallery__control"
         type="button"
         data-gallery-shift="-1"
-        aria-label="Scroll street food inspiration left"
+        aria-label="Scroll best sellers left"
       >
         &larr;
       </button>
@@ -714,7 +709,7 @@
         class="street-gallery__control"
         type="button"
         data-gallery-shift="1"
-        aria-label="Scroll street food inspiration right"
+        aria-label="Scroll best sellers right"
       >
         &rarr;
       </button>
@@ -723,121 +718,104 @@
   <div class="street-gallery__rail" id="street-gallery-rail">
   <div class="street-gallery__grid">
     <article class="gallery-card">
-      <img src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}" alt="Ben Thanh Market inspired artwork" />
+      <img src="{{ url_for('static', filename='images/menu/items/mcq-special-pho.jpg') }}" alt="MCQ Special Pho in broth with herbs" />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Local asset</span>
-        <h3>Ben Thanh Signature</h3>
-        <p>Your attached Ben Thanh illustration now anchors the Saigon identity instead of being a loose reference.</p>
+        <div class="gallery-card__title-row">
+          <h3>MCQ Special Pho</h3>
+          <span class="gallery-card__price">$17</span>
+        </div>
+        <p>Signature mixed-beef pho with rich broth.</p>
       </div>
     </article>
     <article class="gallery-card">
       <img
-        src="{{ url_for('static', filename='images/inspiration/street-food-life.jpg') }}"
-        alt="Street food scene inspiration"
+        src="{{ url_for('static', filename='images/menu/items/slow-cooked-beef-rib-pho.jpg') }}"
+        alt="Slow-cooked beef rib pho with fresh garnish"
       />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Online source</span>
-        <h3>Street-side Energy</h3>
-        <p>Used to bring in the feel of everyday Vietnamese food culture and a busier, more lived-in atmosphere.</p>
+        <div class="gallery-card__title-row">
+          <h3>Slow-Cooked Beef Rib Pho</h3>
+          <span class="gallery-card__price">$17</span>
+        </div>
+        <p>Deep, slow-simmered broth with tender rib.</p>
       </div>
     </article>
     <article class="gallery-card">
       <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-1.jpg') }}"
-        alt="Vietnamese tray meal with herbs and noodles"
+        src="{{ url_for('static', filename='images/menu/items/grilled-pork-chop-with-broken-rice.jpg') }}"
+        alt="Grilled pork chop with broken rice and sides"
       />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Tray-and-Herb Street Detail</h3>
-        <p>This image adds a more casual curb-side meal moment and helps the feature pages feel less repetitive.</p>
+        <div class="gallery-card__title-row">
+          <h3>Grilled Pork Chop with Broken Rice</h3>
+          <span class="gallery-card__price">$17</span>
+        </div>
+        <p>Classic lunch plate with full savory sides.</p>
       </div>
     </article>
     <article class="gallery-card">
       <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-4.jpg') }}"
-        alt="Vietnamese floating market boats"
+        src="{{ url_for('static', filename='images/menu/items/mcq-sizzling-beef-with-bread.jpg') }}"
+        alt="Sizzling beef with bread and sunny side egg"
       />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Floating Market Colour</h3>
-        <p>Boat markets add a broader Vietnam mood and make the brand world feel bigger than one single food counter.</p>
+        <div class="gallery-card__title-row">
+          <h3>MCQ Sizzling Beef with Bread</h3>
+          <span class="gallery-card__price">$17</span>
+        </div>
+        <p>Hotplate favorite with steak, egg, and bread.</p>
       </div>
     </article>
     <article class="gallery-card">
       <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-5.jpg') }}"
-        alt="Vietnamese produce market stall"
+        src="{{ url_for('static', filename='images/menu/items/roast-pork-banh-mi.jpg') }}"
+        alt="Roast pork banh mi on crusty bread"
       />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Wet Market Produce</h3>
-        <p>Vegetable baskets and market colour help the site feel rooted in daily Vietnamese food culture, not just plated dishes.</p>
+        <div class="gallery-card__title-row">
+          <h3>Roast Pork Banh Mi</h3>
+          <span class="gallery-card__price">$11</span>
+        </div>
+        <p>Crispy roast pork with classic banh mi crunch.</p>
       </div>
     </article>
     <article class="gallery-card">
       <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-6.jpg') }}"
-        alt="Vietnamese grilled meat over open flame"
+        src="{{ url_for('static', filename='images/menu/items/chicken-sizzling-hot-plate.jpg') }}"
+        alt="Chicken sizzling hot plate with egg"
       />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Charcoal Grill Heat</h3>
-        <p>This adds real night-stall intensity and gives the homepage a hotter, more energetic food-street feeling.</p>
+        <div class="gallery-card__title-row">
+          <h3>Chicken Sizzling Hot Plate</h3>
+          <span class="gallery-card__price">$15</span>
+        </div>
+        <p>Sizzling chicken plate with savory house sauce.</p>
       </div>
     </article>
     <article class="gallery-card">
       <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-7.jpg') }}"
-        alt="Vietnamese shrimp rice paper rolls"
+        src="{{ url_for('static', filename='images/menu/items/thai-dessert-che-thai.jpg') }}"
+        alt="Thai dessert che thai with fruits and jelly"
       />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Fresh Roll Texture</h3>
-        <p>Transparent rice paper and dipping sauce introduce a cleaner, cooler visual note among the hotter grill scenes.</p>
+        <div class="gallery-card__title-row">
+          <h3>Thai Dessert (Che Thai)</h3>
+          <span class="gallery-card__price">$8</span>
+        </div>
+        <p>Chilled coconut dessert with fruit and jelly.</p>
       </div>
     </article>
     <article class="gallery-card">
       <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-8.jpg') }}"
-        alt="Vietnamese banh xeo cooking and serving"
+        src="{{ url_for('static', filename='images/menu/items/milk-coffee.jpg') }}"
+        alt="Vietnamese milk coffee with ice"
       />
       <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Kitchen-to-Plate Motion</h3>
-        <p>The split cooking-and-plating shot helps communicate that MCQ is both a real kitchen and a digital ordering experience.</p>
-      </div>
-    </article>
-    <article class="gallery-card">
-      <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-9.jpg') }}"
-        alt="Vietnamese skewers and fish balls street stall"
-      />
-      <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Skewer Bar Variety</h3>
-        <p>Rows of skewers and snacks make the site feel fuller and more spontaneous, like browsing a real street-food lane.</p>
-      </div>
-    </article>
-    <article class="gallery-card">
-      <img
-        src="{{ url_for('static', filename='images/inspiration/streetfood-10.jpg') }}"
-        alt="Vietnamese market grill and skewer spread"
-      />
-      <div class="gallery-card__body">
-        <span class="gallery-card__tag">Your image</span>
-        <h3>Street Stall Abundance</h3>
-        <p>The dense market spread pushes the overall design closer to a lively Saigon snack counter instead of a quiet cafe layout.</p>
-      </div>
-    </article>
-    <article class="gallery-card">
-      <img
-        src="{{ url_for('static', filename='images/inspiration/noodle-bowl-unsplash.jpg') }}"
-        alt="Vietnamese noodle bowl inspiration"
-      />
-      <div class="gallery-card__body">
-        <span class="gallery-card__tag">Online source</span>
-        <h3>Bowl-Led Appetite Appeal</h3>
-        <p>A strong food close-up still matters, so the noodle bowl stays as a cleaner appetite anchor among the busier street scenes.</p>
+        <div class="gallery-card__title-row">
+          <h3>Milk Coffee</h3>
+          <span class="gallery-card__price">$8</span>
+        </div>
+        <p>Bold Vietnamese coffee with condensed milk.</p>
       </div>
     </article>
   </div>
