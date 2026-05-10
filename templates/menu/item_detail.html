@@ -317,6 +317,11 @@
       grid-template-columns: 1fr;
     }
 
+    .item-detail__panel {
+      position: relative;
+      top: auto;
+    }
+
     .item-detail__media img {
       height: min(320px, 44vh);
     }
@@ -333,6 +338,30 @@
 
     .item-detail__media img {
       height: min(260px, 38vh);
+    }
+
+    .item-detail__panel {
+      padding: 0.9rem;
+      border-radius: 18px;
+    }
+
+    .item-detail__actions,
+    .item-detail__cart-tools {
+      display: grid;
+      width: 100%;
+      gap: 0.65rem;
+    }
+
+    .item-detail__actions .button--primary,
+    .item-detail__checkout,
+    .item-detail__qty,
+    .item-detail__cart-badge {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .item-detail__qty {
+      min-height: 46px;
     }
   }
 </style>
