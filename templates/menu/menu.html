@@ -580,8 +580,7 @@
     min-width: 0;
   }
 
-  .menu-card__qty-slot .menu-card__add,
-  .menu-card__qty-slot .menu-card__qty {
+  .menu-card__qty-slot .menu-card__add {
     width: 100%;
   }
 
@@ -600,41 +599,6 @@
 
   .menu-card__cart-badge[hidden] {
     display: none;
-  }
-
-  .menu-card__qty {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.55rem;
-    padding: 0.45rem 0.65rem;
-    border-radius: 999px;
-    border: 1px solid rgba(112, 85, 66, 0.16);
-    background: rgba(255, 255, 255, 0.9);
-  }
-
-  .menu-card__qty[hidden] {
-    display: none;
-  }
-
-  .menu-card__qty-btn {
-    width: 32px;
-    height: 32px;
-    border: 0;
-    border-radius: 999px;
-    font: inherit;
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--text-inverse);
-    background: linear-gradient(135deg, var(--brand-orange), var(--brand-red));
-    cursor: pointer;
-  }
-
-  .menu-card__qty-value {
-    min-width: 1.4rem;
-    text-align: center;
-    font-weight: 800;
-    color: var(--text-main);
   }
 
   .menu-card__add.is-busy {
@@ -1121,11 +1085,6 @@
         <a class="button button--secondary menu-card__detail" href="#" aria-label="View item details">Details</a>
         <div class="menu-card__qty-slot">
           <button type="button" class="button button--primary menu-card__add">Add</button>
-          <div class="menu-card__qty" hidden>
-            <button type="button" class="menu-card__qty-btn" data-delta="-1" aria-label="Decrease quantity">-</button>
-            <span class="menu-card__qty-value">1</span>
-            <button type="button" class="menu-card__qty-btn" data-delta="1" aria-label="Increase quantity">+</button>
-          </div>
         </div>
         <span class="menu-card__cart-badge" hidden>In cart: 1</span>
       </div>
@@ -1400,9 +1359,6 @@ function buildCard(item, categoryTitle) {
   const communityBadges = clone.querySelector('.menu-card__community-badges');
   const detail = clone.querySelector('.menu-card__detail');
   const addBtn = clone.querySelector('.menu-card__add');
-  const qtyWrap = clone.querySelector('.menu-card__qty');
-  const qtyValue = clone.querySelector('.menu-card__qty-value');
-  const qtyButtons = clone.querySelectorAll('.menu-card__qty-btn');
   const cartBadge = clone.querySelector('.menu-card__cart-badge');
   const itemId = item.id;
 
@@ -1437,25 +1393,10 @@ function buildCard(item, categoryTitle) {
 
   function setCardQuantity(qty) {
     const safeQty = Math.max(0, Number(qty || 0));
-    if (qtyValue) qtyValue.textContent = String(safeQty || 1);
-    if (addBtn) addBtn.hidden = safeQty > 0;
-    if (qtyWrap) qtyWrap.hidden = safeQty < 1;
     if (cartBadge) {
       cartBadge.hidden = safeQty < 1;
       cartBadge.textContent = `In cart: ${safeQty}`;
     }
-  }
-
-  async function syncQuantity(nextQty) {
-    if (!itemId || !window.McqCart) return;
-    let payload;
-    if (nextQty < 1) {
-      payload = await window.McqCart.remove(itemId);
-    } else {
-      payload = await window.McqCart.setQuantity(itemId, nextQty);
-    }
-    cacheCartQuantities(payload);
-    setCardQuantity(cartQtyById.get(itemId) || 0);
   }
 
   setCardQuantity(cartQtyById.get(itemId) || 0);
@@ -1488,34 +1429,6 @@ function buildCard(item, categoryTitle) {
       addBtn.disabled = true;
     }
   }
-
-  qtyButtons.forEach((button) => {
-    button.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (!itemId || !window.McqCart) return;
-      const currentQty = cartQtyById.get(itemId) || 0;
-      const delta = Number(button.dataset.delta || '0');
-      const nextQty = currentQty + delta;
-      qtyButtons.forEach((b) => {
-        b.disabled = true;
-      });
-      try {
-        await syncQuantity(nextQty);
-        const currentQty = cartQtyById.get(itemId) || 0;
-        if (currentQty > 0) {
-          showFeedback(`${item.name} updated. ${currentQty} now in cart.`, false);
-        } else {
-          showFeedback(`${item.name} removed from the cart.`, false);
-        }
-      } catch (error) {
-        showFeedback(error.message || 'Could not update this cart quantity.', true);
-      } finally {
-        qtyButtons.forEach((b) => {
-          b.disabled = false;
-        });
-      }
-    });
-  });
 
   // Make the whole card clickable for item details.
   // Clicking "Add" is excluded above, and clicking the "Details" link should just work.
