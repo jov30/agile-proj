@@ -394,14 +394,17 @@
 
   .street-gallery {
     position: relative;
-    padding: clamp(1.15rem, 2.4vw, 1.85rem);
-    border-radius: 32px;
-    border: 1px solid rgba(112, 85, 66, 0.12);
-    background:
-      radial-gradient(circle at 12% 0%, rgba(255, 223, 146, 0.2), transparent 42%),
-      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(247, 236, 220, 0.92)),
-      #fff;
-    box-shadow: 0 20px 40px rgba(53, 30, 20, 0.08);
+    margin-top: clamp(3.3rem, 7.8vw, 6rem);
+    padding: 0;
+    border-radius: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .street-gallery.section-panel::before {
+    content: none;
   }
 
   .street-gallery__header {
@@ -411,7 +414,7 @@
     justify-content: center;
     gap: 1rem;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
   }
 
   .street-gallery__header-copy {
@@ -483,6 +486,10 @@
     z-index: 1;
     overflow-x: auto;
     padding-bottom: 0.45rem;
+    margin-left: calc(-1 * clamp(0.8rem, 2vw, 1.3rem));
+    margin-right: calc(50% - 50vw);
+    padding-left: clamp(0.8rem, 2vw, 1.3rem);
+    padding-right: max(0.35rem, env(safe-area-inset-right));
     scroll-behavior: smooth;
     scroll-snap-type: x proximity;
     scrollbar-width: thin;
@@ -507,7 +514,7 @@
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: minmax(248px, 270px);
-    gap: 0.85rem;
+    gap: 1.3rem;
     width: max-content;
   }
 
@@ -692,7 +699,16 @@
     }
 
     .street-gallery__grid {
+      gap: 0.75rem;
       grid-auto-columns: minmax(78vw, 260px);
+    }
+
+    .street-gallery {
+      margin-top: clamp(1.2rem, 4vw, 1.9rem);
+    }
+
+    .street-gallery__header {
+      margin-bottom: 1rem;
     }
   }
 </style>
