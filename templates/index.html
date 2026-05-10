@@ -290,6 +290,10 @@
     font-size: 0.84rem;
   }
 
+  .homepage-flow + .street-gallery {
+    margin-top: clamp(1.6rem, 4vw, 3rem);
+  }
+
   .launchpad__header,
   .support-story__copy,
   .support-story__panel {
@@ -914,6 +918,7 @@
   }
 
   @media (max-width: 1180px) {
+    .homepage-flow__grid,
     .launchpad__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -922,6 +927,7 @@
   @media (max-width: 1080px) {
     .live-ops__grid,
     .support-story,
+    .homepage-flow__header,
     .launchpad__header,
     .street-gallery__header,
     .street-inspiration__header {
@@ -964,6 +970,7 @@
 
   @media (max-width: 720px) {
     .landing-hero--minimal,
+    .homepage-flow,
     .live-ops,
     .launchpad,
     .street-gallery,
@@ -977,6 +984,42 @@
       max-width: 24rem;
       justify-self: center;
       margin-top: 0.25rem;
+    }
+
+    .homepage-flow__header {
+      align-items: flex-start;
+      text-align: left;
+      margin-bottom: 0.8rem;
+    }
+
+    .homepage-flow__header h2 {
+      font-size: 1.45rem;
+    }
+
+    .homepage-flow__header p {
+      max-width: none;
+      line-height: 1.45;
+    }
+
+    .homepage-flow__grid {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(14.5rem, 78vw);
+      grid-template-columns: none;
+      overflow-x: auto;
+      padding-bottom: 0.35rem;
+      scroll-snap-type: x proximity;
+    }
+
+    .homepage-flow__step {
+      min-height: 8.6rem;
+      padding: 0.9rem;
+      border-radius: 18px;
+      scroll-snap-align: start;
+    }
+
+    .homepage-flow__step p {
+      line-height: 1.38;
     }
 
     .landing-hero__visual {
