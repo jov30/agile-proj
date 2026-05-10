@@ -675,10 +675,11 @@
   .menu-cart-dock {
     position: fixed;
     left: 50%;
-    bottom: 1rem;
-    z-index: 40;
+    bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    z-index: 245;
     width: min(1080px, calc(100vw - 2rem));
     transform: translateX(-50%);
+    pointer-events: auto;
   }
 
   .menu-cart-dock[hidden] {
@@ -697,7 +698,10 @@
     background:
       linear-gradient(180deg, rgba(35, 24, 20, 0.96), rgba(23, 19, 21, 0.94)),
       rgba(32, 23, 19, 0.92);
-    box-shadow: var(--shadow-strong);
+    box-shadow:
+      0 10px 28px rgba(0, 0, 0, 0.22),
+      0 22px 56px rgba(53, 30, 20, 0.18),
+      0 0 0 1px rgba(255, 216, 115, 0.12);
   }
 
   .menu-cart-dock__summary {
@@ -892,8 +896,9 @@
     }
 
     .menu-cart-dock {
-      bottom: 0.75rem;
+      bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
       width: calc(100vw - 1rem);
+      z-index: 999;
     }
 
     .menu-cart-dock__inner {
@@ -1063,8 +1068,6 @@
   </div>
 </section>
 
-<div id="menu-cart-dock" class="menu-cart-dock" hidden aria-live="polite"></div>
-
 <template id="menu-card-template">
   <article class="menu-card">
     <div class="menu-card__media">
@@ -1091,6 +1094,10 @@
     </div>
   </article>
 </template>
+{% endblock %}
+
+{% block after_main %}
+<div id="menu-cart-dock" class="menu-cart-dock" hidden aria-live="polite"></div>
 {% endblock %}
 
 {% block scripts %}
