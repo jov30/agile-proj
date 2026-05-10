@@ -595,6 +595,195 @@
     text-overflow: ellipsis;
   }
 
+  .street-inspiration {
+    position: relative;
+    margin-top: clamp(2.5rem, 6vw, 4.5rem);
+    padding: 0;
+    border-radius: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .street-inspiration.section-panel::before {
+    content: none;
+  }
+
+  .street-inspiration__header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .street-inspiration__header-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+  }
+
+  .street-inspiration__header h2 {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.42rem 0.92rem 0.34rem;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 95, 106, 0.42);
+    font-family: "Bebas Neue", "Bricolage Grotesque", sans-serif;
+    font-size: clamp(2.05rem, 4.2vw, 3rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: #0a3d42;
+    background: linear-gradient(180deg, #b6edd8 0%, #9ee8c8 100%);
+    box-shadow:
+      0 5px 0 rgba(0, 95, 106, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .street-inspiration__header p {
+    margin: 0.4rem 0 0;
+    max-width: 50ch;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .street-inspiration__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .street-inspiration__hint {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+    margin-right: 0.12rem;
+  }
+
+  .street-inspiration__control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid rgba(112, 85, 66, 0.18);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0;
+    color: #3d2518;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(53, 30, 20, 0.08);
+    cursor: pointer;
+    transition: background 180ms ease, border-color 180ms ease, transform 140ms ease, box-shadow 180ms ease;
+  }
+
+  .street-inspiration__control:hover {
+    background: rgba(0, 111, 116, 0.08);
+    border-color: rgba(0, 111, 116, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 111, 116, 0.12);
+  }
+
+  .street-inspiration__control:active {
+    transform: scale(0.94);
+    box-shadow: 0 1px 4px rgba(53, 30, 20, 0.1);
+  }
+
+  .street-inspiration__control svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+
+  .street-inspiration__rail {
+    position: relative;
+    z-index: 1;
+    overflow-x: auto;
+    padding-bottom: 0.45rem;
+    margin-left: calc(-1 * clamp(0.8rem, 2vw, 1.3rem));
+    margin-right: calc(50% - 50vw);
+    padding-left: clamp(0.8rem, 2vw, 1.3rem);
+    padding-right: max(0.35rem, env(safe-area-inset-right));
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .street-inspiration__rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .street-inspiration__grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(260px, 290px);
+    gap: 1.3rem;
+    width: max-content;
+  }
+
+  .inspiration-card {
+    display: block;
+    width: min(290px, calc(100vw - 3.2rem));
+    overflow: hidden;
+    border-radius: var(--radius-xl, 18px);
+    border: 1px solid var(--line-soft, rgba(112, 85, 66, 0.12));
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 18px 36px rgba(53, 30, 20, 0.08);
+    scroll-snap-align: start;
+    transition: background 220ms ease, transform 220ms ease;
+  }
+
+  .inspiration-card:hover {
+    background: rgba(255, 255, 255, 0.92);
+    transform: translateY(-2px);
+  }
+
+  .inspiration-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    border-bottom: 1px solid rgba(112, 85, 66, 0.1);
+  }
+
+  .inspiration-card__body {
+    padding: 0.85rem 0.95rem 1rem;
+  }
+
+  .inspiration-card h3 {
+    margin: 0.55rem 0 0.35rem;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.08rem;
+    line-height: 1.25;
+  }
+
+  .inspiration-card p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
   .support-story {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
@@ -640,13 +829,15 @@
     .live-ops__grid,
     .support-story,
     .launchpad__header,
-    .street-gallery__header {
+    .street-gallery__header,
+    .street-inspiration__header {
       flex-direction: column;
       align-items: center;
       gap: 0.75rem;
     }
 
-    .street-gallery__controls {
+    .street-gallery__controls,
+    .street-inspiration__controls {
       position: static;
       transform: none;
     }
@@ -682,6 +873,7 @@
     .live-ops,
     .launchpad,
     .street-gallery,
+    .street-inspiration,
     .support-story {
       padding: 1rem;
     }
@@ -756,6 +948,51 @@
 
     .street-gallery__header {
       margin-bottom: 1rem;
+    }
+
+    .street-inspiration {
+      margin-top: clamp(1.2rem, 4vw, 1.9rem);
+    }
+
+    .street-inspiration__header {
+      margin-bottom: 1rem;
+    }
+
+    .street-inspiration__controls {
+      width: auto;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .street-inspiration__hint {
+      display: none;
+    }
+
+    .street-inspiration__control {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .street-inspiration__control svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .street-inspiration__rail {
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .street-inspiration__grid {
+      gap: 0.75rem;
+      grid-auto-columns: minmax(220px, 260px);
+    }
+
+    .inspiration-card {
+      width: 260px;
     }
   }
 </style>
@@ -1005,6 +1242,115 @@
   </div>
 </section>
 
+<section class="street-inspiration section-panel">
+  <div class="street-inspiration__header">
+    <div class="street-inspiration__header-copy">
+      <h2>Street Food Inspiration</h2>
+      <p>The images and stories behind the MCQ street-food identity — from Ben Thanh Market to night-stall grills.</p>
+    </div>
+    <div class="street-inspiration__controls" aria-label="Inspiration gallery controls">
+      <span class="street-inspiration__hint">Swipe or slide</span>
+      <button
+        class="street-inspiration__control"
+        type="button"
+        data-inspiration-shift="-1"
+        aria-label="Scroll inspiration left"
+      >
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button
+        class="street-inspiration__control"
+        type="button"
+        data-inspiration-shift="1"
+        aria-label="Scroll inspiration right"
+      >
+        <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="street-inspiration__rail" id="street-inspiration-rail">
+  <div class="street-inspiration__grid">
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}" alt="Ben Thanh Market inspired artwork" />
+      <div class="inspiration-card__body">
+        <h3>Ben Thanh Signature</h3>
+        <p>Your attached Ben Thanh illustration now anchors the Saigon identity instead of being a loose reference.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/street-food-life.jpg') }}" alt="Street food scene inspiration" />
+      <div class="inspiration-card__body">
+        <h3>Street-side Energy</h3>
+        <p>Used to bring in the feel of everyday Vietnamese food culture and a busier, more lived-in atmosphere.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-1.jpg') }}" alt="Vietnamese tray meal with herbs and noodles" />
+      <div class="inspiration-card__body">
+        <h3>Tray-and-Herb Street Detail</h3>
+        <p>This image adds a more casual curb-side meal moment and helps the feature pages feel less repetitive.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-4.jpg') }}" alt="Vietnamese floating market boats" />
+      <div class="inspiration-card__body">
+        <h3>Floating Market Colour</h3>
+        <p>Boat markets add a broader Vietnam mood and make the brand world feel bigger than one single food counter.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-5.jpg') }}" alt="Vietnamese produce market stall" />
+      <div class="inspiration-card__body">
+        <h3>Wet Market Produce</h3>
+        <p>Vegetable baskets and market colour help the site feel rooted in daily Vietnamese food culture, not just plated dishes.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-6.jpg') }}" alt="Vietnamese grilled meat over open flame" />
+      <div class="inspiration-card__body">
+        <h3>Charcoal Grill Heat</h3>
+        <p>This adds real night-stall intensity and gives the homepage a hotter, more energetic food-street feeling.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-7.jpg') }}" alt="Vietnamese shrimp rice paper rolls" />
+      <div class="inspiration-card__body">
+        <h3>Fresh Roll Texture</h3>
+        <p>Transparent rice paper and dipping sauce introduce a cleaner, cooler visual note among the hotter grill scenes.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-8.jpg') }}" alt="Vietnamese banh xeo cooking and serving" />
+      <div class="inspiration-card__body">
+        <h3>Kitchen-to-Plate Motion</h3>
+        <p>The split cooking-and-plating shot helps communicate that MCQ is both a real kitchen and a digital ordering experience.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-9.jpg') }}" alt="Vietnamese skewers and fish balls street stall" />
+      <div class="inspiration-card__body">
+        <h3>Skewer Bar Variety</h3>
+        <p>Rows of skewers and snacks make the site feel fuller and more spontaneous, like browsing a real street-food lane.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/streetfood-10.jpg') }}" alt="Vietnamese market grill and skewer spread" />
+      <div class="inspiration-card__body">
+        <h3>Street Stall Abundance</h3>
+        <p>The dense market spread pushes the overall design closer to a lively Saigon snack counter instead of a quiet cafe layout.</p>
+      </div>
+    </article>
+    <article class="inspiration-card">
+      <img src="{{ url_for('static', filename='images/inspiration/noodle-bowl-unsplash.jpg') }}" alt="Vietnamese noodle bowl inspiration" />
+      <div class="inspiration-card__body">
+        <h3>Bowl-Led Appetite Appeal</h3>
+        <p>A strong food close-up still matters, so the noodle bowl stays as a cleaner appetite anchor among the busier street scenes.</p>
+      </div>
+    </article>
+  </div>
+  </div>
+</section>
+
 <section class="support-story section-panel">
   <div class="support-story__copy">
     <p class="eyebrow">MCQ Supermarket</p>
@@ -1059,16 +1405,30 @@
     const galleryRail = document.getElementById('street-gallery-rail');
     const galleryButtons = document.querySelectorAll('[data-gallery-shift]');
 
-    if (!galleryRail || !galleryButtons.length) return;
-
-    galleryButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const card = galleryRail.querySelector('.gallery-card');
-        const step = card ? card.getBoundingClientRect().width + 16 : galleryRail.clientWidth * 0.8;
-        const direction = Number(button.dataset.galleryShift || '1');
-        galleryRail.scrollBy({ left: step * direction, behavior: 'smooth' });
+    if (galleryRail && galleryButtons.length) {
+      galleryButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const card = galleryRail.querySelector('.gallery-card');
+          const step = card ? card.getBoundingClientRect().width + 16 : galleryRail.clientWidth * 0.8;
+          const direction = Number(button.dataset.galleryShift || '1');
+          galleryRail.scrollBy({ left: step * direction, behavior: 'smooth' });
+        });
       });
-    });
+    }
+
+    const inspirationRail = document.getElementById('street-inspiration-rail');
+    const inspirationButtons = document.querySelectorAll('[data-inspiration-shift]');
+
+    if (inspirationRail && inspirationButtons.length) {
+      inspirationButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const card = inspirationRail.querySelector('.inspiration-card');
+          const step = card ? card.getBoundingClientRect().width + 16 : inspirationRail.clientWidth * 0.8;
+          const direction = Number(button.dataset.inspirationShift || '1');
+          inspirationRail.scrollBy({ left: step * direction, behavior: 'smooth' });
+        });
+      });
+    }
   })();
 </script>
 {% endblock %}
