@@ -293,7 +293,9 @@
   }
 
   .menu-browser {
-    padding: clamp(1.3rem, 3vw, 2rem);
+    --menu-browser-pad: clamp(1.3rem, 3vw, 2rem);
+    padding: var(--menu-browser-pad);
+    padding-bottom: calc(var(--menu-browser-pad) + var(--menu-cart-dock-clearance, 0px));
   }
 
   .menu-browser__header {
@@ -741,9 +743,14 @@
 
   @media (max-width: 720px) {
     .menu-hero,
-    .menu-utility,
-    .menu-browser {
+    .menu-utility {
       padding: 1.2rem;
+    }
+
+    .menu-browser {
+      --menu-browser-pad: 1.2rem;
+      padding: var(--menu-browser-pad);
+      padding-bottom: calc(var(--menu-browser-pad) + var(--menu-cart-dock-clearance, 0px));
     }
 
     .menu-hero {
@@ -1163,11 +1170,29 @@ function modeLabel(mode) {
   return mode === 'scheduled' ? 'Scheduled Pickup' : 'Instant Queue';
 }
 
+function syncMenuCartDockClearance() {
+  if (!cartDockEl) return;
+  const root = document.documentElement;
+  if (cartDockEl.hidden) {
+    root.style.removeProperty('--menu-cart-dock-clearance');
+    return;
+  }
+  requestAnimationFrame(() => {
+    const styles = getComputedStyle(cartDockEl);
+    const bottomInset = parseFloat(styles.bottom);
+    const bottomSafe = Number.isFinite(bottomInset) ? bottomInset : 0;
+    const gapPx = 12;
+    const h = cartDockEl.offsetHeight;
+    root.style.setProperty('--menu-cart-dock-clearance', `${h + bottomSafe + gapPx}px`);
+  });
+}
+
 function renderCartDock(cartPayload) {
   if (!cartDockEl) return;
   if (!cartPayload || !cartPayload.item_count) {
     cartDockEl.hidden = true;
     cartDockEl.innerHTML = '';
+    syncMenuCartDockClearance();
     return;
   }
 
@@ -1186,6 +1211,7 @@ function renderCartDock(cartPayload) {
       </div>
     </div>
   `;
+  syncMenuCartDockClearance();
 }
 
 async function refreshCartSnapshot() {
@@ -1198,6 +1224,8 @@ async function refreshCartSnapshot() {
     console.warn('Cart snapshot unavailable', error);
   }
 }
+
+window.addEventListener('resize', () => syncMenuCartDockClearance(), { passive: true });
 
 fetch(menuDataUrl)
   .then((resp) => resp.json())
