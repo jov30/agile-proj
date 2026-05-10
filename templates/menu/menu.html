@@ -1158,6 +1158,8 @@ let menuCategories = [];
 const searchInput = document.getElementById('menu-search');
 let activeCategoryIndex = 0;
 let searchTimer = null;
+let searchSeq = 0;
+let searchAbort = null;
 const cartQtyById = new Map();
 
 function escapeHtml(value) {
@@ -1250,22 +1252,7 @@ fetch(menuDataUrl)
     itemsEl.innerHTML = '<p class="menu-error">Unable to load the menu right now. Please try again soon.</p>';
   });
 
-function ingredientBlob(item) {
-  const parts = [];
-  (item.sections || []).forEach((sec) => {
-    (sec.items || []).forEach((entry) => parts.push(entry));
-  });
-  return parts.join(' ');
-}
-
-function itemMatchesQuery(item, q) {
-  if (!q) return true;
-  const hay = [item.name || '', item.summary || '', ingredientBlob(item)].join(' ').toLowerCase();
-  return hay.includes(q);
-}
-
-function renderSearchResults(q) {
-  // Clear active tab highlight while searching.
+function renderSearchResultsFromCategories(categories, displayQuery) {
   document.querySelectorAll('.menu-category-tab').forEach((tab) => {
     tab.classList.remove('is-active');
     tab.setAttribute('aria-selected', 'false');
@@ -1273,15 +1260,13 @@ function renderSearchResults(q) {
 
   noteEl.hidden = true;
   noteEl.innerHTML = '';
-  activeCategoryEl.textContent = `Search: “${q}”`;
+  activeCategoryEl.textContent = `Search: “${displayQuery}”`;
   heroImg && (heroImg.src = staticBase + (menuCategories[activeCategoryIndex]?.image || 'images/menu/pho-classic.jpg'));
 
   const matches = [];
-  menuCategories.forEach((cat) => {
+  (categories || []).forEach((cat) => {
     (cat.items || []).forEach((item) => {
-      if (itemMatchesQuery(item, q)) {
-        matches.push({ categoryTitle: cat.title, item });
-      }
+      matches.push({ categoryTitle: cat.title, item });
     });
   });
 
@@ -1298,15 +1283,48 @@ function renderSearchResults(q) {
   itemsEl.appendChild(fragment);
 }
 
-  if (searchInput) {
+if (searchInput) {
   searchInput.addEventListener('input', () => {
     window.clearTimeout(searchTimer);
-    searchTimer = window.setTimeout(() => {
-      const q = searchInput.value.trim().toLowerCase();
-      if (q) {
-        renderSearchResults(q);
-      } else {
+    searchTimer = window.setTimeout(async () => {
+      const rawQ = searchInput.value.trim();
+      if (!rawQ) {
+        searchAbort?.abort();
         renderCategory(activeCategoryIndex);
+        return;
+      }
+
+      const seq = ++searchSeq;
+      searchAbort?.abort();
+      const ctrl = new AbortController();
+      searchAbort = ctrl;
+
+      document.querySelectorAll('.menu-category-tab').forEach((tab) => {
+        tab.classList.remove('is-active');
+        tab.setAttribute('aria-selected', 'false');
+      });
+      noteEl.hidden = true;
+      noteEl.innerHTML = '';
+      activeCategoryEl.textContent = `Search: “${rawQ}”`;
+      heroImg && (heroImg.src = staticBase + (menuCategories[activeCategoryIndex]?.image || 'images/menu/pho-classic.jpg'));
+      itemsEl.innerHTML = '<p class="menu-feedback" role="status">Searching…</p>';
+
+      try {
+        const u = new URL(menuDataUrl, window.location.origin);
+        u.searchParams.set('q', rawQ);
+        const resp = await fetch(u.toString(), {
+          signal: ctrl.signal,
+          headers: { Accept: 'application/json' },
+        });
+        if (seq !== searchSeq) return;
+        if (!resp.ok) throw new Error('Search failed');
+        const data = await resp.json();
+        if (seq !== searchSeq) return;
+        renderSearchResultsFromCategories(data.categories || [], rawQ);
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        if (seq !== searchSeq) return;
+        itemsEl.innerHTML = '<p class="menu-error">Unable to search right now. Please try again.</p>';
       }
     }, 140);
   });
