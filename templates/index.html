@@ -690,144 +690,6 @@
   </div>
 </section>
 
-<section class="live-ops section-panel" id="live-ordering">
-  <div class="live-ops__grid">
-    <div>
-      <p class="eyebrow">Live ordering status</p>
-      <h2 class="section-title">Realtime queue and pickup availability</h2>
-      <p class="section-copy">
-        These widgets reflect the current queue load and scheduled pickup planner, so customers know whether to order now
-        or move to a booked slot before they reach checkout.
-      </p>
-      <div class="live-ops__stats">
-        <article class="live-ops__card">
-          <strong>{{ ordering_snapshot.instant_queue.active_count }}/{{ ordering_snapshot.instant_queue.max_active_orders }}</strong>
-          <span>
-            Active instant orders at {{ ordering_snapshot.instant_queue.counter_label }}.
-            Next live ticket is #{{ "%03d"|format(ordering_snapshot.instant_queue.next_queue_number) }}.
-          </span>
-        </article>
-        <article class="live-ops__card">
-          <strong>{{ ordering_snapshot.instant_queue.quoted_wait_minutes }} min</strong>
-          <span>
-            Current instant ETA baseline from {{ ordering_snapshot.instant_queue.kitchen_active_count }} kitchen-active order(s)
-            {% if ordering_snapshot.instant_queue.can_accept %}, ready around {{ ordering_snapshot.instant_queue.estimated_ready_label }}{% endif %}.
-          </span>
-        </article>
-        <article class="live-ops__card">
-          <strong>
-            {% if ordering_snapshot.next_available_pickup %}
-              {{ ordering_snapshot.next_available_pickup.time_label }}
-            {% else %}
-              Unavailable
-            {% endif %}
-          </strong>
-          <span>
-            {% if ordering_snapshot.next_available_pickup %}
-              Next scheduled slot on {{ ordering_snapshot.next_available_pickup.date_label }}.
-            {% else %}
-              No scheduled slots are currently open.
-            {% endif %}
-          </span>
-        </article>
-      </div>
-    </div>
-
-    <aside class="tracker-card">
-      <div class="tracker-card__stack">
-        <div>
-          <p class="eyebrow">Track order</p>
-          <h2>Open detail or receipt directly</h2>
-          <p class="section-copy">Enter the order number from the receipt to jump straight into live tracking.</p>
-        </div>
-        {% if track_error %}
-          <div class="tracker-error">{{ track_error }}</div>
-        {% endif %}
-        <form method="post" action="{{ url_for('public.track_order') }}" class="tracker-form">
-          <div class="tracker-field">
-            <label for="order_number">Order number</label>
-            <input id="order_number" name="order_number" type="text" value="{{ track_value }}" placeholder="MCQ-20260414-AB12" />
-          </div>
-          <div class="tracker-field">
-            <label for="destination">Open</label>
-            <select id="destination" name="destination">
-              <option value="detail">Order detail</option>
-              <option value="receipt">Receipt</option>
-            </select>
-          </div>
-          <button type="submit" class="button button--primary">Track Order</button>
-        </form>
-        <div class="tracker-note">
-          <strong>{{ ordering_snapshot.ready_count }} ready now</strong>
-          <p>Orders already marked ready for pickup are surfaced across the site through in-app notifications.</p>
-        </div>
-      </div>
-    </aside>
-  </div>
-</section>
-
-<section class="launchpad section-panel">
-  <div class="launchpad__header">
-    <div>
-      <p class="eyebrow">User-side launchpad</p>
-      <h2>Buttons ready for the feature set in the README</h2>
-    </div>
-    <p>
-      The homepage now exposes the planned customer journey more clearly: account setup, menu browsing, cart,
-      instant ordering, scheduled pickup, checkout, receipt, live order tracking, and support.
-    </p>
-  </div>
-  <div class="launchpad__grid">
-    <article class="launch-card">
-      <p class="launch-card__kicker">Account</p>
-      <h3>Get customers in fast</h3>
-      <p>Keep account entry simple so returning customers can sign in quickly before placing or tracking an order.</p>
-      <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/register">Register</a>
-        <a class="feature-button" href="/login">Login</a>
-      </div>
-    </article>
-    <article class="launch-card">
-      <p class="launch-card__kicker">Ordering</p>
-      <h3>Cover both ordering paths</h3>
-      <p>These buttons map directly to the two real customer journeys and both start in the menu, where customers choose dishes first.</p>
-      <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/menu?fulfillment=instant">Instant Menu</a>
-        <a class="feature-button" href="/menu?fulfillment=scheduled">Scheduled Menu</a>
-        <a class="feature-button" href="/cart?fulfillment=instant">Cart</a>
-      </div>
-    </article>
-    <article class="launch-card">
-      <p class="launch-card__kicker">Checkout Flow</p>
-      <h3>Keep the next step obvious</h3>
-      <p>Once dishes are in the cart, customers can move into instant checkout, scheduled pickup planning, or order history without detours.</p>
-      <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/checkout?fulfillment=instant">Instant Checkout</a>
-        <a class="feature-button" href="/pickup-planner?fulfillment=scheduled">Scheduled Pickup</a>
-        <a class="feature-button" href="/orders">Order History</a>
-      </div>
-    </article>
-    <article class="launch-card">
-      <p class="launch-card__kicker">Tracking</p>
-      <h3>Receipts and live updates</h3>
-      <p>Customers can jump back into tracking, receipt lookup, and live pickup notifications from one clear section.</p>
-      <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="/orders">Open Orders</a>
-        <a class="feature-button" href="#live-ordering">Track by Order Number</a>
-      </div>
-    </article>
-    <article class="launch-card">
-      <p class="launch-card__kicker">Support</p>
-      <h3>Help is always nearby</h3>
-      <p>The floating chatbox and phone contact keep help visible without interrupting the main ordering path.</p>
-      <div class="launch-card__actions">
-        <a class="feature-button feature-button--accent" href="tel:+61892485623">Call 08 9248 5623</a>
-        <a class="feature-button" href="tel:+61892485623">08 9248 5623</a>
-      </div>
-    </article>
-  </div>
-</section>
-
 <section class="street-gallery section-panel">
   <div class="street-gallery__header">
     <div class="street-gallery__header-copy">
@@ -979,6 +841,144 @@
       </div>
     </article>
   </div>
+  </div>
+</section>
+
+<section class="live-ops section-panel" id="live-ordering">
+  <div class="live-ops__grid">
+    <div>
+      <p class="eyebrow">Live ordering status</p>
+      <h2 class="section-title">Realtime queue and pickup availability</h2>
+      <p class="section-copy">
+        These widgets reflect the current queue load and scheduled pickup planner, so customers know whether to order now
+        or move to a booked slot before they reach checkout.
+      </p>
+      <div class="live-ops__stats">
+        <article class="live-ops__card">
+          <strong>{{ ordering_snapshot.instant_queue.active_count }}/{{ ordering_snapshot.instant_queue.max_active_orders }}</strong>
+          <span>
+            Active instant orders at {{ ordering_snapshot.instant_queue.counter_label }}.
+            Next live ticket is #{{ "%03d"|format(ordering_snapshot.instant_queue.next_queue_number) }}.
+          </span>
+        </article>
+        <article class="live-ops__card">
+          <strong>{{ ordering_snapshot.instant_queue.quoted_wait_minutes }} min</strong>
+          <span>
+            Current instant ETA baseline from {{ ordering_snapshot.instant_queue.kitchen_active_count }} kitchen-active order(s)
+            {% if ordering_snapshot.instant_queue.can_accept %}, ready around {{ ordering_snapshot.instant_queue.estimated_ready_label }}{% endif %}.
+          </span>
+        </article>
+        <article class="live-ops__card">
+          <strong>
+            {% if ordering_snapshot.next_available_pickup %}
+              {{ ordering_snapshot.next_available_pickup.time_label }}
+            {% else %}
+              Unavailable
+            {% endif %}
+          </strong>
+          <span>
+            {% if ordering_snapshot.next_available_pickup %}
+              Next scheduled slot on {{ ordering_snapshot.next_available_pickup.date_label }}.
+            {% else %}
+              No scheduled slots are currently open.
+            {% endif %}
+          </span>
+        </article>
+      </div>
+    </div>
+
+    <aside class="tracker-card">
+      <div class="tracker-card__stack">
+        <div>
+          <p class="eyebrow">Track order</p>
+          <h2>Open detail or receipt directly</h2>
+          <p class="section-copy">Enter the order number from the receipt to jump straight into live tracking.</p>
+        </div>
+        {% if track_error %}
+          <div class="tracker-error">{{ track_error }}</div>
+        {% endif %}
+        <form method="post" action="{{ url_for('public.track_order') }}" class="tracker-form">
+          <div class="tracker-field">
+            <label for="order_number">Order number</label>
+            <input id="order_number" name="order_number" type="text" value="{{ track_value }}" placeholder="MCQ-20260414-AB12" />
+          </div>
+          <div class="tracker-field">
+            <label for="destination">Open</label>
+            <select id="destination" name="destination">
+              <option value="detail">Order detail</option>
+              <option value="receipt">Receipt</option>
+            </select>
+          </div>
+          <button type="submit" class="button button--primary">Track Order</button>
+        </form>
+        <div class="tracker-note">
+          <strong>{{ ordering_snapshot.ready_count }} ready now</strong>
+          <p>Orders already marked ready for pickup are surfaced across the site through in-app notifications.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="launchpad section-panel">
+  <div class="launchpad__header">
+    <div>
+      <p class="eyebrow">User-side launchpad</p>
+      <h2>Buttons ready for the feature set in the README</h2>
+    </div>
+    <p>
+      The homepage now exposes the planned customer journey more clearly: account setup, menu browsing, cart,
+      instant ordering, scheduled pickup, checkout, receipt, live order tracking, and support.
+    </p>
+  </div>
+  <div class="launchpad__grid">
+    <article class="launch-card">
+      <p class="launch-card__kicker">Account</p>
+      <h3>Get customers in fast</h3>
+      <p>Keep account entry simple so returning customers can sign in quickly before placing or tracking an order.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/register">Register</a>
+        <a class="feature-button" href="/login">Login</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Ordering</p>
+      <h3>Cover both ordering paths</h3>
+      <p>These buttons map directly to the two real customer journeys and both start in the menu, where customers choose dishes first.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/menu?fulfillment=instant">Instant Menu</a>
+        <a class="feature-button" href="/menu?fulfillment=scheduled">Scheduled Menu</a>
+        <a class="feature-button" href="/cart?fulfillment=instant">Cart</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Checkout Flow</p>
+      <h3>Keep the next step obvious</h3>
+      <p>Once dishes are in the cart, customers can move into instant checkout, scheduled pickup planning, or order history without detours.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/checkout?fulfillment=instant">Instant Checkout</a>
+        <a class="feature-button" href="/pickup-planner?fulfillment=scheduled">Scheduled Pickup</a>
+        <a class="feature-button" href="/orders">Order History</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Tracking</p>
+      <h3>Receipts and live updates</h3>
+      <p>Customers can jump back into tracking, receipt lookup, and live pickup notifications from one clear section.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="/orders">Open Orders</a>
+        <a class="feature-button" href="#live-ordering">Track by Order Number</a>
+      </div>
+    </article>
+    <article class="launch-card">
+      <p class="launch-card__kicker">Support</p>
+      <h3>Help is always nearby</h3>
+      <p>The floating chatbox and phone contact keep help visible without interrupting the main ordering path.</p>
+      <div class="launch-card__actions">
+        <a class="feature-button feature-button--accent" href="tel:+61892485623">Call 08 9248 5623</a>
+        <a class="feature-button" href="tel:+61892485623">08 9248 5623</a>
+      </div>
+    </article>
   </div>
 </section>
 
