@@ -496,10 +496,10 @@
   {% if not orders and not total_order_count %}
     <section class="orders-empty section-panel">
       <p class="eyebrow">Order archive</p>
-      <h1>No pickup orders have been placed in this browser session yet.</h1>
+      <h1>No orders have been placed yet!</h1>
       <p>
-        Once checkout is completed, the order record is written to SQLite, the receipt becomes available,
-        and the entry appears here for filtering, detail viewing, and one-click reorder.
+Once you place an order, it’ll show up here—complete with your receipt, 
+easy filtering, and a one-click reorder option. Your order is saved securely in our system so you can track it anytime.
       </p>
       <div class="orders-empty__actions">
         <a href="{{ url_for('public.menu') }}" class="button button--primary">Browse menu</a>

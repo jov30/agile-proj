@@ -1591,10 +1591,6 @@
     <div>
       <p class="eyebrow">Live ordering status</p>
       <h2 class="section-title">Realtime queue and pickup availability</h2>
-      <p class="section-copy">
-        These widgets reflect the current queue load and scheduled pickup planner, so customers know whether to order now
-        or move to a booked slot before they reach checkout.
-      </p>
       <div class="live-ops__stats">
         <article class="live-ops__card">
           <strong>{{ ordering_snapshot.instant_queue.active_count }}/{{ ordering_snapshot.instant_queue.max_active_orders }}</strong>
@@ -1642,7 +1638,7 @@
         <form method="post" action="{{ url_for('public.track_order') }}" class="tracker-form">
           <div class="tracker-field">
             <label for="order_number">Order number</label>
-            <input id="order_number" name="order_number" type="text" value="{{ track_value }}" placeholder="MCQ-20260414-AB12" />
+            <input id="order_number" name="order_number" type="text" value="{{ track_value }}" placeholder="E.g. MCQ-20260414-AB12" />
           </div>
           <div class="tracker-field">
             <label for="destination">Open</label>
@@ -1666,7 +1662,7 @@
   <div class="street-inspiration__header">
     <div class="street-inspiration__header-copy">
       <h2>Street Food Inspiration</h2>
-      <p>The images and stories behind the MCQ street-food identity — from Ben Thanh Market to night-stall grills.</p>
+      <p>The images and stories behind the MCQ street food identity, from the Ben Thanh Market to night-stall grills.</p>
     </div>
     <div class="street-inspiration__controls" aria-label="Inspiration gallery controls">
       <span class="street-inspiration__hint">Swipe or slide</span>
@@ -1694,42 +1690,42 @@
       <img src="{{ url_for('static', filename='images/brand/benthanh.jpg') }}" alt="Ben Thanh Market inspired artwork" />
       <div class="inspiration-card__body">
         <h3>Ben Thanh Signature</h3>
-        <p>Your attached Ben Thanh illustration now anchors the Saigon identity instead of being a loose reference.</p>
+        <p>Our Ben Thanh illustration anchors MCQ in the heart of Saigon, reflecting the vibrant energy and culture that inspire every dish we serve.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/street-food-life.jpg') }}" alt="Street food scene inspiration" />
       <div class="inspiration-card__body">
         <h3>Street-side Energy</h3>
-        <p>Used to bring in the feel of everyday Vietnamese food culture and a busier, more lived-in atmosphere.</p>
+        <p>The buzz of Saigon’s streets comes alive in MCQ’s menu and atmosphere bringing the everyday energy of Vietnamese street food straight to your table.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/streetfood-1.jpg') }}" alt="Vietnamese tray meal with herbs and noodles" />
       <div class="inspiration-card__body">
         <h3>Tray-and-Herb Street Detail</h3>
-        <p>This image adds a more casual curb-side meal moment and helps the feature pages feel less repetitive.</p>
+        <p>From casual trays of fresh herbs to perfectly balanced meals, MCQ captures the authentic curb-side moments that make Vietnamese food so special.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/streetfood-4.jpg') }}" alt="Vietnamese floating market boats" />
       <div class="inspiration-card__body">
         <h3>Floating Market Colour</h3>
-        <p>Boat markets add a broader Vietnam mood and make the brand world feel bigger than one single food counter.</p>
+        <p>The colors and textures of Vietnam’s floating markets inspire the variety and freshness you’ll find in every MCQ dish.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/streetfood-5.jpg') }}" alt="Vietnamese produce market stall" />
       <div class="inspiration-card__body">
         <h3>Wet Market Produce</h3>
-        <p>Vegetable baskets and market colour help the site feel rooted in daily Vietnamese food culture, not just plated dishes.</p>
+        <p>Vegetable baskets and market stalls remind us why MCQ focuses on fresh, vibrant ingredients that bring daily Vietnamese flavors to life.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/streetfood-6.jpg') }}" alt="Vietnamese grilled meat over open flame" />
       <div class="inspiration-card__body">
         <h3>Charcoal Grill Heat</h3>
-        <p>This adds real night-stall intensity and gives the homepage a hotter, more energetic food-street feeling.</p>
+        <p>Night-stall grills inspire the smoky, sizzling flavors that give MCQ dishes their unforgettable heat and energy.</p>
       </div>
     </article>
     <article class="inspiration-card">
@@ -1743,28 +1739,28 @@
       <img src="{{ url_for('static', filename='images/inspiration/streetfood-8.jpg') }}" alt="Vietnamese banh xeo cooking and serving" />
       <div class="inspiration-card__body">
         <h3>Kitchen-to-Plate Motion</h3>
-        <p>The split cooking-and-plating shot helps communicate that MCQ is both a real kitchen and a digital ordering experience.</p>
+        <p>Transparent rice paper, fresh herbs, and dipping sauces; MCQ brings the delicate textures and freshness of Vietnamese rolls to every plate.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/streetfood-9.jpg') }}" alt="Vietnamese skewers and fish balls street stall" />
       <div class="inspiration-card__body">
         <h3>Skewer Bar Variety</h3>
-        <p>Rows of skewers and snacks make the site feel fuller and more spontaneous, like browsing a real street-food lane.</p>
+        <p>Rows of skewers and bites reflect the spontaneity and variety of Saigon street food; MCQ brings that lively street vibe to every visit.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/streetfood-10.jpg') }}" alt="Vietnamese market grill and skewer spread" />
       <div class="inspiration-card__body">
         <h3>Street Stall Abundance</h3>
-        <p>The dense market spread pushes the overall design closer to a lively Saigon snack counter instead of a quiet cafe layout.</p>
+        <p>A full spread of flavors and textures mirrors MCQ’s commitment to abundance, variety, and the joyful experience of Vietnamese street dining.</p>
       </div>
     </article>
     <article class="inspiration-card">
       <img src="{{ url_for('static', filename='images/inspiration/noodle-bowl-unsplash.jpg') }}" alt="Vietnamese noodle bowl inspiration" />
       <div class="inspiration-card__body">
         <h3>Bowl-Led Appetite Appeal</h3>
-        <p>A strong food close-up still matters, so the noodle bowl stays as a cleaner appetite anchor among the busier street scenes.</p>
+        <p>Steaming bowls of noodles and fresh ingredients showcase MCQ’s dedication to meals that satisfy both the eyes and the appetite.</p>
       </div>
     </article>
   </div>
@@ -1778,28 +1774,14 @@
       Need Help?
     </h2>
     <p class="section-copy">
-      Visit our Customer Support for assistance or call us at 08 9248 5623. The floating chatbox now stays pinned to
-      the bottom of the website so customers always have a visible support entry point while browsing.
+Need help? Our Customer Support team is here for you! You can reach us anytime through the chat box, 
+which stays pinned at the bottom of the screen for easy access, or give us a call at 08 9248 5623.
     </p>
     <div class="button-row">
       <a href="tel:+61892485623" class="button button--primary">Call 08 9248 5623</a>
       <a href="#live-ordering" class="button button--secondary">Track Order</a>
       <a href="/menu?fulfillment=instant" class="button button--secondary">Browse Menu</a>
       <a href="/orders" class="button button--secondary">Order History</a>
-    </div>
-  </div>
-  <div class="support-story__panel">
-    <div class="support-card">
-      <strong>Built around the project brief</strong>
-      <span>User registration, login, menu browsing, cart, instant ordering, scheduled pickup, receipt, order history, and support are all represented in the new layout.</span>
-    </div>
-    <div class="support-card">
-      <strong>Chat support entry point</strong>
-      <span>The always-on bottom chatbox is designed as a future customer assistance surface for instant queue, payment, pickup, and order questions.</span>
-    </div>
-    <div class="support-card">
-      <strong>Stronger Vietnam street-food identity</strong>
-      <span>Ben Thanh, market-life photography, your street-food images, and warmer Saigon-inspired materials now shape the whole homepage experience.</span>
     </div>
   </div>
 </section>
