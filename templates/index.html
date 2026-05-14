@@ -1591,10 +1591,6 @@
     <div>
       <p class="eyebrow">Live ordering status</p>
       <h2 class="section-title">Realtime queue and pickup availability</h2>
-      <p class="section-copy">
-        These widgets reflect the current queue load and scheduled pickup planner, so customers know whether to order now
-        or move to a booked slot before they reach checkout.
-      </p>
       <div class="live-ops__stats">
         <article class="live-ops__card">
           <strong>{{ ordering_snapshot.instant_queue.active_count }}/{{ ordering_snapshot.instant_queue.max_active_orders }}</strong>
@@ -1642,7 +1638,7 @@
         <form method="post" action="{{ url_for('public.track_order') }}" class="tracker-form">
           <div class="tracker-field">
             <label for="order_number">Order number</label>
-            <input id="order_number" name="order_number" type="text" value="{{ track_value }}" placeholder="MCQ-20260414-AB12" />
+            <input id="order_number" name="order_number" type="text" value="{{ track_value }}" placeholder="E.g. MCQ-20260414-AB12" />
           </div>
           <div class="tracker-field">
             <label for="destination">Open</label>
@@ -1786,20 +1782,6 @@
       <a href="#live-ordering" class="button button--secondary">Track Order</a>
       <a href="/menu?fulfillment=instant" class="button button--secondary">Browse Menu</a>
       <a href="/orders" class="button button--secondary">Order History</a>
-    </div>
-  </div>
-  <div class="support-story__panel">
-    <div class="support-card">
-      <strong>Built around the project brief</strong>
-      <span>User registration, login, menu browsing, cart, instant ordering, scheduled pickup, receipt, order history, and support are all represented in the new layout.</span>
-    </div>
-    <div class="support-card">
-      <strong>Chat support entry point</strong>
-      <span>The always-on bottom chatbox is designed as a future customer assistance surface for instant queue, payment, pickup, and order questions.</span>
-    </div>
-    <div class="support-card">
-      <strong>Stronger Vietnam street-food identity</strong>
-      <span>Ben Thanh, market-life photography, your street-food images, and warmer Saigon-inspired materials now shape the whole homepage experience.</span>
     </div>
   </div>
 </section>
