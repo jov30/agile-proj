@@ -71,11 +71,6 @@ def _auth_context(
         "form_data": form_data or {"email": "", "password": ""},
         "errors": errors or [],
         "next_url": next_url or "",
-        "admin_demo": {
-            "name": current_app.config["ADMIN_NAME"],
-            "email": current_app.config["ADMIN_EMAIL"],
-            "password": current_app.config["ADMIN_PASSWORD"],
-        },
     }
 
 
@@ -227,13 +222,3 @@ def logout():
     return redirect(url_for("public.home"))
 
 
-@auth_bp.post("/demo/admin-mode")
-def demo_admin_mode():
-    session[SESSION_USER_KEY] = {
-        "name": current_app.config["ADMIN_NAME"],
-        "email": current_app.config["ADMIN_EMAIL"],
-        "role": "admin",
-    }
-    session.modified = True
-    next_url = _safe_next_url(request.form.get("next"))
-    return redirect(next_url or url_for("admin.admin_dashboard"))
