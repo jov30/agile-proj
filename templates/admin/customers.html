@@ -429,8 +429,8 @@
   <section class="admin-panel section-panel">
     <div class="admin-hero__grid">
       <div>
-        <p class="eyebrow">Customer management</p>
-        <h1 class="section-title">Customer accounts</h1>
+        <p class="eyebrow inline-flex items-center gap-2"><i data-lucide="users" class="!w-3.5 !h-3.5"></i>Customer management</p>
+        <h1 class="section-title">Customer <span class="gradient-text">accounts</span></h1>
         <p class="section-copy">
           All registered and guest customers are listed here. Registered accounts have a profile on the system.
           Guest customers have placed at least one order without signing up.
@@ -438,14 +438,23 @@
       </div>
       <div class="admin-hero__stats">
         <a class="admin-stat admin-stat--link {% if account_type == 'all' %}is-active{% endif %}" href="{{ url_for('admin.admin_customers') }}">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 ring-1 ring-amber-300/30 mb-1">
+            <i data-lucide="users-round" class="!w-5 !h-5 text-orange-600"></i>
+          </span>
           <strong>{{ customers|length }}</strong>
           <span>Total customers{% if search_query %} matching "{{ search_query }}"{% endif %}</span>
         </a>
         <a class="admin-stat admin-stat--link {% if account_type == 'registered' %}is-active{% endif %}" href="{{ url_for('admin.admin_customers', account_type='registered') }}">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-green-500/20 ring-1 ring-emerald-300/30 mb-1">
+            <i data-lucide="user-check" class="!w-5 !h-5 text-emerald-600"></i>
+          </span>
           <strong>{{ registered_count }}</strong>
           <span>Registered accounts</span>
         </a>
         <a class="admin-stat admin-stat--link {% if account_type == 'guest' %}is-active{% endif %}" href="{{ url_for('admin.admin_customers', account_type='guest') }}">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-400/20 to-pink-500/20 ring-1 ring-rose-300/30 mb-1">
+            <i data-lucide="user-round" class="!w-5 !h-5 text-rose-600"></i>
+          </span>
           <strong>{{ guest_count }}</strong>
           <span>Guest orderers</span>
         </a>

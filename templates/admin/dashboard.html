@@ -212,33 +212,71 @@
 
 {% block content %}
 <div class="admin-dashboard">
-  <section class="admin-card">
-    <p class="eyebrow">Admin overview</p>
-    <h1 class="section-title">Store operations dashboard</h1>
-    <p class="section-copy">Review orders, pickup status, customers, menu operations, and revenue reporting from one place.</p>
-    <div class="admin-actions">
-      <a class="button button--primary" href="{{ url_for('admin.admin_queue') }}">Open queue</a>
-      <a class="button button--secondary" href="{{ url_for('admin.admin_orders') }}">View orders</a>
-      <a class="button button--secondary" href="{{ url_for('admin.admin_customers') }}">Customers</a>
-      <a class="button button--secondary" href="{{ url_for('admin.admin_menu') }}">Menu items</a>
-      <a class="button button--secondary" href="{{ url_for('admin.admin_vouchers') }}">Vouchers</a>
+  <section class="admin-card reveal-up" style="background: linear-gradient(135deg, #2c201b 0%, #1b1412 60%, #3a2418 100%); border: 0;">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
+      <div class="text-amber-50">
+        <p class="eyebrow inline-flex items-center gap-2" style="background: rgba(255, 216, 115, 0.18); color: var(--brand-gold);"><i data-lucide="layout-dashboard" class="!w-3.5 !h-3.5"></i>Admin overview</p>
+        <h1 class="section-title text-amber-100 !mt-3">Store operations <span class="gradient-text">dashboard</span></h1>
+        <p class="section-copy text-amber-100/70">Review orders, pickup status, customers, menu operations, and revenue reporting from one place.</p>
+        <div class="admin-actions">
+          <a class="button button--primary shine-button inline-flex items-center gap-2" href="{{ url_for('admin.admin_queue') }}">
+            <i data-lucide="list-checks" class="!w-4 !h-4"></i>Open queue
+          </a>
+          <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('admin.admin_orders') }}">
+            <i data-lucide="package" class="!w-4 !h-4"></i>View orders
+          </a>
+          <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('admin.admin_customers') }}">
+            <i data-lucide="users" class="!w-4 !h-4"></i>Customers
+          </a>
+          <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('admin.admin_menu') }}">
+            <i data-lucide="book-open" class="!w-4 !h-4"></i>Menu items
+          </a>
+          <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('admin.admin_vouchers') }}">
+            <i data-lucide="ticket" class="!w-4 !h-4"></i>Vouchers
+          </a>
+        </div>
+      </div>
+      <div class="hidden lg:grid grid-cols-2 gap-3 min-w-[280px]">
+        <div class="text-center rounded-2xl bg-white/8 backdrop-blur p-4 ring-1 ring-amber-200/15">
+          <i data-lucide="trending-up" class="!w-6 !h-6 text-emerald-300 mx-auto mb-1"></i>
+          <div class="text-xs uppercase tracking-wider opacity-70 text-amber-100">Revenue</div>
+          <div class="font-display text-xl font-extrabold text-amber-200">{{ revenue_display }}</div>
+        </div>
+        <div class="text-center rounded-2xl bg-white/8 backdrop-blur p-4 ring-1 ring-amber-200/15">
+          <i data-lucide="package-2" class="!w-6 !h-6 text-orange-300 mx-auto mb-1"></i>
+          <div class="text-xs uppercase tracking-wider opacity-70 text-amber-100">Total orders</div>
+          <div class="font-display text-xl font-extrabold text-amber-200">{{ total_orders }}</div>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="admin-dashboard__stats">
-    <article class="admin-card admin-stat">
+    <article class="admin-card admin-stat reveal-up delay-1">
+      <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 ring-1 ring-amber-300/30 mb-1">
+        <i data-lucide="receipt" class="!w-5 !h-5 text-orange-600"></i>
+      </span>
       <strong>{{ total_orders }}</strong>
       <span>Total orders</span>
     </article>
-    <article class="admin-card admin-stat">
+    <article class="admin-card admin-stat reveal-up delay-2">
+      <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-400/20 to-red-500/20 ring-1 ring-rose-300/30 mb-1">
+        <i data-lucide="flame" class="!w-5 !h-5 text-red-600"></i>
+      </span>
       <strong>{{ active_orders }}</strong>
       <span>Active pickup orders</span>
     </article>
-    <article class="admin-card admin-stat">
+    <article class="admin-card admin-stat reveal-up delay-3">
+      <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-green-500/20 ring-1 ring-emerald-300/30 mb-1">
+        <i data-lucide="check-circle-2" class="!w-5 !h-5 text-emerald-600"></i>
+      </span>
       <strong>{{ completed_orders }}</strong>
       <span>Completed orders</span>
     </article>
-    <article class="admin-card admin-stat">
+    <article class="admin-card admin-stat reveal-up delay-4">
+      <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-400/20 to-cyan-500/20 ring-1 ring-teal-300/30 mb-1">
+        <i data-lucide="dollar-sign" class="!w-5 !h-5 text-teal-700"></i>
+      </span>
       <strong>{{ revenue_display }}</strong>
       <span>Total sales</span>
     </article>
