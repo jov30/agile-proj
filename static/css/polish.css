@@ -476,3 +476,126 @@ select:focus-visible {
 .lucide {
   vertical-align: -2px;
 }
+
+/* ── Best-seller / menu cards — gentle lift + image zoom ────────────────── */
+.gallery-card {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, border-color 0.3s ease !important;
+  position: relative;
+  isolation: isolate;
+}
+
+.gallery-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent 55%, rgba(43, 22, 12, 0.6));
+  opacity: 0.85;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.gallery-card:hover::after {
+  opacity: 0.7;
+}
+
+.gallery-card img {
+  transition: transform 0.55s ease, filter 0.35s ease;
+  position: relative;
+  z-index: -1;
+}
+
+.gallery-card:hover img {
+  transform: scale(1.06);
+  filter: saturate(1.1) brightness(1.02);
+}
+
+.gallery-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 28px 60px rgba(53, 30, 20, 0.22) !important;
+}
+
+.gallery-card__body {
+  position: relative;
+  z-index: 1;
+}
+
+.gallery-card__price {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red)) !important;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: 900 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* ── Homepage flow steps — animated number + ring ───────────────────────── */
+.homepage-flow__step {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.3s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.homepage-flow__step::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 180, 54, 0.55), rgba(235, 81, 48, 0.4), rgba(255, 216, 115, 0));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.homepage-flow__step:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 22px 44px rgba(53, 30, 20, 0.16) !important;
+}
+
+.homepage-flow__step:hover::before {
+  opacity: 1;
+}
+
+.homepage-flow__number {
+  transition: transform 0.3s ease, background 0.3s ease !important;
+}
+
+.homepage-flow__step:hover .homepage-flow__number {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+/* ── Hero trust badge — sheen ──────────────────────────────────────────── */
+.hero-trust-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-trust-badge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: heroBadgeShine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes heroBadgeShine {
+  0% { transform: translateX(-120%); }
+  35%, 100% { transform: translateX(120%); }
+}
+
+/* ── Hero visual — refined drop shadow ──────────────────────────────────── */
+.hero-visual {
+  filter: drop-shadow(0 30px 60px rgba(53, 30, 20, 0.22));
+}
+
+/* ── Smooth scroll for in-page anchors ──────────────────────────────────── */
+html { scroll-behavior: smooth; }
