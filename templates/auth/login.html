@@ -247,16 +247,32 @@
           <form method="post" class="auth-form" novalidate>
             <input type="hidden" name="next" value="{{ next_url }}" />
             <div class="field">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" value="{{ form_data.email }}" autocomplete="email" required />
+              <label for="email" class="inline-flex items-center gap-1.5"><i data-lucide="mail" class="!w-4 !h-4 text-stone-500"></i>Email</label>
+              <div class="relative">
+                <i data-lucide="at-sign" class="!w-4 !h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input id="email" name="email" type="email" value="{{ form_data.email }}" autocomplete="email" required style="padding-left: 2.5rem" />
+              </div>
             </div>
             <div class="field">
-              <label for="password">Password</label>
-              <input id="password" name="password" type="password" autocomplete="current-password" required />
+              <label for="password" class="inline-flex items-center gap-1.5"><i data-lucide="lock" class="!w-4 !h-4 text-stone-500"></i>Password</label>
+              <div class="relative">
+                <i data-lucide="key-round" class="!w-4 !h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input id="password" name="password" type="password" autocomplete="current-password" required style="padding-left: 2.5rem" />
+              </div>
             </div>
-            <button type="submit" class="button button--primary">{{ submit_label }}</button>
-            <a href="{{ alternate_href }}" class="button button--secondary">{{ alternate_label }}</a>
+            <button type="submit" class="button button--primary shine-button inline-flex items-center justify-center gap-2">
+              <i data-lucide="log-in" class="!w-4 !h-4"></i>
+              {{ submit_label }}
+            </button>
+            <a href="{{ alternate_href }}" class="button button--secondary inline-flex items-center justify-center gap-2">
+              <i data-lucide="user-plus" class="!w-4 !h-4"></i>
+              {{ alternate_label }}
+            </a>
           </form>
+          <div class="mt-2 flex items-center gap-3 text-xs text-stone-500">
+            <span class="grid place-items-center w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-700"><i data-lucide="shield-check" class="!w-3.5 !h-3.5"></i></span>
+            Your session is signed and limited to the MCQ website. We never share your login outside this app.
+          </div>
         </div>
       </article>
 
@@ -266,10 +282,24 @@
           <h2 class="auth-side__heading">Order ahead, skip the wait, eat well.</h2>
           <p class="auth-side__sub">Sign in to track your pickups, view receipts, and earn loyalty points on every order.</p>
           <div class="auth-side__pills">
-            <span class="auth-side__pill">Instant queue ordering</span>
-            <span class="auth-side__pill">Scheduled pickup slots</span>
-            <span class="auth-side__pill">Loyalty points</span>
-            <span class="auth-side__pill">Order tracking</span>
+            <span class="auth-side__pill"><i data-lucide="zap" class="!w-3.5 !h-3.5"></i>Instant queue ordering</span>
+            <span class="auth-side__pill"><i data-lucide="calendar-clock" class="!w-3.5 !h-3.5"></i>Scheduled pickup slots</span>
+            <span class="auth-side__pill"><i data-lucide="sparkles" class="!w-3.5 !h-3.5"></i>Loyalty points</span>
+            <span class="auth-side__pill"><i data-lucide="bell-ring" class="!w-3.5 !h-3.5"></i>Order tracking</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-1">
+            <div class="text-center rounded-2xl bg-white/10 backdrop-blur p-3 ring-1 ring-amber-200/15">
+              <div class="font-display text-2xl font-extrabold text-amber-300">4.9</div>
+              <div class="text-[0.7rem] uppercase tracking-wider opacity-70">Uber rating</div>
+            </div>
+            <div class="text-center rounded-2xl bg-white/10 backdrop-blur p-3 ring-1 ring-amber-200/15">
+              <div class="font-display text-2xl font-extrabold text-amber-300">12m</div>
+              <div class="text-[0.7rem] uppercase tracking-wider opacity-70">Avg pickup</div>
+            </div>
+            <div class="text-center rounded-2xl bg-white/10 backdrop-blur p-3 ring-1 ring-amber-200/15">
+              <div class="font-display text-2xl font-extrabold text-amber-300">$1</div>
+              <div class="text-[0.7rem] uppercase tracking-wider opacity-70">= 1 point</div>
+            </div>
           </div>
         </div>
       </aside>
