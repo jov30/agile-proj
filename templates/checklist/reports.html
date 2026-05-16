@@ -1,0 +1,85 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}Issue reports queue | MCQ{% endblock %}
+
+{% block header_kicker %}Issue queue{% endblock %}
+{% block header_title %}Triage staff reports across the restaurant{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">Open {{ counts.get('open', 0) }}</span>
+<span class="checklist-header__pill">In progress {{ counts.get('in_progress', 0) }}</span>
+<span class="checklist-header__pill">Resolved {{ counts.get('resolved', 0) }}</span>
+{% endblock %}
+
+{% block checklist_body %}
+<form class="checklist-toolbar" method="get">
+  <label style="font-size:0.78rem;color:var(--text-muted)">Status</label>
+  <select name="status">
+    {% for status in ['all', 'open', 'in_progress', 'resolved', 'closed'] %}
+    <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>{{ status.replace('_', ' ')|title }}</option>
+    {% endfor %}
+  </select>
+  <label style="font-size:0.78rem;color:var(--text-muted)">Category</label>
+  <select name="category">
+    <option value="">All categories</option>
+    {% for key, cat in issue_categories.items() %}
+    <option value="{{ key }}" {% if category_filter == key %}selected{% endif %}>{{ cat.label }}</option>
+    {% endfor %}
+  </select>
+  <button class="checklist-btn checklist-btn--sm" type="submit">Filter</button>
+  <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.report_issue') }}">New report</a>
+</form>
+
+{% if reports %}
+<div class="checklist-stack">
+  {% for report in reports %}
+  <article class="checklist-section" style="border-left:4px solid {{ report.category_accent }}">
+    <div class="checklist-card__row" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="checklist-card__title">{{ report.title }}</div>
+        <div class="checklist-timeline__meta">{{ report.category_label }} · {{ report.reported_by }} · {{ report.submitted_at }}</div>
+      </div>
+      <div class="checklist-card__row" style="gap:0.4rem">
+        <span class="checklist-pill {% if report.priority == 'urgent' %}checklist-pill--danger{% elif report.priority == 'low' %}checklist-pill--pending{% else %}checklist-pill--warning{% endif %}">{{ report.priority|title }}</span>
+        <span class="checklist-pill {% if report.status == 'resolved' %}checklist-pill--success{% elif report.status == 'in_progress' %}checklist-pill--info{% elif report.status == 'closed' %}checklist-pill--pending{% else %}checklist-pill--warning{% endif %}">{{ report.status.replace('_', ' ')|title }}</span>
+      </div>
+    </div>
+    <p style="margin:0;color:var(--text-main);white-space:pre-wrap">{{ report.description }}</p>
+    {% if report.photo_url %}
+    <img src="{{ report.photo_url }}" alt="Report photo" style="max-width:240px;border-radius:12px;cursor:zoom-in" onclick="openChecklistLightbox('{{ report.photo_url }}')">
+    {% endif %}
+    {% if report.admin_notes %}
+    <div><strong style="font-size:0.74rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-muted)">Admin notes</strong><div style="color:var(--text-muted)">{{ report.admin_notes }}</div></div>
+    {% endif %}
+    {% if report.resolved_by %}
+    <div class="checklist-timeline__meta">Resolved by {{ report.resolved_by }} on {{ report.resolved_at }}</div>
+    {% endif %}
+    <form class="checklist-verify-form" method="POST" action="{{ url_for('checklist.update_report', report_id=report.id) }}" style="margin-top:0">
+      <div class="checklist-info-grid">
+        <div>
+          <strong>Status</strong>
+          <select name="status" style="width:100%">
+            {% for status in ['open', 'in_progress', 'resolved', 'closed'] %}
+            <option value="{{ status }}" {% if report.status == status %}selected{% endif %}>{{ status.replace('_', ' ')|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <strong>Resolved by</strong>
+          <input type="text" name="resolved_by" value="{{ report.resolved_by or '' }}" placeholder="Manager name" style="width:100%">
+        </div>
+        <div style="grid-column: 1 / -1">
+          <strong>Admin notes</strong>
+          <textarea name="admin_notes" rows="2" style="width:100%" placeholder="What is the plan or outcome?">{{ report.admin_notes or '' }}</textarea>
+        </div>
+      </div>
+      <div class="checklist-toolbar" style="background:transparent;border:0;padding:0;justify-content:flex-end">
+        <button class="checklist-btn checklist-btn--sm" type="submit">Save update</button>
+      </div>
+    </form>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="checklist-empty">No issue reports match these filters.</div>
+{% endif %}
+{% endblock %}

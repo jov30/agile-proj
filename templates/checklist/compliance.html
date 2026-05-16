@@ -1,0 +1,114 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}Compliance report | MCQ{% endblock %}
+
+{% block header_kicker %}Compliance{% endblock %}
+{% block header_title %}Roll-up of recent operations performance{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">{{ start }} → {{ end }}</span>
+<span class="checklist-header__pill">{{ days }} day window</span>
+{% endblock %}
+
+{% block checklist_body %}
+<form class="checklist-toolbar" method="get">
+  <label style="font-size:0.78rem;color:var(--text-muted)">Window</label>
+  <select name="days">
+    {% for option in [7, 14, 30, 60, 90] %}
+    <option value="{{ option }}" {% if days == option %}selected{% endif %}>Last {{ option }} days</option>
+    {% endfor %}
+  </select>
+  <button class="checklist-btn checklist-btn--sm" type="submit">Apply</button>
+</form>
+
+<section class="checklist-section">
+  <h2><small>Per staff member</small>Submission and verification counts</h2>
+  {% if per_staff %}
+  <div style="overflow-x:auto">
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Staff</th>
+          <th>Submissions</th>
+          <th>Verified</th>
+          <th>Issues</th>
+          <th>Latest submission</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in per_staff %}
+        <tr>
+          <td><strong>{{ row.name }}</strong></td>
+          <td>{{ row.total }}</td>
+          <td>{{ row.verified }}</td>
+          <td>{{ row.issues }}</td>
+          <td>{{ row.last_submission }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="checklist-empty">No staff submissions in this window.</div>
+  {% endif %}
+</section>
+
+<section class="checklist-section">
+  <h2><small>Per station</small>Open vs close coverage by checklist type</h2>
+  {% if per_type %}
+  <div style="overflow-x:auto">
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Station</th>
+          <th>Openings</th>
+          <th>Closings</th>
+          <th>Total</th>
+          <th>Verified</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in per_type %}
+        <tr>
+          <td><strong style="color:{{ row.accent }}">{{ row.title }}</strong></td>
+          <td>{{ row.openings }}</td>
+          <td>{{ row.closings }}</td>
+          <td>{{ row.total }}</td>
+          <td>{{ row.verified }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="checklist-empty">No checklist coverage in this window.</div>
+  {% endif %}
+</section>
+
+<section class="checklist-section">
+  <h2><small>Photo evidence</small>Captures per staff member</h2>
+  {% if photo_stats %}
+  <div style="overflow-x:auto">
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Staff</th>
+          <th>Sessions with photos</th>
+          <th>Total photos uploaded</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in photo_stats %}
+        <tr>
+          <td>{{ row.submitted_by }}</td>
+          <td>{{ row.sessions_with_photos }}</td>
+          <td>{{ row.total_photos }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="checklist-empty">No photo uploads in this window.</div>
+  {% endif %}
+</section>
+{% endblock %}

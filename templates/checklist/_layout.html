@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/checklist.css') }}">
+{% block checklist_head %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<section class="app-main">
+  <div class="checklist-shell">
+    {% block checklist_header %}
+    <header class="checklist-header">
+      <div>
+        <p class="checklist-header__kicker">{% block header_kicker %}MCQ Operations{% endblock %}</p>
+        <h1>{% block header_title %}Checklist{% endblock %}</h1>
+      </div>
+      <div class="checklist-header__meta">
+        {% block header_meta %}{% endblock %}
+      </div>
+    </header>
+    {% endblock %}
+
+    {% block checklist_subnav %}
+    <nav class="checklist-toolbar" aria-label="Checklist sections">
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.home' %}is-active{% endif %}" href="{{ url_for('checklist.home') }}">Overview</a>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.manager_panel' %}is-active{% endif %}" href="{{ url_for('checklist.manager_panel') }}">Manager review</a>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.history' %}is-active{% endif %}" href="{{ url_for('checklist.history') }}">History</a>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.compliance_report' %}is-active{% endif %}" href="{{ url_for('checklist.compliance_report') }}">Compliance</a>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.analytics' %}is-active{% endif %}" href="{{ url_for('checklist.analytics') }}">Analytics</a>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.photo_gallery' %}is-active{% endif %}" href="{{ url_for('checklist.photo_gallery') }}">Photo gallery</a>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.reports' %}is-active{% endif %}" href="{{ url_for('checklist.reports') }}">Issue reports</a>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.report_issue' %}is-active{% endif %}" href="{{ url_for('checklist.report_issue') }}">Log an issue</a>
+    </nav>
+    {% endblock %}
+
+    {% block checklist_body %}{% endblock %}
+  </div>
+</section>
+
+<div class="checklist-lightbox" id="checklist-lightbox" onclick="closeChecklistLightbox()">
+  <button type="button" aria-label="Close" onclick="event.stopPropagation(); closeChecklistLightbox()">×</button>
+  <img id="checklist-lightbox-img" alt="">
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openChecklistLightbox(src) {
+    var box = document.getElementById('checklist-lightbox');
+    var img = document.getElementById('checklist-lightbox-img');
+    img.src = src;
+    box.classList.add('is-open');
+  }
+  function closeChecklistLightbox() {
+    var box = document.getElementById('checklist-lightbox');
+    var img = document.getElementById('checklist-lightbox-img');
+    box.classList.remove('is-open');
+    img.src = '';
+  }
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeChecklistLightbox();
+  });
+</script>
+{% block checklist_scripts %}{% endblock %}
+{% endblock %}
