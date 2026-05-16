@@ -50,6 +50,52 @@
 {% block checklist_scripts %}
 <script>
   var charts = {};
+  var sharedChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: '#6c584f',
+          boxWidth: 12,
+          boxHeight: 12,
+          useBorderRadius: true,
+          borderRadius: 6,
+          font: { family: '"Be Vietnam Pro", sans-serif', weight: '700' }
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(35,24,20,0.94)',
+        borderColor: 'rgba(255,216,115,0.28)',
+        borderWidth: 1,
+        padding: 12,
+        titleColor: '#ffd873',
+        bodyColor: '#fff7ef',
+        displayColors: true
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(112,85,66,0.08)' },
+        ticks: { color: '#6c584f', font: { family: '"Be Vietnam Pro", sans-serif', weight: '700' } }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(112,85,66,0.1)' },
+        ticks: { color: '#6c584f', precision: 0, font: { family: '"Be Vietnam Pro", sans-serif', weight: '700' } }
+      }
+    }
+  };
+
+  function mergeChartOptions(extra) {
+    return {
+      ...sharedChartOptions,
+      ...extra,
+      plugins: { ...sharedChartOptions.plugins, ...(extra.plugins || {}) },
+      scales: { ...sharedChartOptions.scales, ...(extra.scales || {}) }
+    };
+  }
 
   function ensureChart(canvasId, config) {
     if (charts[canvasId]) {
@@ -77,7 +123,7 @@
           { label: 'Verified', data: data.daily_verified, borderColor: '#28724d', backgroundColor: 'rgba(40,114,77,0.16)', tension: 0.3, fill: true }
         ]
       },
-      options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { position: 'bottom' } } }
+      options: mergeChartOptions({})
     });
 
     ensureChart('analytics-temp', {
@@ -88,7 +134,7 @@
           { label: 'Temperature records', data: data.daily_temp, backgroundColor: '#eb5130' }
         ]
       },
-      options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } }
+      options: mergeChartOptions({ plugins: { legend: { display: false } } })
     });
 
     ensureChart('analytics-staff', {
@@ -97,7 +143,7 @@
         labels: data.staff_names,
         datasets: [{ data: data.staff_counts, backgroundColor: '#ffb436' }]
       },
-      options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+      options: mergeChartOptions({ indexAxis: 'y', plugins: { legend: { display: false } } })
     });
 
     ensureChart('analytics-type', {
@@ -109,7 +155,7 @@
           { label: 'Verified', data: data.type_verified, backgroundColor: '#28724d' }
         ]
       },
-      options: { plugins: { legend: { position: 'bottom' } } }
+      options: mergeChartOptions({})
     });
   }
 

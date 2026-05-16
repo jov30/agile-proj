@@ -5,13 +5,72 @@
 {% block head %}
 <style>
   .profile-shell {
+    --profile-ink: #241510;
+    --profile-coral: #ff5a3d;
+    --profile-rose: #e95686;
+    --profile-teal: #00848a;
+    --profile-mint: #65d6c8;
+    --profile-gold: #ffd873;
+    position: relative;
+    isolation: isolate;
     display: grid;
-    gap: 1.2rem;
+    gap: 1.35rem;
+  }
+
+  .profile-shell::before {
+    content: "";
+    position: absolute;
+    inset: -1.5rem -1rem auto;
+    z-index: -1;
+    height: 22rem;
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(115deg, rgba(255, 216, 115, 0.34), rgba(255, 106, 19, 0.14) 34%, rgba(0, 132, 138, 0.16) 70%, rgba(233, 86, 134, 0.13)),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px 18px);
+    opacity: 0.9;
+    pointer-events: none;
   }
 
   /* ── Hero ── */
   .profile-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     padding: clamp(1.4rem, 3vw, 2.2rem);
+    border-color: rgba(255, 180, 54, 0.36);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 250, 240, 0.84) 48%, rgba(255, 241, 224, 0.92)),
+      linear-gradient(118deg, rgba(255, 216, 115, 0.58), rgba(255, 106, 19, 0.26) 36%, rgba(233, 86, 134, 0.2) 66%, rgba(0, 132, 138, 0.24));
+    box-shadow: 0 30px 70px rgba(191, 94, 41, 0.18), 0 10px 28px rgba(0, 111, 116, 0.09);
+  }
+
+  .profile-hero.section-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.68), transparent 38%, rgba(0, 132, 138, 0.08)),
+      repeating-linear-gradient(105deg, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(15deg, rgba(255, 180, 54, 0.08) 0 1px, transparent 1px 42px);
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  .profile-hero::after {
+    content: "";
+    position: absolute;
+    right: -5rem;
+    bottom: -4.8rem;
+    z-index: 0;
+    width: min(38rem, 58%);
+    height: 12rem;
+    border-radius: 36px;
+    background:
+      linear-gradient(90deg, rgba(0, 132, 138, 0.72), rgba(101, 214, 200, 0.66) 30%, rgba(255, 216, 115, 0.74) 58%, rgba(255, 90, 61, 0.7) 100%);
+    box-shadow: 0 24px 58px rgba(255, 106, 19, 0.2);
+    opacity: 0.78;
+    transform: rotate(-6deg);
+    pointer-events: none;
   }
 
   .profile-hero__grid {
@@ -30,9 +89,25 @@
 
   /* ── Nameplate with avatar ── */
   .profile-nameplate {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     gap: 1.1rem;
+    padding: 0.95rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.66);
+    box-shadow: 0 18px 42px rgba(146, 70, 31, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
+  }
+
+  .profile-nameplate::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 6px;
+    background: linear-gradient(180deg, var(--profile-teal), var(--profile-gold), var(--profile-coral));
   }
 
   .profile-avatar-wrap {
@@ -41,6 +116,7 @@
   }
 
   .profile-avatar {
+    position: relative;
     width: 72px;
     height: 72px;
     border-radius: 999px;
@@ -50,8 +126,9 @@
     font-size: 1.6rem;
     font-weight: 800;
     color: #2b170d;
-    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
-    box-shadow: 0 14px 28px rgba(255, 106, 19, 0.28);
+    background: linear-gradient(135deg, #fff3a8, var(--profile-gold) 40%, var(--profile-coral));
+    border: 3px solid rgba(255, 247, 239, 0.78);
+    box-shadow: 0 16px 32px rgba(255, 106, 19, 0.28), 0 0 0 8px rgba(0, 132, 138, 0.1);
     overflow: hidden;
     cursor: pointer;
     transition: box-shadow 0.2s ease;
@@ -74,11 +151,21 @@
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
     font-size: clamp(1.8rem, 2.8vw, 2.6rem);
     line-height: 1.05;
+    background: linear-gradient(115deg, var(--profile-ink), var(--brand-red) 48%, var(--profile-teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .profile-nameplate__text p {
     margin: 0.3rem 0 0;
-    color: var(--text-muted);
+    color: rgba(35, 24, 20, 0.72);
+  }
+
+  .profile-hero .eyebrow {
+    border: 1px solid rgba(255, 90, 61, 0.2);
+    background: linear-gradient(135deg, rgba(255, 216, 115, 0.34), rgba(255, 90, 61, 0.12));
+    color: var(--brand-red);
   }
 
   /* ── Tags ── */
@@ -98,21 +185,28 @@
     font-size: 0.85rem;
     font-weight: 700;
     position: relative;
+    box-shadow: 0 10px 20px rgba(53, 30, 20, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
 
   .profile-tag--tier {
     color: #2b170d;
-    background: linear-gradient(135deg, var(--brand-gold), var(--brand-amber));
+    background: linear-gradient(135deg, var(--profile-gold), var(--brand-amber) 52%, rgba(255, 90, 61, 0.8));
     cursor: help;
   }
 
   .profile-tag--code {
-    color: var(--text-muted);
-    background: rgba(112, 85, 66, 0.08);
-    border: 1px solid rgba(112, 85, 66, 0.14);
+    color: var(--profile-teal);
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(0, 132, 138, 0.18);
     font-family: "Menlo", "Monaco", monospace;
     font-weight: 600;
     cursor: help;
+  }
+
+  .profile-tag:not(.profile-tag--tier):not(.profile-tag--code) {
+    color: #11464a;
+    background: linear-gradient(135deg, rgba(101, 214, 200, 0.28), rgba(255, 255, 255, 0.56));
+    border: 1px solid rgba(0, 132, 138, 0.18);
   }
 
   /* Tooltip */
@@ -159,8 +253,9 @@
     align-items: center;
     padding: 0.9rem 1rem;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(112, 85, 66, 0.1);
+    background: rgba(255, 255, 255, 0.64);
+    border: 1px solid rgba(255, 180, 54, 0.22);
+    box-shadow: 0 12px 28px rgba(53, 30, 20, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   }
 
   .profile-tier-legend__label {
@@ -168,7 +263,7 @@
     font-size: 0.75rem;
     font-family: "Bebas Neue", sans-serif;
     letter-spacing: 0.14em;
-    color: var(--text-muted);
+    color: rgba(35, 24, 20, 0.58);
   }
 
   .tier-pip {
@@ -183,12 +278,13 @@
 
   .tier-pip--active {
     color: #2b170d;
-    background: linear-gradient(135deg, var(--brand-gold), var(--brand-amber));
+    background: linear-gradient(135deg, var(--profile-gold), var(--brand-orange));
+    box-shadow: 0 10px 20px rgba(255, 106, 19, 0.16);
   }
 
   .tier-pip--inactive {
-    color: var(--text-muted);
-    background: rgba(112, 85, 66, 0.07);
+    color: rgba(35, 24, 20, 0.7);
+    background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(112, 85, 66, 0.12);
   }
 
@@ -199,10 +295,38 @@
 
   /* ── Points ── */
   .profile-points {
+    position: relative;
+    overflow: hidden;
     padding: 1.3rem;
     border-radius: var(--radius-lg);
-    background: rgba(255, 245, 228, 0.7);
-    border: 1px solid rgba(255, 180, 54, 0.18);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(255, 248, 234, 0.7) 52%, rgba(232, 255, 252, 0.74)),
+      linear-gradient(115deg, rgba(255, 216, 115, 0.42), rgba(255, 90, 61, 0.16) 44%, rgba(0, 132, 138, 0.18));
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    box-shadow: 0 26px 56px rgba(191, 94, 41, 0.14), 0 10px 28px rgba(0, 111, 116, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  }
+
+  .profile-points::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(0, 132, 138, 0.16), transparent 26%, rgba(255, 90, 61, 0.12)),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0 1px, transparent 1px 22px);
+    pointer-events: none;
+  }
+
+  .profile-points::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 6px;
+    background: linear-gradient(90deg, var(--profile-teal), var(--profile-mint), var(--profile-gold), var(--profile-coral), var(--profile-rose));
+  }
+
+  .profile-points > * {
+    position: relative;
+    z-index: 1;
   }
 
   .profile-points__top {
@@ -219,7 +343,7 @@
     font-size: clamp(3rem, 5vw, 4.5rem);
     line-height: 1;
     letter-spacing: 0.04em;
-    background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
+    background: linear-gradient(120deg, var(--brand-red), var(--brand-orange) 45%, var(--profile-teal));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -242,8 +366,9 @@
   .profile-voucher-box {
     padding: 0.95rem 1rem;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(112, 85, 66, 0.12);
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 90, 61, 0.18);
+    box-shadow: 0 16px 30px rgba(255, 106, 19, 0.1);
     min-width: 180px;
   }
 
@@ -259,6 +384,7 @@
     font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
     font-size: 1.5rem;
     font-weight: 800;
+    color: var(--brand-red);
   }
 
   .profile-voucher-box p {
@@ -286,12 +412,14 @@
     border-radius: 999px;
     background: rgba(112, 85, 66, 0.1);
     overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(53, 30, 20, 0.12);
   }
 
   .profile-track__bar {
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--brand-amber), var(--brand-orange));
+    background: linear-gradient(90deg, var(--profile-teal), var(--profile-mint), var(--brand-amber), var(--brand-orange));
+    box-shadow: 0 0 16px rgba(0, 132, 138, 0.2);
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -302,6 +430,18 @@
     margin-top: 0.4rem;
   }
 
+  .profile-hero .profile-actions .button--secondary {
+    border-color: rgba(0, 132, 138, 0.18);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--profile-teal);
+    box-shadow: 0 12px 24px rgba(0, 111, 116, 0.08);
+  }
+
+  .profile-hero .profile-actions .button--secondary:hover {
+    border-color: rgba(0, 132, 138, 0.3);
+    background: rgba(232, 255, 252, 0.88);
+  }
+
   /* ── Digital card ── */
   .member-card-face {
     position: relative;
@@ -310,22 +450,38 @@
     padding: 1.4rem;
     display: grid;
     gap: 1.1rem;
-    color: var(--text-inverse);
+    color: var(--profile-ink);
     background:
-      linear-gradient(135deg, rgba(255, 180, 54, 0.14), rgba(255, 106, 19, 0.12)),
-      linear-gradient(180deg, rgba(36, 25, 21, 0.94), rgba(20, 15, 17, 0.97));
-    border: 1px solid rgba(255, 216, 115, 0.16);
-    box-shadow: 0 28px 56px rgba(21, 11, 7, 0.22);
+      linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.42)),
+      linear-gradient(135deg, #ffe58a 0%, #ffb436 28%, #ff6a13 56%, #e95686 78%, #00848a 100%);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 30px 66px rgba(235, 81, 48, 0.2), 0 12px 30px rgba(0, 111, 116, 0.12);
+    transform-style: preserve-3d;
   }
 
   .member-card-face::before {
     content: "";
     position: absolute;
-    top: -60px; right: -60px;
-    width: 200px; height: 200px;
-    border-radius: 999px;
-    background: radial-gradient(circle, rgba(255, 216, 115, 0.12), transparent 70%);
+    inset: 0 0 0 auto;
+    width: 42%;
+    background: linear-gradient(180deg, rgba(0, 132, 138, 0.34), rgba(101, 214, 200, 0.22), rgba(255, 255, 255, 0.08));
+    clip-path: polygon(26% 0, 100% 0, 100% 100%, 0 100%);
     pointer-events: none;
+  }
+
+  .member-card-face::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(120deg, transparent 24%, rgba(255, 255, 255, 0.34) 42%, transparent 58%),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 1px, transparent 1px 18px);
+    pointer-events: none;
+  }
+
+  .member-card-face > * {
+    position: relative;
+    z-index: 1;
   }
 
   .member-card-face__header {
@@ -339,7 +495,7 @@
     font-family: "Bebas Neue", sans-serif;
     font-size: 0.82rem;
     letter-spacing: 0.18em;
-    color: rgba(255, 216, 115, 0.88);
+    color: rgba(35, 24, 20, 0.68);
     margin-bottom: 0.3rem;
   }
 
@@ -353,7 +509,7 @@
   .member-card-face__sub {
     font-family: "Menlo", "Monaco", monospace;
     font-size: 0.8rem;
-    color: rgba(255, 247, 239, 0.6);
+    color: rgba(35, 24, 20, 0.62);
     margin-top: 0.25rem;
   }
 
@@ -364,7 +520,9 @@
     font-size: 0.78rem;
     font-weight: 800;
     color: #2b170d;
-    background: linear-gradient(135deg, var(--brand-gold), var(--brand-orange));
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.64);
+    box-shadow: 0 10px 22px rgba(53, 30, 20, 0.1);
     white-space: nowrap;
   }
 
@@ -377,14 +535,15 @@
   .member-card-face__stat {
     padding: 0.85rem 0.9rem;
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 216, 115, 0.1);
+    background: rgba(255, 255, 255, 0.54);
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   .member-card-face__stat span {
     display: block;
     font-size: 0.78rem;
-    color: rgba(255, 247, 239, 0.72);
+    color: rgba(35, 24, 20, 0.66);
     margin-bottom: 0.2rem;
   }
 
@@ -397,7 +556,9 @@
   .member-card-face__barcode {
     padding: 0.75rem;
     border-radius: 18px;
-    background: rgba(255, 250, 245, 0.97);
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(35, 24, 20, 0.08);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   }
 
   .member-card-face__barcode img { width: 100%; display: block; }
@@ -407,14 +568,14 @@
     font-family: "Bebas Neue", sans-serif;
     font-size: 0.78rem;
     letter-spacing: 0.14em;
-    color: rgba(255, 247, 239, 0.72);
+    color: rgba(35, 24, 20, 0.68);
   }
 
   /* ── Stats strip ── */
   .profile-stats-row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.85rem;
+    gap: 0.95rem;
   }
 
   .profile-stat {
@@ -422,19 +583,48 @@
     overflow: hidden;
     padding: 1.1rem 1rem;
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(112, 85, 66, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.72);
     background:
-      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 252, 247, 0.46)),
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(255, 242, 226, 0.94)),
       #fff;
-    box-shadow: 0 12px 28px rgba(53, 30, 20, 0.06);
+    box-shadow: 0 18px 38px rgba(53, 30, 20, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.2s ease;
   }
 
   .profile-stat::before {
     content: "";
     position: absolute;
+    inset: 0 0 auto;
+    height: 6px;
+    pointer-events: none;
+    background: linear-gradient(90deg, var(--brand-amber), var(--brand-red));
+  }
+
+  .profile-stat::after {
+    content: "";
+    position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 50%);
+    background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px 22px);
+  }
+
+  .profile-stat:nth-child(2)::before {
+    background: linear-gradient(90deg, var(--profile-teal), var(--profile-mint));
+  }
+
+  .profile-stat:nth-child(3)::before {
+    background: linear-gradient(90deg, var(--profile-rose), var(--brand-orange));
+  }
+
+  .profile-stat:nth-child(4)::before {
+    background: linear-gradient(90deg, var(--brand-green), var(--profile-gold));
+  }
+
+  .profile-stat:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 180, 54, 0.32);
+    box-shadow: 0 24px 48px rgba(53, 30, 20, 0.14);
   }
 
   .profile-stat > * { position: relative; z-index: 1; }
@@ -446,6 +636,10 @@
     line-height: 1;
     margin-bottom: 0.3rem;
     overflow-wrap: anywhere;
+    background: linear-gradient(120deg, var(--brand-red), var(--brand-orange) 45%, var(--profile-teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .profile-stat__label {
@@ -457,6 +651,20 @@
   /* ── Lower ── */
   .profile-lower { padding: clamp(1.4rem, 3vw, 2.2rem); }
 
+  .profile-lower.section-panel {
+    border-color: rgba(255, 255, 255, 0.72);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 252, 247, 0.44)),
+      linear-gradient(118deg, rgba(255, 216, 115, 0.28), rgba(255, 245, 235, 0.92) 38%, rgba(232, 255, 252, 0.82) 100%);
+    box-shadow: 0 26px 62px rgba(53, 30, 20, 0.1);
+  }
+
+  .profile-lower.section-panel::before {
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.72), transparent 42%, rgba(0, 132, 138, 0.08)),
+      repeating-linear-gradient(105deg, rgba(255, 180, 54, 0.09) 0 1px, transparent 1px 38px);
+  }
+
   .profile-lower__grid {
     position: relative;
     z-index: 1;
@@ -464,6 +672,24 @@
     grid-template-columns: minmax(0, 1fr) 380px;
     gap: 1.2rem;
     align-items: start;
+  }
+
+  .profile-section-title {
+    margin: 0.2rem 0 0;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: clamp(1.6rem, 2.4vw, 2.4rem);
+    line-height: 1.04;
+    color: var(--profile-ink);
+  }
+
+  .profile-section-title::after {
+    content: "";
+    display: block;
+    width: 3.4rem;
+    height: 3px;
+    margin-top: 0.7rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--profile-teal), var(--profile-mint), var(--profile-gold), var(--profile-coral));
   }
 
   .profile-benefits { display: grid; gap: 0.75rem; margin-top: 1.1rem; }
@@ -474,8 +700,18 @@
     align-items: flex-start;
     padding: 1rem 1.05rem;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(112, 85, 66, 0.1);
-    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(255, 247, 239, 0.58)),
+      rgba(255, 255, 255, 0.6);
+    box-shadow: 0 14px 28px rgba(53, 30, 20, 0.07);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.2s ease;
+  }
+
+  .profile-benefit:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0, 132, 138, 0.22);
+    box-shadow: 0 20px 38px rgba(0, 111, 116, 0.1);
   }
 
   .profile-benefit__dot {
@@ -483,8 +719,18 @@
     width: 10px; height: 10px;
     border-radius: 999px;
     margin-top: 0.3rem;
-    background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
-    box-shadow: 0 0 0 4px rgba(255, 106, 19, 0.1);
+    background: linear-gradient(135deg, var(--profile-teal), var(--profile-mint));
+    box-shadow: 0 0 0 5px rgba(0, 132, 138, 0.1);
+  }
+
+  .profile-benefit:nth-child(2n) .profile-benefit__dot {
+    background: linear-gradient(135deg, var(--profile-gold), var(--profile-coral));
+    box-shadow: 0 0 0 5px rgba(255, 106, 19, 0.1);
+  }
+
+  .profile-benefit:nth-child(3n) .profile-benefit__dot {
+    background: linear-gradient(135deg, var(--profile-rose), var(--brand-orange));
+    box-shadow: 0 0 0 5px rgba(233, 86, 134, 0.1);
   }
 
   .profile-benefit strong {
@@ -505,11 +751,12 @@
   .profile-orders {
     padding: 1.3rem;
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(112, 85, 66, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.72);
     background:
-      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 252, 247, 0.42)),
+      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(232, 255, 252, 0.84)),
       #fff;
-    box-shadow: 0 12px 28px rgba(53, 30, 20, 0.06);
+    box-shadow: 0 18px 38px rgba(0, 111, 116, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   }
 
   .profile-orders h2 {
@@ -534,8 +781,8 @@
     gap: 1rem;
     padding: 0.9rem 1rem;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(112, 85, 66, 0.1);
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(0, 132, 138, 0.12);
     text-decoration: none;
     color: inherit;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -571,19 +818,21 @@
     font-size: 0.75rem;
     font-weight: 700;
     color: var(--brand-teal);
-    background: rgba(0, 111, 116, 0.08);
-    border: 1px solid rgba(0, 111, 116, 0.14);
+    background: rgba(101, 214, 200, 0.16);
+    border: 1px solid rgba(0, 111, 116, 0.16);
   }
 
   /* ── Empty ── */
   .profile-empty {
     padding: 2rem 1.3rem;
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(112, 85, 66, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.72);
     background:
-      linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(248, 236, 220, 0.94)),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 252, 247, 0.42)),
+      linear-gradient(118deg, rgba(255, 216, 115, 0.3), rgba(255, 245, 235, 0.9) 48%, rgba(232, 255, 252, 0.82)),
       #fff;
     text-align: center;
+    box-shadow: 0 18px 38px rgba(53, 30, 20, 0.08);
   }
 
   .profile-empty__icon {
@@ -593,8 +842,16 @@
     place-items: center;
     margin: 0 auto 1rem;
     font-size: 1.5rem;
-    background: rgba(255, 180, 54, 0.12);
-    border: 1px solid rgba(255, 180, 54, 0.2);
+    background: linear-gradient(135deg, rgba(255, 216, 115, 0.62), rgba(255, 90, 61, 0.18), rgba(101, 214, 200, 0.24));
+    border: 1px solid rgba(255, 180, 54, 0.24);
+    box-shadow: 0 14px 28px rgba(255, 106, 19, 0.12);
+  }
+
+  .profile-empty__icon i,
+  .profile-empty__icon .lucide {
+    width: 1.55rem;
+    height: 1.55rem;
+    color: var(--brand-red);
   }
 
   .profile-empty h2 {
@@ -863,10 +1120,10 @@
         </div>
 
         <div class="profile-actions">
-          <a href="/community" class="button button--primary">MCQ Community</a>
-          <a href="/favorites" class="button button--secondary">Saved Meals</a>
-          <a href="/orders" class="button button--secondary">Order History</a>
-          <a href="/profile/settings" class="button button--secondary">Edit Profile</a>
+          <a href="/community" class="button button--primary inline-flex items-center gap-2"><i data-lucide="users-round" class="!w-4 !h-4"></i>MCQ Community</a>
+          <a href="/favorites" class="button button--secondary inline-flex items-center gap-2"><i data-lucide="heart" class="!w-4 !h-4"></i>Saved Meals</a>
+          <a href="/orders" class="button button--secondary inline-flex items-center gap-2"><i data-lucide="receipt-text" class="!w-4 !h-4"></i>Order History</a>
+          <a href="/profile/settings" class="button button--secondary inline-flex items-center gap-2"><i data-lucide="settings" class="!w-4 !h-4"></i>Edit Profile</a>
         </div>
       </div>
 
@@ -944,7 +1201,7 @@
 
       <div>
         <p class="eyebrow">Member perks</p>
-        <h2 style="margin: 0.2rem 0 0; font-family: 'Bricolage Grotesque', 'Be Vietnam Pro', sans-serif; font-size: clamp(1.6rem, 2.4vw, 2.4rem);">
+        <h2 class="profile-section-title">
           What this membership unlocks
         </h2>
         <div class="profile-benefits">
@@ -982,12 +1239,12 @@
         </div>
       {% else %}
         <div class="profile-empty">
-          <div class="profile-empty__icon">🥢</div>
+          <div class="profile-empty__icon"><i data-lucide="utensils" aria-hidden="true"></i></div>
           <h2>No orders yet</h2>
           <p>Once you place your first order, your pickup history, receipt links, and loyalty points will all appear here.</p>
           <div class="button-row" style="justify-content: center; margin-top: 0;">
-            <a href="/menu" class="button button--primary">Browse Menu</a>
-            <a href="/community" class="button button--secondary">Open Community</a>
+            <a href="/menu" class="button button--primary inline-flex items-center gap-2"><i data-lucide="utensils-crossed" class="!w-4 !h-4"></i>Browse Menu</a>
+            <a href="/community" class="button button--secondary inline-flex items-center gap-2"><i data-lucide="users-round" class="!w-4 !h-4"></i>Open Community</a>
           </div>
         </div>
       {% endif %}

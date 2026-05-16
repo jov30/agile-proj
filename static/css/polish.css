@@ -620,10 +620,12 @@ html { scroll-behavior: smooth; }
 }
 
 .menu-card__price {
-  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red)) !important;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
+  background:
+    linear-gradient(135deg, rgba(255, 216, 115, 0.32), rgba(255, 106, 19, 0.18)),
+    rgba(255, 247, 239, 0.88) !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--brand-red) !important;
   font-weight: 900 !important;
 }
 

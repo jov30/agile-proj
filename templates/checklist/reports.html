@@ -43,12 +43,15 @@
         <span class="checklist-pill {% if report.status == 'resolved' %}checklist-pill--success{% elif report.status == 'in_progress' %}checklist-pill--info{% elif report.status == 'closed' %}checklist-pill--pending{% else %}checklist-pill--warning{% endif %}">{{ report.status.replace('_', ' ')|title }}</span>
       </div>
     </div>
-    <p style="margin:0;color:var(--text-main);white-space:pre-wrap">{{ report.description }}</p>
+    <p class="checklist-report-copy">{{ report.description }}</p>
     {% if report.photo_url %}
-    <img src="{{ report.photo_url }}" alt="Report photo" style="max-width:240px;border-radius:12px;cursor:zoom-in" onclick="openChecklistLightbox('{{ report.photo_url }}')">
+    <img class="checklist-report-photo" src="{{ report.photo_url }}" alt="Report photo" onclick="openChecklistLightbox('{{ report.photo_url }}')">
     {% endif %}
     {% if report.admin_notes %}
-    <div><strong style="font-size:0.74rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-muted)">Admin notes</strong><div style="color:var(--text-muted)">{{ report.admin_notes }}</div></div>
+    <div class="checklist-note-panel">
+      <strong>Admin notes</strong>
+      <div>{{ report.admin_notes }}</div>
+    </div>
     {% endif %}
     {% if report.resolved_by %}
     <div class="checklist-timeline__meta">Resolved by {{ report.resolved_by }} on {{ report.resolved_at }}</div>

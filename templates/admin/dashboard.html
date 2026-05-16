@@ -29,6 +29,107 @@
     gap: 0.85rem;
   }
 
+  .admin-card.admin-dashboard__hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid rgba(255, 216, 115, 0.34);
+    background:
+      linear-gradient(90deg, rgba(13, 9, 7, 0.22), rgba(13, 9, 7, 0.06) 58%, rgba(13, 9, 7, 0.16)),
+      radial-gradient(28rem 16rem at 84% 8%, rgba(255, 216, 115, 0.2), transparent 62%),
+      radial-gradient(26rem 18rem at 8% 100%, rgba(235, 81, 48, 0.24), transparent 66%),
+      linear-gradient(135deg, #342015 0%, #1f1511 48%, #100c0a 100%);
+    box-shadow: 0 26px 64px rgba(22, 12, 8, 0.36);
+    color: #fff7ef;
+  }
+
+  .admin-card.admin-dashboard__hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 34%),
+      radial-gradient(1.5px 1.5px at 18% 26%, rgba(255, 216, 115, 0.62), transparent 62%),
+      radial-gradient(1.4px 1.4px at 72% 36%, rgba(255, 247, 239, 0.42), transparent 62%),
+      radial-gradient(1.5px 1.5px at 90% 72%, rgba(255, 180, 54, 0.48), transparent 62%);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .admin-card.admin-dashboard__hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .admin-card.admin-dashboard__hero .eyebrow {
+    border: 1px solid rgba(255, 216, 115, 0.3);
+    background: rgba(255, 247, 239, 0.12);
+    color: #fff1b8;
+  }
+
+  .admin-card.admin-dashboard__hero .section-title {
+    color: #fff7ef;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
+  }
+
+  .admin-card.admin-dashboard__hero .gradient-text {
+    background: linear-gradient(120deg, #fff4bc, #ffd873 42%, #ffb436 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .admin-card.admin-dashboard__hero .section-copy {
+    color: rgba(255, 247, 239, 0.88);
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.24);
+  }
+
+  .admin-card.admin-dashboard__hero .button--secondary {
+    border-color: rgba(255, 216, 115, 0.34);
+    background: rgba(255, 247, 239, 0.12);
+    color: #fff7ef;
+  }
+
+  .admin-card.admin-dashboard__hero .button--secondary:hover {
+    border-color: rgba(255, 216, 115, 0.55);
+    background: rgba(255, 247, 239, 0.18);
+  }
+
+  .admin-dashboard__hero-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    min-width: 280px;
+  }
+
+  .admin-dashboard__hero-metric {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid rgba(255, 216, 115, 0.22);
+    background: rgba(255, 247, 239, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(12px);
+  }
+
+  .admin-dashboard__hero-metric span {
+    display: block;
+    margin-top: 0.2rem;
+    color: rgba(255, 247, 239, 0.72);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .admin-dashboard__hero-metric strong {
+    display: block;
+    margin-top: 0.15rem;
+    color: #ffd873;
+    font-family: "Bricolage Grotesque", "Be Vietnam Pro", sans-serif;
+    font-size: 1.25rem;
+  }
+
   .admin-chart-card {
     padding: 0;
     overflow: hidden;
@@ -212,12 +313,12 @@
 
 {% block content %}
 <div class="admin-dashboard">
-  <section class="admin-card reveal-up" style="background: linear-gradient(135deg, #2c201b 0%, #1b1412 60%, #3a2418 100%); border: 0;">
+  <section class="admin-card admin-dashboard__hero reveal-up">
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
       <div class="text-amber-50">
-        <p class="eyebrow inline-flex items-center gap-2" style="background: rgba(255, 216, 115, 0.18); color: var(--brand-gold);"><i data-lucide="layout-dashboard" class="!w-3.5 !h-3.5"></i>Admin overview</p>
-        <h1 class="section-title text-amber-100 !mt-3">Store operations <span class="gradient-text">dashboard</span></h1>
-        <p class="section-copy text-amber-100/70">Review orders, pickup status, customers, menu operations, and revenue reporting from one place.</p>
+        <p class="eyebrow inline-flex items-center gap-2"><i data-lucide="layout-dashboard" class="!w-3.5 !h-3.5"></i>Admin overview</p>
+        <h1 class="section-title !mt-3">Store operations <span class="gradient-text">dashboard</span></h1>
+        <p class="section-copy">Review orders, pickup status, customers, menu operations, and revenue reporting from one place.</p>
         <div class="admin-actions">
           <a class="button button--primary shine-button inline-flex items-center gap-2" href="{{ url_for('admin.admin_queue') }}">
             <i data-lucide="list-checks" class="!w-4 !h-4"></i>Open queue
@@ -236,16 +337,16 @@
           </a>
         </div>
       </div>
-      <div class="hidden lg:grid grid-cols-2 gap-3 min-w-[280px]">
-        <div class="text-center rounded-2xl bg-white/8 backdrop-blur p-4 ring-1 ring-amber-200/15">
+      <div class="admin-dashboard__hero-metrics hidden lg:grid">
+        <div class="admin-dashboard__hero-metric">
           <i data-lucide="trending-up" class="!w-6 !h-6 text-emerald-300 mx-auto mb-1"></i>
-          <div class="text-xs uppercase tracking-wider opacity-70 text-amber-100">Revenue</div>
-          <div class="font-display text-xl font-extrabold text-amber-200">{{ revenue_display }}</div>
+          <span>Revenue</span>
+          <strong>{{ revenue_display }}</strong>
         </div>
-        <div class="text-center rounded-2xl bg-white/8 backdrop-blur p-4 ring-1 ring-amber-200/15">
+        <div class="admin-dashboard__hero-metric">
           <i data-lucide="package-2" class="!w-6 !h-6 text-orange-300 mx-auto mb-1"></i>
-          <div class="text-xs uppercase tracking-wider opacity-70 text-amber-100">Total orders</div>
-          <div class="font-display text-xl font-extrabold text-amber-200">{{ total_orders }}</div>
+          <span>Total orders</span>
+          <strong>{{ total_orders }}</strong>
         </div>
       </div>
     </div>

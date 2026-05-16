@@ -6,10 +6,10 @@
 {% endblock %}
 
 {% block content %}
-<section class="app-main">
+<section class="checklist-page">
   <div class="checklist-shell">
     {% block checklist_header %}
-    <header class="checklist-header">
+    <header class="checklist-header reveal-up">
       <div>
         <p class="checklist-header__kicker">{% block header_kicker %}MCQ Operations{% endblock %}</p>
         <h1>{% block header_title %}Checklist{% endblock %}</h1>
@@ -21,7 +21,7 @@
     {% endblock %}
 
     {% block checklist_subnav %}
-    <nav class="checklist-toolbar" aria-label="Checklist sections">
+    <nav class="checklist-toolbar checklist-subnav reveal-up delay-1" aria-label="Checklist sections">
       <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.home' %}is-active{% endif %}" href="{{ url_for('checklist.home') }}">Overview</a>
       <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.manager_panel' %}is-active{% endif %}" href="{{ url_for('checklist.manager_panel') }}">Manager review</a>
       <a class="checklist-btn checklist-btn--ghost checklist-btn--sm {% if request.endpoint == 'checklist.history' %}is-active{% endif %}" href="{{ url_for('checklist.history') }}">History</a>
@@ -33,7 +33,9 @@
     </nav>
     {% endblock %}
 
-    {% block checklist_body %}{% endblock %}
+    <div class="checklist-body-flow reveal-up delay-2">
+      {% block checklist_body %}{% endblock %}
+    </div>
   </div>
 </section>
 

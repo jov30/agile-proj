@@ -33,7 +33,7 @@
     <div class="checklist-info-grid">
       <div>
         <strong>Responsible</strong>
-        <select name="responsible" class="checklist-form" style="width:100%">
+        <select name="responsible" style="width:100%">
           <option value="">Select staff…</option>
           {% for member in staff %}
           <option value="{{ member }}" {% if existing and existing.responsible == member %}selected{% endif %}>{{ member }}</option>
