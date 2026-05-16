@@ -128,6 +128,7 @@
             <a href="{{ url_for('admin.admin_customers') }}" class="{% if request.path.startswith('/admin/customers') %}is-active{% endif %}"><i data-lucide="users" class="!w-4 !h-4"></i>Customers</a>
             <a href="{{ url_for('admin.admin_menu') }}" class="{% if request.path.startswith('/admin/menu') %}is-active{% endif %}"><i data-lucide="book-open" class="!w-4 !h-4"></i>Menu Admin</a>
             <a href="{{ url_for('admin.admin_vouchers') }}" class="{% if request.path.startswith('/admin/vouchers') %}is-active{% endif %}"><i data-lucide="ticket" class="!w-4 !h-4"></i>Vouchers</a>
+            <a href="{{ url_for('checklist.home') }}" class="{% if request.path.startswith('/admin/checklist') %}is-active{% endif %}"><i data-lucide="clipboard-check" class="!w-4 !h-4"></i>Checklist</a>
           {% endif %}
           {% if current_user and not is_admin %}
             <a href="{{ account_href }}" class="{% if request.path.startswith('/login') or request.path.startswith('/register') or request.path.startswith('/profile') %}is-active{% endif %}"><i data-lucide="user" class="!w-4 !h-4"></i>Account</a>

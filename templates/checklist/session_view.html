@@ -1,0 +1,136 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}{{ chk_data.title }} record | MCQ{% endblock %}
+
+{% block header_kicker %}Checklist record{% endblock %}
+{% block header_title %}{{ chk_data.title }} — {{ session.section|title }}{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">{{ session.day_of_week or 'Day' }} · {{ session.date }}</span>
+<span class="checklist-header__pill">Deadline {{ deadline_label }}</span>
+{% if session.is_late %}<span class="checklist-header__pill" style="background:rgba(235,81,48,0.45)">Late</span>{% endif %}
+{% if session.verified %}<span class="checklist-header__pill" style="background:rgba(40,114,77,0.5)">Verified</span>{% else %}<span class="checklist-header__pill">Pending review</span>{% endif %}
+{% endblock %}
+
+{% block checklist_body %}
+<section class="checklist-section">
+  <div class="checklist-info-grid">
+    <div><strong>Submitted at</strong>{{ session.submitted_at }}</div>
+    <div><strong>Submitted by</strong>{{ session.submitted_by or '—' }}</div>
+    <div><strong>Responsible</strong>{{ session.responsible or '—' }}</div>
+    <div><strong>Completion</strong>{{ session.done_count }}/{{ session.total_count }} ({{ session.completion_pct }}%)</div>
+    <div><strong>Photos uploaded</strong>{{ session.photo_count }}</div>
+    {% if session.verified %}
+    <div><strong>Verified by</strong>{{ session.verified_by or '—' }} · {{ session.verified_at }}</div>
+    {% endif %}
+  </div>
+  {% if session.general_note %}
+  <div style="margin-top:0.8rem;font-size:0.88rem"><strong>General note</strong><div style="color:var(--text-muted)">{{ session.general_note }}</div></div>
+  {% endif %}
+  <div class="checklist-progress" style="margin-top:0.6rem"><span style="width: {{ session.completion_pct }}%"></span></div>
+  <div class="checklist-toolbar" style="background:transparent;border:0;padding:0;margin-top:0.6rem">
+    <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.checklist_form', chk_type=chk_type, section=session.section, date=session.date) }}">Edit submission</a>
+    <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.export_checklist_excel', session_id=session.id) }}">Export Excel</a>
+    <button class="checklist-btn checklist-btn--ghost checklist-btn--sm" type="button" onclick="window.print()">Print</button>
+  </div>
+</section>
+
+<section class="checklist-section">
+  <h2><small>Tasks</small>Detailed line items</h2>
+  <table class="checklist-table">
+    <thead>
+      <tr>
+        <th style="width:40px">#</th>
+        <th>Task</th>
+        <th style="width:90px;text-align:center">Status</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr class="{% if task.done %}is-done{% endif %}">
+        <td>{{ task.task_order + 1 }}</td>
+        <td>{{ task.task_name }}</td>
+        <td style="text-align:center">
+          <span class="checklist-pill {% if task.done %}checklist-pill--success{% else %}checklist-pill--danger{% endif %}">
+            {% if task.done %}Done{% else %}Missed{% endif %}
+          </span>
+        </td>
+        <td>{{ task.note or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% if photos %}
+<section class="checklist-section">
+  <h2><small>Photo evidence</small>{{ photos|length }} captured</h2>
+  <div class="checklist-photo-card__grid">
+    {% for photo in photos %}
+    <img src="{{ photo.url }}" alt="Photo {{ photo.photo_number + 1 }}" onclick="openChecklistLightbox('{{ photo.url }}')">
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if session.verified %}
+<section class="checklist-section">
+  <h2><small>Manager Verification</small>Result already recorded</h2>
+  <div class="checklist-info-grid">
+    <div><strong>Result</strong>{{ (session.overall_result or '—').replace('_', ' ').title() }}</div>
+    <div><strong>Verified by</strong>{{ session.verified_by or '—' }}</div>
+    <div><strong>Verified at</strong>{{ session.verified_at }}</div>
+  </div>
+  {% if session.issues_found %}
+  <div style="margin-top:0.6rem"><strong>Issues found</strong><div style="color:var(--text-muted)">{{ session.issues_found }}</div></div>
+  {% endif %}
+  {% if session.action_responsible %}
+  <div><strong>Action owner</strong>{{ session.action_responsible }}</div>
+  {% endif %}
+  {% if session.manager_notes %}
+  <div style="margin-top:0.4rem"><strong>Manager notes</strong><div style="color:var(--text-muted)">{{ session.manager_notes }}</div></div>
+  {% endif %}
+</section>
+{% else %}
+<section class="checklist-section">
+  <h2><small>Manager Verification</small>Record the review outcome</h2>
+  <form class="checklist-verify-form" method="POST" action="{{ url_for('checklist.session_verify', session_id=session.id) }}">
+    <div class="checklist-info-grid">
+      <div>
+        <strong>Verified by</strong>
+        <select name="verified_by" required style="width:100%">
+          <option value="">Select manager…</option>
+          {% for member in staff %}
+          <option value="{{ member }}">{{ member }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <strong>Overall result</strong>
+        <select name="overall_result" required style="width:100%">
+          <option value="">Select result…</option>
+          <option value="all_good">All good</option>
+          <option value="minor_issues">Minor issues</option>
+          <option value="issues_found">Issues found</option>
+        </select>
+      </div>
+    </div>
+    <label>
+      <strong style="font-size:0.74rem;color:var(--text-muted)">Issues found</strong>
+      <textarea name="issues_found" rows="2" placeholder="Describe any problems noticed…" style="width:100%"></textarea>
+    </label>
+    <label>
+      <strong style="font-size:0.74rem;color:var(--text-muted)">Action / who follows up</strong>
+      <input type="text" name="action_responsible" placeholder="e.g. Cha Lan tomorrow morning" style="width:100%">
+    </label>
+    <label>
+      <strong style="font-size:0.74rem;color:var(--text-muted)">Manager notes</strong>
+      <textarea name="manager_notes" rows="2" placeholder="Any extra context for the team" style="width:100%"></textarea>
+    </label>
+    <div class="checklist-toolbar" style="background:transparent;border:0;padding:0;justify-content:flex-end">
+      <button class="checklist-btn checklist-btn--success" type="submit">Mark as verified</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

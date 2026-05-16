@@ -1,0 +1,100 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}Manager review | MCQ{% endblock %}
+
+{% block header_kicker %}Manager panel{% endblock %}
+{% block header_title %}Verify open submissions and surface issues{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">{{ pending|length }} pending</span>
+<span class="checklist-header__pill">{{ verified_today }} verified today</span>
+{% endblock %}
+
+{% block checklist_body %}
+<section class="checklist-section">
+  <h2><small>Pending verification</small>Open the record to mark it verified</h2>
+  {% if pending %}
+  <div style="overflow-x:auto">
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Station</th>
+          <th>Section</th>
+          <th>Submitted by</th>
+          <th>Completion</th>
+          <th>Photos</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in pending %}
+        <tr>
+          <td>{{ record.date }}</td>
+          <td><strong style="color:{{ record.accent }}">{{ record.type_title }}</strong></td>
+          <td>{{ record.section|title }}</td>
+          <td>{{ record.submitted_by or '—' }}</td>
+          <td>{{ record.done_count }}/{{ record.total_count }} ({{ record.completion_pct }}%)</td>
+          <td>{{ record.photo_count }}</td>
+          <td><a class="checklist-btn checklist-btn--sm" href="{{ url_for('checklist.session_view', session_id=record.id) }}">Review</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="checklist-empty">Nothing in the verification queue right now. Nice work.</div>
+  {% endif %}
+</section>
+
+<section class="checklist-section">
+  <h2><small>Issues flagged</small>Sessions previously marked as having problems</h2>
+  {% if issues %}
+  <div style="overflow-x:auto">
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Station</th>
+          <th>Submitted by</th>
+          <th>Issues</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in issues %}
+        <tr>
+          <td>{{ record.date }}</td>
+          <td><strong style="color:{{ record.accent }}">{{ record.type_title }}</strong></td>
+          <td>{{ record.submitted_by or '—' }}</td>
+          <td>{{ record.issues_found or '—' }}</td>
+          <td><a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.session_view', session_id=record.id) }}">Open</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="checklist-empty">No flagged issues recently.</div>
+  {% endif %}
+</section>
+
+<section class="checklist-section">
+  <h2><small>Audit log</small>Last 20 actions</h2>
+  {% if recent_log %}
+  <ul class="checklist-timeline">
+    {% for entry in recent_log %}
+    <li>
+      <span class="checklist-timeline__dot" style="background:{% if entry.tone == 'verify' %}#28724d{% elif entry.tone == 'temp' %}#eb5130{% else %}#ff6a13{% endif %}">{{ entry.action[:1] }}</span>
+      <div>
+        <strong>{{ entry.action }}</strong>
+        <div class="checklist-timeline__meta">{{ entry.user }} · {{ entry.time }} · {{ entry.date }}</div>
+        {% if entry.details %}<div class="checklist-timeline__meta">{{ entry.details }}</div>{% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="checklist-empty">No audit activity yet.</div>
+  {% endif %}
+</section>
+{% endblock %}
