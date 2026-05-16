@@ -543,12 +543,12 @@
               <p>{{ order.order_number }} · last updated {{ order.updated_at }}</p>
             </div>
           </div>
-          <p class="eyebrow">Order confirmed</p>
+          <p class="eyebrow inline-flex items-center gap-1.5"><i data-lucide="check-circle-2" class="!w-3.5 !h-3.5 text-emerald-600"></i>Order confirmed</p>
           <h1 class="section-title">
             {% if order.is_instant %}
-              Queue ticket {{ order.queue_display }} confirmed for {{ order.counter_label }}.
+              Queue ticket <span class="gradient-text">{{ order.queue_display }}</span> confirmed for {{ order.counter_label }}.
             {% else %}
-              Pickup booked for {{ order.pickup_day }}.
+              Pickup booked for <span class="gradient-text">{{ order.pickup_day }}</span>.
             {% endif %}
           </h1>
           <p class="section-copy">
@@ -574,16 +574,34 @@
             {% endif %}
           </div>
           <div class="receipt-actions">
-            <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--primary">Download PDF receipt</a>
-            <button type="button" class="button button--secondary" onclick="window.print()">Print receipt</button>
-            <a href="{{ url_for('orders.order_detail', order_number=order.order_number) }}" class="button button--secondary">Open order detail</a>
-            <a href="{{ url_for('orders.orders') }}" class="button button--secondary">View order history</a>
-            <a href="{{ url_for('user.shared_meals', order=order.order_number) }}" class="button button--secondary">Share this meal</a>
-            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='best_part') }}" class="button button--secondary">Share best part</a>
-            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='tip') }}" class="button button--secondary">Share a tip</a>
-            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='pairing') }}" class="button button--secondary">Share pairing</a>
+            <a href="{{ url_for('orders.receipt_pdf', order_number=order.order_number) }}" class="button button--primary shine-button inline-flex items-center gap-2">
+              <i data-lucide="download" class="!w-4 !h-4"></i>Download PDF receipt
+            </a>
+            <button type="button" class="button button--secondary inline-flex items-center gap-2" onclick="window.print()">
+              <i data-lucide="printer" class="!w-4 !h-4"></i>Print receipt
+            </button>
+            <a href="{{ url_for('orders.order_detail', order_number=order.order_number) }}" class="button button--secondary inline-flex items-center gap-2">
+              <i data-lucide="package" class="!w-4 !h-4"></i>Open order detail
+            </a>
+            <a href="{{ url_for('orders.orders') }}" class="button button--secondary inline-flex items-center gap-2">
+              <i data-lucide="receipt-text" class="!w-4 !h-4"></i>View order history
+            </a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number) }}" class="button button--secondary inline-flex items-center gap-2">
+              <i data-lucide="share-2" class="!w-4 !h-4"></i>Share this meal
+            </a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='best_part') }}" class="button button--secondary inline-flex items-center gap-2">
+              <i data-lucide="heart" class="!w-4 !h-4"></i>Share best part
+            </a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='tip') }}" class="button button--secondary inline-flex items-center gap-2">
+              <i data-lucide="lightbulb" class="!w-4 !h-4"></i>Share a tip
+            </a>
+            <a href="{{ url_for('user.shared_meals', order=order.order_number, prompt='pairing') }}" class="button button--secondary inline-flex items-center gap-2">
+              <i data-lucide="grape" class="!w-4 !h-4"></i>Share pairing
+            </a>
             <form class="inline-form" method="post" action="{{ url_for('orders.reorder', order_number=order.order_number) }}">
-              <button type="submit" class="button button--secondary button--inline">Order again</button>
+              <button type="submit" class="button button--secondary button--inline inline-flex items-center gap-2">
+                <i data-lucide="repeat" class="!w-4 !h-4"></i>Order again
+              </button>
             </form>
           </div>
         </div>
