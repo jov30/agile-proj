@@ -87,22 +87,12 @@
         </nav>
         {% if current_user %}
           <div class="header-actions">
-            {% if not is_admin %}
-              <form method="post" action="{{ url_for('auth.demo_admin_mode') }}">
-                <input type="hidden" name="next" value="{{ url_for('admin.admin_dashboard') }}" />
-                <button type="submit" class="header-cta">Admin Mode</button>
-              </form>
-            {% endif %}
             <form method="post" action="{{ url_for('auth.logout') }}">
               <button type="submit" class="header-cta">Logout</button>
             </form>
           </div>
         {% else %}
           <div class="header-actions">
-            <form method="post" action="{{ url_for('auth.demo_admin_mode') }}">
-              <input type="hidden" name="next" value="{{ url_for('admin.admin_dashboard') }}" />
-              <button type="submit" class="header-cta">Admin Mode</button>
-            </form>
             <a href="{{ url_for('auth.login') }}" class="header-cta">Login</a>
           </div>
         {% endif %}
