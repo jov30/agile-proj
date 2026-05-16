@@ -38,6 +38,47 @@ def load_enriched_menu(path: Path) -> dict[str, Any]:
     return enrich_menu(raw)
 
 
+def _ingredient_search_blob(item: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for sec in item.get("sections") or []:
+        if not isinstance(sec, dict):
+            continue
+        for entry in sec.get("items") or []:
+            parts.append(str(entry))
+    return " ".join(parts)
+
+
+def filter_menu_by_query(data: dict[str, Any], query: str) -> dict[str, Any]:
+    """Return a copy of the menu payload with only items matching a keyword (substring, case-insensitive).
+
+    Matches against item name, summary, ingredient/section lines, and category title.
+    """
+    q = (query or "").strip().lower()
+    if not q:
+        return data
+    out_categories: list[dict[str, Any]] = []
+    for cat in data.get("categories") or []:
+        title = str(cat.get("title") or "")
+        matched: list[dict[str, Any]] = []
+        for item in cat.get("items") or []:
+            if not isinstance(item, dict):
+                continue
+            hay = " ".join(
+                [
+                    str(item.get("name") or ""),
+                    str(item.get("summary") or ""),
+                    _ingredient_search_blob(item),
+                    title,
+                ]
+            ).lower()
+            if q in hay:
+                matched.append(item)
+        if matched:
+            cat_out = {**cat, "items": matched}
+            out_categories.append(cat_out)
+    return {"categories": out_categories}
+
+
 def find_item(menu: dict[str, Any], item_id: str) -> tuple[dict[str, Any], dict[str, Any]] | None:
     for cat in menu.get("categories", []):
         for item in cat.get("items", []):

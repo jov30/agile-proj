@@ -4,7 +4,7 @@ from pathlib import Path
 
 from flask import Blueprint, abort, jsonify, redirect, render_template, request, session, url_for
 
-from menu_catalog import find_item, load_enriched_menu
+from menu_catalog import filter_menu_by_query, find_item, load_enriched_menu
 from models import CommunityPost, FULFILLMENT_TYPES, Order
 
 public_bp = Blueprint("public", __name__)
@@ -15,6 +15,8 @@ _ROOT_DIR = Path(__file__).resolve().parent.parent
 def _menu_path() -> Path:
     return _ROOT_DIR / "static" / "data" / "menu.json"
 
+
+MENU_SEARCH_QUERY_MAX_LEN = 200
 
 def _preferred_fulfillment(default: str = FULFILLMENT_TYPES[0]) -> str:
     raw_value = request.args.get("fulfillment", "").strip().lower()
@@ -113,6 +115,12 @@ def menu() -> str:
 @public_bp.get("/api/menu")
 def api_menu():
     data = load_enriched_menu(_menu_path())
+    raw_q = request.args.get("q", "", type=str) or ""
+    q = raw_q.strip()
+    if q:
+        if len(q) > MENU_SEARCH_QUERY_MAX_LEN:
+            q = q[:MENU_SEARCH_QUERY_MAX_LEN]
+        data = filter_menu_by_query(data, q)
     return jsonify(_apply_community_badges(data))
 
 

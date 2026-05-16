@@ -1,12 +1,38 @@
 import unittest
 
 from app import app
+from menu_catalog import filter_menu_by_query, load_enriched_menu
+from routes.menu import _menu_path
 
 
 class TestMenuAndCart(unittest.TestCase):
     def setUp(self) -> None:
         app.config["TESTING"] = True
         self.client = app.test_client()
+
+    def test_api_menu_search_filters_on_backend(self):
+        full = self.client.get("/api/menu").get_json()
+        full_count = sum(len(c.get("items") or []) for c in full.get("categories") or [])
+        resp = self.client.get("/api/menu?q=coriander")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        filt_count = sum(len(c.get("items") or []) for c in data.get("categories") or [])
+        self.assertGreater(filt_count, 0)
+        self.assertLess(filt_count, full_count)
+
+    def test_api_menu_search_no_match_returns_empty_categories(self):
+        resp = self.client.get("/api/menu?q=zzzznomatchzzzz")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(data.get("categories") or [], [])
+
+    def test_filter_menu_by_query_unit(self):
+        path = _menu_path()
+        if not path.is_file():
+            self.skipTest("menu.json not present")
+        data = load_enriched_menu(path)
+        filtered = filter_menu_by_query(data, "Pho Noodle Soup")
+        self.assertLess(len(filtered["categories"]), len(data["categories"]))
 
     def test_api_menu_contains_items_with_ids(self):
         resp = self.client.get("/api/menu")
