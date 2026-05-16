@@ -143,6 +143,24 @@ body.is-scrolled .app-header__inner {
 /* ── Nav links — subtle underline glow ──────────────────────────────────── */
 .main-nav a {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.95rem;
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.main-nav a i[data-lucide],
+.main-nav a .lucide {
+  opacity: 0.85;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.main-nav a:hover i[data-lucide],
+.main-nav a.is-active i[data-lucide] {
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
 .main-nav a::after {
