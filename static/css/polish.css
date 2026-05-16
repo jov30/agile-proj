@@ -599,3 +599,179 @@ select:focus-visible {
 
 /* ── Smooth scroll for in-page anchors ──────────────────────────────────── */
 html { scroll-behavior: smooth; }
+
+/* ── Menu cards — soft lift, image zoom, gradient price ─────────────────── */
+.menu-card {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.3s ease !important;
+  position: relative;
+}
+
+.menu-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 30px 60px rgba(53, 30, 20, 0.2) !important;
+}
+
+.menu-card__media img {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.menu-card:hover .menu-card__media img {
+  transform: scale(1.07);
+}
+
+.menu-card__price {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red)) !important;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: 900 !important;
+}
+
+/* Menu flow toggles + utility links — shimmer on active state */
+.menu-flow__mode.is-active,
+.menu-utility__link--accent {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-flow__mode.is-active::before,
+.menu-utility__link--accent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: heroBadgeShine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Category tabs — clearer active state ──────────────────────────────── */
+.menu-tab.is-active,
+.menu-category-pill.is-active {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red)) !important;
+  color: #2a160b !important;
+  font-weight: 800 !important;
+  box-shadow: 0 10px 22px rgba(255, 106, 19, 0.32) !important;
+}
+
+/* ── Cart / Checkout polish ─────────────────────────────────────────────── */
+.cart-line,
+.cart-line-item,
+.cart-summary,
+.checkout-card,
+.checkout-section {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.cart-line:hover,
+.cart-line-item:hover {
+  transform: translateX(2px);
+  border-color: var(--line-strong);
+}
+
+.cart-summary,
+.checkout-card,
+.checkout-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sticky summary on checkout */
+.checkout-summary.is-sticky,
+.cart-summary--sticky {
+  position: sticky;
+  top: 7.5rem;
+}
+
+/* ── Auth pages enhancement ─────────────────────────────────────────────── */
+.auth-card,
+.auth-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card::before,
+.auth-shell::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(40rem 24rem at 20% 20%, rgba(255, 180, 54, 0.16), transparent 60%),
+    radial-gradient(36rem 22rem at 80% 80%, rgba(235, 81, 48, 0.12), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Tables — soft borders, hover rows ──────────────────────────────────── */
+.admin-table,
+table.admin-table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.admin-table thead th,
+table.admin-table thead th {
+  background: linear-gradient(135deg, #2c201b, #1b1412) !important;
+  color: #fff7ef !important;
+}
+
+.admin-table tbody tr,
+table.admin-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.admin-table tbody tr:hover,
+table.admin-table tbody tr:hover {
+  background: rgba(255, 180, 54, 0.08) !important;
+}
+
+/* ── Admin shell card styling — already exists, enhance ─────────────────── */
+.admin-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.25s ease !important;
+}
+
+.admin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 50px rgba(53, 30, 20, 0.14) !important;
+  border-color: var(--line-strong) !important;
+}
+
+.admin-stat strong {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 1.7rem !important;
+}
+
+/* ── Button overrides (generic) ─────────────────────────────────────────── */
+.button.button--primary,
+.button-primary,
+.checkout-submit,
+.cart-checkout {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.button.button--primary::before,
+.button-primary::before,
+.checkout-submit::before,
+.cart-checkout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.button.button--primary:hover::before,
+.button-primary:hover::before,
+.checkout-submit:hover::before,
+.cart-checkout:hover::before {
+  transform: translateX(120%);
+}

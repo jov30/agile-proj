@@ -1013,15 +1013,17 @@
   <div class="menu-flow">
     <div class="menu-flow__switch" aria-label="Preferred pickup flow">
       <a
-        class="menu-flow__mode {% if preferred_fulfillment == 'instant' %}is-active{% endif %}"
+        class="menu-flow__mode {% if preferred_fulfillment == 'instant' %}is-active{% endif %} inline-flex items-center gap-2"
         href="{{ url_for('public.menu', fulfillment='instant') }}"
       >
+        <i data-lucide="zap" class="!w-4 !h-4"></i>
         Instant Queue
       </a>
       <a
-        class="menu-flow__mode {% if preferred_fulfillment == 'scheduled' %}is-active{% endif %}"
+        class="menu-flow__mode {% if preferred_fulfillment == 'scheduled' %}is-active{% endif %} inline-flex items-center gap-2"
         href="{{ url_for('public.menu', fulfillment='scheduled') }}"
       >
+        <i data-lucide="calendar-clock" class="!w-4 !h-4"></i>
         Scheduled Pickup
       </a>
     </div>
@@ -1036,13 +1038,26 @@
     </div>
   </div>
   <div class="menu-utility__grid">
-    <a class="menu-utility__link menu-utility__link--accent" href="{{ url_for('orders.cart', fulfillment=preferred_fulfillment) }}">Cart</a>
-    <a class="menu-utility__link" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">
+    <a class="menu-utility__link menu-utility__link--accent inline-flex items-center gap-2" href="{{ url_for('orders.cart', fulfillment=preferred_fulfillment) }}">
+      <i data-lucide="shopping-bag" class="!w-4 !h-4"></i>
+      Cart
+    </a>
+    <a class="menu-utility__link inline-flex items-center gap-2" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">
+      <i data-lucide="credit-card" class="!w-4 !h-4"></i>
       {% if preferred_fulfillment == 'instant' %}Instant Checkout{% else %}Scheduled Checkout{% endif %}
     </a>
-    <a class="menu-utility__link" href="{{ url_for('orders.pickup_planner', fulfillment='scheduled') }}">Pickup Planner</a>
-    <a class="menu-utility__link" href="{{ url_for('orders.orders') }}">Order History</a>
-    <a class="menu-utility__link" href="tel:+61892485623">Call Store</a>
+    <a class="menu-utility__link inline-flex items-center gap-2" href="{{ url_for('orders.pickup_planner', fulfillment='scheduled') }}">
+      <i data-lucide="map-pin" class="!w-4 !h-4"></i>
+      Pickup Planner
+    </a>
+    <a class="menu-utility__link inline-flex items-center gap-2" href="{{ url_for('orders.orders') }}">
+      <i data-lucide="receipt-text" class="!w-4 !h-4"></i>
+      Order History
+    </a>
+    <a class="menu-utility__link inline-flex items-center gap-2" href="tel:+61892485623">
+      <i data-lucide="phone-call" class="!w-4 !h-4"></i>
+      Call Store
+    </a>
   </div>
 </section>
 

@@ -304,8 +304,14 @@
           <span class="pill"><strong>Live cart totals</strong> update immediately as quantities change.</span>
         </div>
         <div class="cart-page__actions">
-          <a class="button button--primary" href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">Browse menu</a>
-          <a class="button button--secondary" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">Jump to checkout</a>
+          <a class="button button--primary shine-button inline-flex items-center gap-2" href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">
+            <i data-lucide="utensils-crossed" class="!w-4 !h-4"></i>
+            Browse menu
+          </a>
+          <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">
+            <i data-lucide="credit-card" class="!w-4 !h-4"></i>
+            Jump to checkout
+          </a>
         </div>
       </div>
       <div class="cart-hero__visuals">
@@ -425,12 +431,27 @@
           </div>
         </div>
         <div class="cart-summary__actions">
-          <a class="button button--primary" href="/checkout?fulfillment=${encodeURIComponent(mode)}">${checkoutLabel(mode)}</a>
-          <a class="button button--secondary" href="/checkout?fulfillment=${encodeURIComponent(alternateMode)}">Switch to ${modeLabel(alternateMode)}</a>
-          <a class="button button--secondary" href="/menu?fulfillment=${encodeURIComponent(mode)}">Add more items</a>
-          <button type="button" class="button button--secondary button--inline" id="clear-cart-button">Clear cart</button>
+          <a class="button button--primary shine-button inline-flex items-center gap-2" href="/checkout?fulfillment=${encodeURIComponent(mode)}">
+            <i data-lucide="${mode === 'scheduled' ? 'calendar-clock' : 'zap'}" class="!w-4 !h-4"></i>
+            ${checkoutLabel(mode)}
+          </a>
+          <a class="button button--secondary inline-flex items-center gap-2" href="/checkout?fulfillment=${encodeURIComponent(alternateMode)}">
+            <i data-lucide="repeat-2" class="!w-4 !h-4"></i>
+            Switch to ${modeLabel(alternateMode)}
+          </a>
+          <a class="button button--secondary inline-flex items-center gap-2" href="/menu?fulfillment=${encodeURIComponent(mode)}">
+            <i data-lucide="plus-circle" class="!w-4 !h-4"></i>
+            Add more items
+          </a>
+          <button type="button" class="button button--secondary button--inline inline-flex items-center gap-2" id="clear-cart-button">
+            <i data-lucide="trash-2" class="!w-4 !h-4"></i>
+            Clear cart
+          </button>
         </div>
       `;
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
 
       const clearButton = document.getElementById("clear-cart-button");
       clearButton?.addEventListener("click", async () => {
