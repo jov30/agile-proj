@@ -11,6 +11,54 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/polish.css') }}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              cream: "#f6ecdf",
+              sand: "#efe0cb",
+              wood: "#2c201b",
+              deep: "#1b1412",
+              amber: "#ffb436",
+              orange: "#ff6a13",
+              red: "#eb5130",
+              gold: "#ffd873",
+              rose: "#d94c79",
+              teal: "#006f74",
+            },
+            fontFamily: {
+              display: ['"Bricolage Grotesque"', '"Be Vietnam Pro"', "sans-serif"],
+              body: ['"Be Vietnam Pro"', '"Segoe UI"', "sans-serif"],
+              kicker: ['"Bebas Neue"', "sans-serif"],
+            },
+            boxShadow: {
+              soft: "0 18px 50px rgba(53, 30, 20, 0.11)",
+              strong: "0 28px 80px rgba(32, 18, 12, 0.2)",
+              glow: "0 22px 36px rgba(255, 106, 19, 0.34)",
+            },
+            animation: {
+              "fade-up": "fadeUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both",
+              shimmer: "shimmer 2.5s linear infinite",
+              "spin-slow": "spin 12s linear infinite",
+            },
+            keyframes: {
+              fadeUp: {
+                from: { opacity: 0, transform: "translateY(28px)" },
+                to: { opacity: 1, transform: "none" },
+              },
+              shimmer: {
+                "0%": { backgroundPosition: "-200% 50%" },
+                "100%": { backgroundPosition: "200% 50%" },
+              },
+            },
+          },
+        },
+        corePlugins: { preflight: false },
+      };
+    </script>
     <style>
       .site-alerts {
         width: min(1180px, calc(100vw - 2rem));
@@ -372,6 +420,38 @@
         });
 
         navMobileQuery.addEventListener('change', syncNavForViewport);
+      })();
+    </script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+      (() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+
+        const onScroll = () => {
+          document.body.classList.toggle('is-scrolled', window.scrollY > 24);
+        };
+        document.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        if ('IntersectionObserver' in window) {
+          const reveals = document.querySelectorAll('.reveal-up');
+          const io = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-visible');
+                  io.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+          );
+          reveals.forEach((node) => io.observe(node));
+        } else {
+          document.querySelectorAll('.reveal-up').forEach((node) => node.classList.add('is-visible'));
+        }
       })();
     </script>
     {% block scripts %}{% endblock %}
