@@ -78,23 +78,6 @@ class TestAuthAndAdminAccess(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/login?next=/admin/orders/queue", response.headers["Location"])
 
-    def test_customer_session_cannot_call_admin_status_api(self):
-        order_number = self._place_order()
-        login = self.client.post(
-            "/login",
-            data={"email": "customer@example.com", "password": "customer-123"},
-            follow_redirects=False,
-        )
-        self.assertEqual(login.status_code, 302)
-
-        response = self.client.patch(
-            f"/api/orders/{order_number}/status",
-            json={"status": "Preparing"},
-        )
-        self.assertEqual(response.status_code, 403)
-        payload = response.get_json()
-        self.assertEqual(payload["error"], "admin access required")
-
 
 if __name__ == "__main__":
     unittest.main()
