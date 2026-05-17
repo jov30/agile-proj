@@ -1,0 +1,181 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}Operations Checklist | MCQ Vietnamese Street Food{% endblock %}
+
+{% block header_kicker %}Operations Console{% endblock %}
+{% block header_title %}Today's checklist & temperature overview{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">{{ today_label }}</span>
+<span class="checklist-header__pill">Admin mode</span>
+{% endblock %}
+
+{% block checklist_body %}
+{% if alerts %}
+<div class="checklist-alerts">
+  {% for alert in alerts %}
+  <div class="checklist-alert checklist-alert--{{ alert.tone }}">
+    <span>{{ alert.msg }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="checklist-stats">
+  <article class="checklist-stat">
+    <strong>{{ checklist_status.values()|selectattr('opening')|list|length + checklist_status.values()|selectattr('closing')|list|length }}</strong>
+    <span>Checklist sections submitted today</span>
+  </article>
+  <article class="checklist-stat">
+    <strong>{{ temperature_status.values()|select|list|length }}</strong>
+    <span>Temperature records logged today</span>
+  </article>
+  <article class="checklist-stat">
+    <strong>{{ pending_count }}</strong>
+    <span>Pending manager verification</span>
+  </article>
+  <article class="checklist-stat">
+    <strong>{{ week_chk }}</strong>
+    <span>Checklists this week</span>
+  </article>
+</div>
+
+<div class="checklist-grid">
+  <div class="checklist-stack">
+    <section class="checklist-section">
+      <h2><small>Daily Checklists</small>Open / close status per station</h2>
+      <div class="checklist-card-grid">
+        {% for key, chk in checklists.items() %}
+        {% set status = checklist_status.get(key, {}) %}
+        {% set opening = status.get('opening') %}
+        {% set closing = status.get('closing') %}
+        <article class="checklist-card" style="--accent: {{ chk.accent }}; border-left-color: {{ chk.accent }}">
+          <div class="checklist-card__title">{{ chk.title }}</div>
+          <div class="checklist-card__row">
+            <span class="checklist-pill checklist-pill--info">Open</span>
+            {% if opening %}
+              <span class="checklist-pill {% if opening.verified %}checklist-pill--success{% else %}checklist-pill--warning{% endif %}">
+                {% if opening.verified %}Verified{% else %}Submitted{% endif %}
+              </span>
+              <span class="checklist-card__row" style="margin-left:auto;font-size:0.72rem;color:var(--text-muted)">{{ opening.submitted_time }}</span>
+              <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.session_view', session_id=opening.id) }}">View</a>
+            {% else %}
+              <span class="checklist-pill checklist-pill--pending">Pending</span>
+              <a class="checklist-btn checklist-btn--sm" style="margin-left:auto" href="{{ url_for('checklist.checklist_form', chk_type=key, section='opening') }}">Fill in</a>
+            {% endif %}
+          </div>
+          <div class="checklist-card__row">
+            <span class="checklist-pill checklist-pill--info">Close</span>
+            {% if closing %}
+              <span class="checklist-pill {% if closing.verified %}checklist-pill--success{% else %}checklist-pill--warning{% endif %}">
+                {% if closing.verified %}Verified{% else %}Submitted{% endif %}
+              </span>
+              <span class="checklist-card__row" style="margin-left:auto;font-size:0.72rem;color:var(--text-muted)">{{ closing.submitted_time }}</span>
+              <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.session_view', session_id=closing.id) }}">View</a>
+            {% else %}
+              <span class="checklist-pill checklist-pill--pending">Pending</span>
+              <a class="checklist-btn checklist-btn--sm" style="margin-left:auto" href="{{ url_for('checklist.checklist_form', chk_type=key, section='closing') }}">Fill in</a>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="checklist-section">
+      <h2><small>Temperature Records</small>Food safety logs for today</h2>
+      <div class="checklist-card-grid">
+        {% for key, temp in temperature_records.items() %}
+        {% set ts = temperature_status.get(key) %}
+        <article class="checklist-card" style="--accent: {{ temp.accent }}; border-left-color: {{ temp.accent }}">
+          <div class="checklist-card__title">{{ temp.title }}</div>
+          <div class="checklist-card__row">
+            {% if ts %}
+              <span class="checklist-pill checklist-pill--success">Logged at {{ ts.submitted_time }}</span>
+              <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.temperature_view', session_id=ts.id) }}">View</a>
+              <a class="checklist-btn checklist-btn--sm" href="{{ url_for('checklist.temperature_form', temp_type=key) }}">Edit</a>
+            {% else %}
+              <span class="checklist-pill checklist-pill--pending">Not yet recorded</span>
+              <a class="checklist-btn checklist-btn--sm" style="margin-left:auto" href="{{ url_for('checklist.temperature_form', temp_type=key) }}">Record</a>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="checklist-stack">
+    <section class="checklist-section">
+      <h2><small>Today's Timeline</small>Submissions as they come in</h2>
+      <div class="checklist-toolbar" style="padding:0.5rem 0">
+        <label style="font-size:0.78rem;color:var(--text-muted)">Date</label>
+        <input type="date" id="checklist-timeline-date" value="{{ today_iso }}" onchange="loadChecklistTimeline(this.value)">
+      </div>
+      <div id="checklist-timeline-body">
+        <div class="checklist-empty">Loading…</div>
+      </div>
+    </section>
+
+    <section class="checklist-section">
+      <h2><small>Recent Activity</small>Latest audit log entries</h2>
+      {% if recent_audit %}
+      <ul class="checklist-timeline">
+        {% for entry in recent_audit %}
+        <li>
+          <span class="checklist-timeline__dot" style="background:{% if entry.tone == 'verify' %}#28724d{% elif entry.tone == 'temp' %}#eb5130{% else %}#ff6a13{% endif %}">{{ entry.action[:1] }}</span>
+          <div>
+            <strong>{{ entry.action }}</strong>
+            <div class="checklist-timeline__meta">{{ entry.user }} · {{ entry.time }} · {{ entry.date }}</div>
+            {% if entry.details %}<div class="checklist-timeline__meta">{{ entry.details }}</div>{% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="checklist-empty">No activity logged yet.</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block checklist_scripts %}
+<script>
+  async function loadChecklistTimeline(target) {
+    var body = document.getElementById('checklist-timeline-body');
+    body.innerHTML = '<div class="checklist-empty">Loading…</div>';
+    try {
+      var res = await fetch('{{ url_for("checklist.timeline_api") }}?date=' + encodeURIComponent(target));
+      var data = await res.json();
+      if (!data.events || !data.events.length) {
+        body.innerHTML = '<div class="checklist-empty">No submissions for this date.</div>';
+        return;
+      }
+      var html = '<ul class="checklist-timeline">';
+      data.events.forEach(function (ev) {
+        var icon = ev.kind === 'temperature' ? 'T' : (ev.section === 'opening' ? 'O' : 'C');
+        var verifiedTag = ev.verified ? '<span class="checklist-pill checklist-pill--success">Verified ' + ev.verified_at + '</span>' : '';
+        var photoTag = ev.kind === 'checklist'
+          ? '<span class="checklist-pill ' + (ev.photo_count >= 4 ? 'checklist-pill--success' : 'checklist-pill--warning') + '">Photos ' + ev.photo_count + '</span>'
+          : '';
+        html += '<li>'
+          + '<span class="checklist-timeline__dot" style="background:' + ev.accent + '">' + icon + '</span>'
+          + '<div>'
+          + '<strong>' + ev.type_label + '</strong>'
+          + ' <span class="checklist-pill checklist-pill--pending">' + ev.section + '</span> '
+          + verifiedTag + ' ' + photoTag
+          + '<div class="checklist-timeline__meta">' + ev.time + ' · ' + ev.by
+          + (ev.kind === 'checklist' ? ' · ' + ev.done_count + '/' + ev.total_count + ' tasks' : '')
+          + '</div></div></li>';
+      });
+      html += '</ul>';
+      body.innerHTML = html;
+    } catch (err) {
+      body.innerHTML = '<div class="checklist-empty">Could not load timeline.</div>';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    loadChecklistTimeline('{{ today_iso }}');
+  });
+</script>
+{% endblock %}

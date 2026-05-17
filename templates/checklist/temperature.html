@@ -1,0 +1,95 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}{{ temp_data.title }} | MCQ{% endblock %}
+
+{% block header_kicker %}Temperature record{% endblock %}
+{% block header_title %}{{ temp_data.title }}{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">Date {{ temp_date }}</span>
+{% if existing %}<span class="checklist-header__pill" style="background:rgba(40,114,77,0.45)">Logged {{ existing.submitted_time }}</span>{% endif %}
+{% endblock %}
+
+{% block checklist_body %}
+<form class="checklist-form" method="POST" action="{{ url_for('checklist.temperature_save', temp_type=temp_type) }}">
+  <input type="hidden" name="date" value="{{ temp_date }}">
+
+  <div class="checklist-toolbar">
+    <label style="font-size:0.78rem;color:var(--text-muted)">Date</label>
+    <input type="date" value="{{ temp_date }}" onchange="window.location.href='{{ url_for('checklist.temperature_form', temp_type=temp_type) }}?date='+this.value">
+    <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.home') }}">Back to dashboard</a>
+  </div>
+
+  <section class="checklist-section">
+    <div class="checklist-info-grid">
+      <div>
+        <strong>Recorded by</strong>
+        <select name="recorded_by" required style="width:100%">
+          <option value="">Select staff…</option>
+          {% for member in staff %}
+          <option value="{{ member }}" {% if existing and existing.recorded_by == member %}selected{% endif %}>{{ member }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <strong>Checked by</strong>
+        <select name="checked_by" style="width:100%">
+          <option value="">Select staff…</option>
+          {% for member in staff %}
+          <option value="{{ member }}" {% if existing and existing.checked_by == member %}selected{% endif %}>{{ member }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="grid-column: 1 / -1">
+        <strong>Notes</strong>
+        <textarea name="notes" rows="2" style="width:100%" placeholder="Any relevant observations…">{{ existing.notes if existing else '' }}</textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="checklist-section">
+    <h2><small>Readings</small>Five check-ins per food, °C</h2>
+    <div class="checklist-alert checklist-alert--warning">Safe zone is below 5°C (cold) or above 60°C (hot). Anything within 5-60°C must be discarded after 4 hours.</div>
+    <div style="overflow-x:auto">
+      <table class="checklist-table checklist-temperature-table">
+        <thead>
+          <tr>
+            <th>Food</th>
+            <th>Check 1</th>
+            <th>Check 2</th>
+            <th>Check 3</th>
+            <th>Check 4</th>
+            <th>Check 5</th>
+            <th style="width:80px;text-align:center">Discarded</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for food in temp_data.foods %}
+          {% set i = loop.index0 %}
+          {% set r = readings[i] if i < readings|length else None %}
+          <tr>
+            <td><strong>{{ food }}</strong></td>
+            {% for n in range(1, 6) %}
+            <td>
+              <input type="time" name="c{{ n }}_time_{{ i }}" value="{{ r['c%d_time' % n] if r else '' }}">
+              <input type="number" name="c{{ n }}_temp_{{ i }}" step="0.1" placeholder="°C" value="{{ r['c%d_temp' % n] if r and r['c%d_temp' % n] is not none else '' }}">
+            </td>
+            {% endfor %}
+            <td style="text-align:center">
+              <select name="discarded_{{ i }}">
+                <option value="N" {% if not r or r.discarded == 'N' %}selected{% endif %}>N</option>
+                <option value="Y" {% if r and r.discarded == 'Y' %}selected{% endif %}>Y</option>
+              </select>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="checklist-toolbar" style="justify-content:flex-end">
+    <a class="checklist-btn checklist-btn--ghost" href="{{ url_for('checklist.home') }}">Cancel</a>
+    <button class="checklist-btn checklist-btn--success" type="submit">Save temperature record</button>
+  </div>
+</form>
+{% endblock %}

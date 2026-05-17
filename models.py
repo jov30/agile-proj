@@ -389,6 +389,184 @@ class CommunitySave(db.Model):
     post = db.relationship("CommunityPost", back_populates="saves")
 
 
+class ChecklistSession(db.Model):
+    __tablename__ = "checklist_sessions"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "checklist_type",
+            "section",
+            "session_date",
+            name="uq_checklist_session_type_section_date",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    checklist_type = db.Column(db.String(40), nullable=False, index=True)
+    section = db.Column(db.String(20), nullable=False, index=True)
+    session_date = db.Column(db.Date, nullable=False, index=True)
+    day_of_week = db.Column(db.String(20), nullable=True)
+    responsible = db.Column(db.String(120), nullable=True)
+    submitted_by = db.Column(db.String(120), nullable=True)
+    general_done_by = db.Column(db.String(120), nullable=True)
+    manager_submit = db.Column(db.String(120), nullable=True)
+    general_note = db.Column(db.Text, nullable=True)
+    is_late = db.Column(db.Boolean, nullable=False, default=False)
+    submitted_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive, index=True)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        onupdate=utc_now_naive,
+    )
+    verified = db.Column(db.Boolean, nullable=False, default=False, index=True)
+    verified_by = db.Column(db.String(120), nullable=True)
+    verified_at = db.Column(db.DateTime, nullable=True)
+    overall_result = db.Column(db.String(40), nullable=True)
+    issues_found = db.Column(db.Text, nullable=True)
+    action_responsible = db.Column(db.String(255), nullable=True)
+    manager_notes = db.Column(db.Text, nullable=True)
+
+    tasks = db.relationship(
+        "ChecklistTask",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        order_by="ChecklistTask.task_order",
+    )
+    photos = db.relationship(
+        "ChecklistPhoto",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        order_by="ChecklistPhoto.photo_number",
+    )
+
+
+class ChecklistTask(db.Model):
+    __tablename__ = "checklist_tasks"
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(
+        db.Integer,
+        db.ForeignKey("checklist_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    task_order = db.Column(db.Integer, nullable=False)
+    task_name = db.Column(db.String(500), nullable=False)
+    done = db.Column(db.Boolean, nullable=False, default=False)
+    note = db.Column(db.String(255), nullable=True)
+
+    session = db.relationship("ChecklistSession", back_populates="tasks")
+
+
+class ChecklistPhoto(db.Model):
+    __tablename__ = "checklist_photos"
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(
+        db.Integer,
+        db.ForeignKey("checklist_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    filename = db.Column(db.String(255), nullable=False)
+    original_name = db.Column(db.String(255), nullable=True)
+    photo_number = db.Column(db.Integer, nullable=False, default=0)
+    file_size = db.Column(db.Integer, nullable=True)
+    uploaded_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive)
+    uploaded_by = db.Column(db.String(120), nullable=True)
+
+    session = db.relationship("ChecklistSession", back_populates="photos")
+
+
+class TemperatureSession(db.Model):
+    __tablename__ = "temperature_sessions"
+    __table_args__ = (
+        db.UniqueConstraint(
+            "record_type",
+            "session_date",
+            name="uq_temperature_session_type_date",
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    record_type = db.Column(db.String(40), nullable=False, index=True)
+    session_date = db.Column(db.Date, nullable=False, index=True)
+    recorded_by = db.Column(db.String(120), nullable=True)
+    checked_by = db.Column(db.String(120), nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+    submitted_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive, index=True)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=utc_now_naive,
+        onupdate=utc_now_naive,
+    )
+
+    readings = db.relationship(
+        "TemperatureReading",
+        back_populates="session",
+        cascade="all, delete-orphan",
+        order_by="TemperatureReading.food_order",
+    )
+
+
+class TemperatureReading(db.Model):
+    __tablename__ = "temperature_readings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(
+        db.Integer,
+        db.ForeignKey("temperature_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    food_order = db.Column(db.Integer, nullable=False)
+    food_name = db.Column(db.String(255), nullable=False)
+    c1_time = db.Column(db.String(20), nullable=True)
+    c1_temp = db.Column(db.Float, nullable=True)
+    c2_time = db.Column(db.String(20), nullable=True)
+    c2_temp = db.Column(db.Float, nullable=True)
+    c3_time = db.Column(db.String(20), nullable=True)
+    c3_temp = db.Column(db.Float, nullable=True)
+    c4_time = db.Column(db.String(20), nullable=True)
+    c4_temp = db.Column(db.Float, nullable=True)
+    c5_time = db.Column(db.String(20), nullable=True)
+    c5_temp = db.Column(db.Float, nullable=True)
+    discarded = db.Column(db.String(2), nullable=False, default="N")
+
+    session = db.relationship("TemperatureSession", back_populates="readings")
+
+
+class ChecklistAuditLog(db.Model):
+    __tablename__ = "checklist_audit_log"
+
+    id = db.Column(db.Integer, primary_key=True)
+    action = db.Column(db.String(60), nullable=False, index=True)
+    record_type = db.Column(db.String(40), nullable=True)
+    record_id = db.Column(db.Integer, nullable=True)
+    user_name = db.Column(db.String(120), nullable=True)
+    details = db.Column(db.String(500), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive, index=True)
+
+
+class IssueReport(db.Model):
+    __tablename__ = "issue_reports"
+
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(40), nullable=False, index=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    reported_by = db.Column(db.String(120), nullable=False)
+    priority = db.Column(db.String(20), nullable=False, default="normal")
+    status = db.Column(db.String(20), nullable=False, default="open", index=True)
+    photo = db.Column(db.String(255), nullable=True)
+    report_date = db.Column(db.Date, nullable=False, default=lambda: date.today(), index=True)
+    submitted_at = db.Column(db.DateTime, nullable=False, default=utc_now_naive)
+    admin_notes = db.Column(db.Text, nullable=True)
+    resolved_by = db.Column(db.String(120), nullable=True)
+    resolved_at = db.Column(db.DateTime, nullable=True)
+
+
 def _sync_legacy_schema() -> None:
     inspector = inspect(db.engine)
     tables = set(inspector.get_table_names())

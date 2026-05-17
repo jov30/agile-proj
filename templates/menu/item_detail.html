@@ -192,7 +192,8 @@
       {% endif %}
       <div class="item-detail__actions">
         <div class="item-detail__cart-tools">
-          <button type="button" class="button button--primary" id="detail-add-cart" data-item-id="{{ item.id }}" {% if item.available is sameas false %}disabled{% endif %}>
+          <button type="button" class="button button--primary inline-flex items-center gap-2" id="detail-add-cart" data-item-id="{{ item.id }}" {% if item.available is sameas false %}disabled{% endif %}>
+            <i data-lucide="{{ 'ban' if item.available is sameas false else 'shopping-bag' }}" class="!w-4 !h-4"></i>
             {{ "Unavailable" if item.available is sameas false else "Add to cart" }}
           </button>
           <div class="item-detail__qty" id="detail-qty" hidden>
@@ -202,9 +203,16 @@
           </div>
           <span class="item-detail__cart-badge" id="detail-cart-count" hidden>In cart: 1</span>
         </div>
-        <a class="button button--secondary" href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">Back to menu</a>
-        <a class="button button--secondary" href="{{ url_for('orders.cart', fulfillment=preferred_fulfillment) }}">View cart</a>
-        <a class="button button--secondary" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">
+        <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('public.menu', fulfillment=preferred_fulfillment) }}">
+          <i data-lucide="arrow-left" class="!w-4 !h-4"></i>
+          Back to menu
+        </a>
+        <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('orders.cart', fulfillment=preferred_fulfillment) }}">
+          <i data-lucide="shopping-cart" class="!w-4 !h-4"></i>
+          View cart
+        </a>
+        <a class="button button--secondary inline-flex items-center gap-2" href="{{ url_for('orders.checkout', fulfillment=preferred_fulfillment) }}">
+          <i data-lucide="{{ 'calendar-clock' if preferred_fulfillment == 'scheduled' else 'zap' }}" class="!w-4 !h-4"></i>
           {% if preferred_fulfillment == 'scheduled' %}Scheduled checkout{% else %}Instant checkout{% endif %}
         </a>
       </div>

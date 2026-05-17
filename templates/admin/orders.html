@@ -226,8 +226,8 @@
   <section class="admin-panel section-panel">
     <div class="admin-hero__grid">
       <div>
-        <p class="eyebrow">Operations console</p>
-        <h1 class="section-title">Live pickup queue management</h1>
+        <p class="eyebrow inline-flex items-center gap-2"><i data-lucide="radio" class="!w-3.5 !h-3.5"></i>Operations console</p>
+        <h1 class="section-title gradient-text">Live pickup queue management</h1>
         <p class="section-copy">
           Update order stages in real time for both instant and scheduled fulfillment. When an order reaches
           <strong>Ready for Pickup</strong>, mock email and SMS notifications are recorded automatically.
@@ -235,14 +235,23 @@
       </div>
       <div class="admin-hero__stats">
         <article class="admin-stat">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-red-400/20 to-orange-500/20 ring-1 ring-red-300/30 mb-1">
+            <i data-lucide="flame" class="!w-5 !h-5 text-red-600"></i>
+          </span>
           <strong>{{ instant_orders|length }}</strong>
           <span>Active instant queue orders</span>
         </article>
         <article class="admin-stat">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-400/20 to-cyan-500/20 ring-1 ring-teal-300/30 mb-1">
+            <i data-lucide="calendar-clock" class="!w-5 !h-5 text-teal-700"></i>
+          </span>
           <strong>{{ scheduled_orders|length }}</strong>
           <span>Active scheduled pickup orders</span>
         </article>
         <article class="admin-stat">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 ring-1 ring-amber-300/30 mb-1">
+            <i data-lucide="chef-hat" class="!w-5 !h-5 text-orange-600"></i>
+          </span>
           <strong>{{ (instant_orders|length) + (scheduled_orders|length) }}</strong>
           <span>Total active orders in prep pipeline</span>
         </article>

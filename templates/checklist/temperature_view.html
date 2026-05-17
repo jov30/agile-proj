@@ -1,0 +1,67 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}{{ temp_data.title }} record | MCQ{% endblock %}
+
+{% block header_kicker %}Temperature record{% endblock %}
+{% block header_title %}{{ temp_data.title }}{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">Date {{ session.date }}</span>
+<span class="checklist-header__pill">Logged {{ session.submitted_time }}</span>
+{% endblock %}
+
+{% block checklist_body %}
+<section class="checklist-section">
+  <div class="checklist-info-grid">
+    <div><strong>Recorded by</strong>{{ session.recorded_by or '—' }}</div>
+    <div><strong>Checked by</strong>{{ session.checked_by or '—' }}</div>
+    <div><strong>Submitted at</strong>{{ session.submitted_at }}</div>
+  </div>
+  {% if session.notes %}
+  <div style="margin-top:0.6rem"><strong>Notes</strong><div style="color:var(--text-muted)">{{ session.notes }}</div></div>
+  {% endif %}
+  <div class="checklist-toolbar" style="background:transparent;border:0;padding:0;margin-top:0.6rem">
+    <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.temperature_form', temp_type=session.type, date=session.date) }}">Edit</a>
+    <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.export_temperature_excel', session_id=session.id) }}">Export Excel</a>
+    <button type="button" class="checklist-btn checklist-btn--ghost checklist-btn--sm" onclick="window.print()">Print</button>
+  </div>
+</section>
+
+<section class="checklist-section">
+  <h2><small>Readings</small>Times and temperatures, °C</h2>
+  <div style="overflow-x:auto">
+    <table class="checklist-table checklist-temperature-table">
+      <thead>
+        <tr>
+          <th>Food</th>
+          <th>Check 1</th>
+          <th>Check 2</th>
+          <th>Check 3</th>
+          <th>Check 4</th>
+          <th>Check 5</th>
+          <th style="width:80px;text-align:center">Discarded?</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reading in readings %}
+        <tr>
+          <td><strong>{{ reading.food_name }}</strong></td>
+          {% for check in reading.checks %}
+          <td class="{% if check.temp is not none and (check.temp < 5 or check.temp > 60) %}danger{% elif check.temp is not none %}safe{% endif %}">
+            <div style="font-size:0.72rem;color:var(--text-muted)">{{ check.time or '—' }}</div>
+            <div style="font-weight:700">{% if check.temp is not none %}{{ '%.1f'|format(check.temp) }}°C{% else %}—{% endif %}</div>
+          </td>
+          {% endfor %}
+          <td style="text-align:center">
+            {% if reading.discarded == 'Y' %}
+            <span class="checklist-pill checklist-pill--danger">Yes</span>
+            {% else %}
+            <span class="checklist-pill checklist-pill--pending">No</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

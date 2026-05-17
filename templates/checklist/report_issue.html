@@ -1,0 +1,70 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}Log an issue | MCQ{% endblock %}
+
+{% block header_kicker %}Issue report{% endblock %}
+{% block header_title %}Tell the manager about something that needs attention{% endblock %}
+
+{% block checklist_body %}
+{% if submitted %}
+<div class="checklist-alert checklist-alert--info">
+  Your report was submitted. The manager will review it from the Issue reports queue.
+</div>
+{% endif %}
+
+<form class="checklist-form" method="POST" enctype="multipart/form-data">
+  <section class="checklist-section">
+    <h2><small>Step 1</small>Pick the category that fits best</h2>
+    <div class="checklist-card-grid">
+      {% for key, cat in issue_categories.items() %}
+      <label class="checklist-card" style="border-left-color:{{ cat.accent }};cursor:pointer">
+        <div class="checklist-card__row" style="gap:0.5rem">
+          <input type="radio" name="category" value="{{ key }}" required>
+          <strong>{{ cat.label }}</strong>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="checklist-section">
+    <h2><small>Step 2</small>Summarise the problem</h2>
+    <div class="checklist-info-grid">
+      <div>
+        <strong>Reported by</strong>
+        <select name="reported_by" required style="width:100%">
+          <option value="">Select staff…</option>
+          {% for member in staff %}
+          <option value="{{ member }}">{{ member }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <strong>Priority</strong>
+        <select name="priority" style="width:100%">
+          <option value="low">Low</option>
+          <option value="normal" selected>Normal</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+      <div style="grid-column: 1 / -1">
+        <strong>Title</strong>
+        <input type="text" name="title" required placeholder="Short summary…" style="width:100%">
+      </div>
+      <div style="grid-column: 1 / -1">
+        <strong>Description</strong>
+        <textarea name="description" rows="4" required style="width:100%" placeholder="What happened? When? Who is involved? What needs to change?"></textarea>
+      </div>
+      <div style="grid-column: 1 / -1">
+        <strong>Photo (optional)</strong>
+        <input type="file" name="photo" accept="image/*" capture="environment">
+      </div>
+    </div>
+  </section>
+
+  <div class="checklist-toolbar" style="justify-content:flex-end">
+    <a class="checklist-btn checklist-btn--ghost" href="{{ url_for('checklist.home') }}">Cancel</a>
+    <button class="checklist-btn checklist-btn--success" type="submit">Submit report</button>
+  </div>
+</form>
+{% endblock %}

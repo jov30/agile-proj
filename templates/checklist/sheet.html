@@ -1,0 +1,257 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}{{ chk_data.title }} Checklist | MCQ{% endblock %}
+
+{% block header_kicker %}Daily checklist{% endblock %}
+{% block header_title %}{{ chk_data.title }} — {{ section|title }}{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">{{ day_name }} · {{ chk_date }}</span>
+<span class="checklist-header__pill">Deadline {{ deadline_label }}</span>
+{% if existing and existing.is_late %}<span class="checklist-header__pill" style="background:rgba(255,0,0,0.35)">Submitted late</span>{% endif %}
+{% if existing and existing.verified %}<span class="checklist-header__pill" style="background:rgba(40,114,77,0.45)">Verified</span>{% endif %}
+{% endblock %}
+
+{% block checklist_body %}
+<form class="checklist-form" method="POST" action="{{ url_for('checklist.checklist_save', chk_type=chk_type) }}" enctype="multipart/form-data" id="checklist-sheet-form">
+  <input type="hidden" name="date" value="{{ chk_date }}">
+  <input type="hidden" name="section" value="{{ section }}">
+
+  <div class="checklist-toolbar">
+    <label style="font-size:0.78rem;color:var(--text-muted)">Date</label>
+    <input type="date" value="{{ chk_date }}" onchange="window.location.href='{{ url_for('checklist.checklist_form', chk_type=chk_type) }}?section={{ section }}&date='+this.value">
+    <div class="checklist-toggle-group">
+      <a class="{% if section == 'opening' %}is-active{% endif %}" href="{{ url_for('checklist.checklist_form', chk_type=chk_type, section='opening', date=chk_date) }}">Opening</a>
+      <a class="{% if section == 'closing' %}is-active{% endif %}" href="{{ url_for('checklist.checklist_form', chk_type=chk_type, section='closing', date=chk_date) }}">Closing</a>
+    </div>
+    <span id="checklist-deadline-status" class="checklist-pill checklist-pill--info">Checking deadline…</span>
+    {% if existing %}
+    <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.session_view', session_id=existing.id) }}">View record</a>
+    {% endif %}
+  </div>
+
+  <section class="checklist-section">
+    <div class="checklist-info-grid">
+      <div>
+        <strong>Responsible</strong>
+        <select name="responsible" style="width:100%">
+          <option value="">Select staff…</option>
+          {% for member in staff %}
+          <option value="{{ member }}" {% if existing and existing.responsible == member %}selected{% endif %}>{{ member }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <strong>Submitted by</strong>
+        <select name="submitted_by" required style="width:100%">
+          <option value="">Select staff…</option>
+          {% for member in staff %}
+          <option value="{{ member }}" {% if existing and existing.submitted_by == member %}selected{% endif %}>{{ member }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="grid-column: 1 / -1">
+        <strong>General note</strong>
+        <textarea name="general_note" rows="2" style="width:100%" placeholder="Any context for this submission…">{{ existing.general_note if existing else '' }}</textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="checklist-section">
+    <h2><small>Task list</small>{{ tasks|length }} items — tick as you go</h2>
+    <div class="checklist-toolbar" style="background:transparent;border:0;padding:0">
+      <button type="button" class="checklist-btn checklist-btn--success checklist-btn--sm" onclick="toggleAllChecklistTasks(true)">Check all</button>
+      <button type="button" class="checklist-btn checklist-btn--ghost checklist-btn--sm" onclick="toggleAllChecklistTasks(false)">Clear all</button>
+      <span style="font-size:0.82rem;color:var(--text-muted)">Done <strong id="checklist-done-count">0</strong>/{{ tasks|length }}</span>
+      <div class="checklist-progress" style="flex:1"><span id="checklist-progress-bar" style="width:0%"></span></div>
+    </div>
+    <table class="checklist-table">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Task</th>
+          <th style="width:90px;text-align:center">Done?</th>
+          <th style="width:260px">Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        {% set i = loop.index0 %}
+        {% set et = existing_tasks[i] if i < existing_tasks|length else None %}
+        <tr class="checklist-task-row {% if et and et.done %}is-done{% endif %}" id="checklist-row-{{ i }}">
+          <td>{{ i + 1 }}</td>
+          <td>{{ task }}</td>
+          <td style="text-align:center">
+            <input type="checkbox" name="done_{{ i }}" value="1" id="checklist-check-{{ i }}" onchange="updateChecklistRow({{ i }})" {% if et and et.done %}checked{% endif %}>
+          </td>
+          <td>
+            <input type="text" name="note_{{ i }}" placeholder="Optional note" value="{{ et.note if et else '' }}">
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="checklist-section">
+    <h2><small>Photo evidence</small>Upload {{ photos_required }} photos before submitting</h2>
+    {% if existing %}
+    <div class="checklist-alert checklist-alert--info">
+      This checklist has been submitted. Uploading new photos replaces the existing batch, or leave empty to keep them.
+    </div>
+    {% endif %}
+    <div class="checklist-photo-grid" id="checklist-photo-grid">
+      {% for n in range(photos_required) %}
+      <label class="checklist-photo-slot" id="checklist-slot-{{ n }}" for="checklist-photo-input-{{ n }}">
+        <input type="file" name="photo_{{ n }}" id="checklist-photo-input-{{ n }}" accept="image/*" capture="environment" onchange="previewChecklistPhoto(this, {{ n }})">
+        <div class="checklist-photo-slot__empty" id="checklist-empty-{{ n }}">
+          <strong>Photo {{ n + 1 }}</strong>
+          <div>Tap to capture</div>
+        </div>
+        <img id="checklist-preview-{{ n }}" alt="">
+        <div class="checklist-photo-slot__check">✓</div>
+      </label>
+      {% endfor %}
+      <label class="checklist-photo-slot checklist-photo-slot--extra" for="checklist-photo-input-extra">
+        <input type="file" name="photo_{{ photos_required }}" id="checklist-photo-input-extra" accept="image/*" capture="environment" onchange="previewChecklistExtra(this)">
+        <div class="checklist-photo-slot__empty" id="checklist-empty-extra">
+          <strong>+ Extra</strong>
+          <div>Optional</div>
+        </div>
+        <img id="checklist-preview-extra" alt="">
+        <div class="checklist-photo-slot__check">✓</div>
+      </label>
+    </div>
+    <div class="checklist-progress" style="margin-top:0.4rem"><span id="checklist-photo-progress" style="width:0%;background:linear-gradient(90deg,#28724d,#1e5b39)"></span></div>
+    <div id="checklist-photo-status" class="checklist-photo-status">{{ photos_required }} photos required before submitting</div>
+  </section>
+
+  {% if existing_photos %}
+  <section class="checklist-section">
+    <h2><small>Existing photos</small>Captured on the original submission</h2>
+    <div class="checklist-photo-card__grid">
+      {% for photo in existing_photos %}
+      <img src="{{ photo.url }}" alt="Photo {{ photo.photo_number + 1 }}" onclick="openChecklistLightbox('{{ photo.url }}')">
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="checklist-toolbar" style="justify-content:flex-end">
+    <a class="checklist-btn checklist-btn--ghost" href="{{ url_for('checklist.home') }}">Back to dashboard</a>
+    {% if existing %}
+    <button type="submit" class="checklist-btn checklist-btn--warning">Save changes</button>
+    {% endif %}
+    <button type="submit" class="checklist-btn" id="checklist-submit" {% if not existing %}disabled aria-disabled="true"{% endif %}>Submit checklist</button>
+  </div>
+</form>
+{% endblock %}
+
+{% block checklist_scripts %}
+<script>
+  var REQUIRED_PHOTOS = {{ photos_required }};
+  var hasExistingSubmission = {{ 'true' if existing else 'false' }};
+
+  function updateChecklistRow(i) {
+    var row = document.getElementById('checklist-row-' + i);
+    var checkbox = document.getElementById('checklist-check-' + i);
+    row.classList.toggle('is-done', checkbox.checked);
+    updateChecklistProgress();
+  }
+
+  function toggleAllChecklistTasks(value) {
+    document.querySelectorAll('.checklist-task-row input[type="checkbox"]').forEach(function (input, idx) {
+      input.checked = value;
+      updateChecklistRow(idx);
+    });
+  }
+
+  function updateChecklistProgress() {
+    var all = document.querySelectorAll('.checklist-task-row input[type="checkbox"]');
+    var done = document.querySelectorAll('.checklist-task-row input[type="checkbox"]:checked').length;
+    document.getElementById('checklist-done-count').textContent = done;
+    document.getElementById('checklist-progress-bar').style.width = (all.length ? (done / all.length * 100) : 0) + '%';
+  }
+
+  function previewChecklistPhoto(input, n) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (event) {
+        var preview = document.getElementById('checklist-preview-' + n);
+        preview.src = event.target.result;
+        preview.style.display = 'block';
+        document.getElementById('checklist-empty-' + n).style.display = 'none';
+        document.getElementById('checklist-slot-' + n).classList.add('has-photo');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+    updateChecklistPhotoCount();
+  }
+
+  function previewChecklistExtra(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (event) {
+        var preview = document.getElementById('checklist-preview-extra');
+        preview.src = event.target.result;
+        preview.style.display = 'block';
+        document.getElementById('checklist-empty-extra').style.display = 'none';
+        input.closest('.checklist-photo-slot').classList.add('has-photo');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function updateChecklistPhotoCount() {
+    var count = 0;
+    for (var i = 0; i < REQUIRED_PHOTOS; i++) {
+      var input = document.getElementById('checklist-photo-input-' + i);
+      if (input && input.files && input.files[0]) count++;
+    }
+    var pct = Math.min(100, count / REQUIRED_PHOTOS * 100);
+    document.getElementById('checklist-photo-progress').style.width = pct + '%';
+    var statusEl = document.getElementById('checklist-photo-status');
+    var submitBtn = document.getElementById('checklist-submit');
+    if (count >= REQUIRED_PHOTOS) {
+      statusEl.classList.add('is-ready');
+      statusEl.textContent = 'Ready to submit · ' + count + ' photos captured';
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('aria-disabled');
+    } else if (hasExistingSubmission) {
+      statusEl.classList.add('is-ready');
+      statusEl.textContent = 'Existing photos kept (upload new ones to replace)';
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('aria-disabled');
+    } else {
+      statusEl.classList.remove('is-ready');
+      statusEl.textContent = (REQUIRED_PHOTOS - count) + ' more photo(s) required before submitting';
+      submitBtn.disabled = true;
+      submitBtn.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  (function () {
+    var section = '{{ section }}';
+    var deadlineHour = section === 'opening' ? 10 : 18;
+    var deadlineMin = 30;
+    var deadlineLabel = section === 'opening' ? '10:30 AM' : '6:30 PM';
+    var now = new Date();
+    var diff = (deadlineHour * 60 + deadlineMin) - (now.getHours() * 60 + now.getMinutes());
+    var status = document.getElementById('checklist-deadline-status');
+    if (diff > 30) {
+      status.className = 'checklist-pill checklist-pill--success';
+      status.textContent = 'On time · ' + diff + ' min left';
+    } else if (diff > 0) {
+      status.className = 'checklist-pill checklist-pill--warning';
+      status.textContent = 'Hurry — ' + diff + ' min before ' + deadlineLabel;
+    } else {
+      status.className = 'checklist-pill checklist-pill--danger';
+      status.textContent = 'Past ' + deadlineLabel + ' deadline';
+    }
+  })();
+
+  document.addEventListener('DOMContentLoaded', function () {
+    updateChecklistProgress();
+    updateChecklistPhotoCount();
+  });
+</script>
+{% endblock %}

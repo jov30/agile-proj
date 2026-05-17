@@ -1,0 +1,779 @@
+/*
+ * polish.css — visual refinement layer on top of main.css
+ *
+ * Adds motion, gradients, glassmorphism and "lung linh" sparkle so the
+ * Vietnamese street food site feels lively without rewriting the existing
+ * structure. Pairs with the Tailwind utility runtime loaded from base.html.
+ */
+
+/* ── Smooth, polished defaults ──────────────────────────────────────────── */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(255, 106, 19, 0.28);
+  color: #231814;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 180, 54, 0.55), rgba(235, 81, 48, 0.55));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--brand-amber), var(--brand-red));
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* ── Background ambience: floating warm orbs ────────────────────────────── */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(60rem 32rem at -10% 110%, rgba(255, 180, 54, 0.16), transparent 60%),
+    radial-gradient(50rem 30rem at 110% 35%, rgba(235, 81, 48, 0.12), transparent 60%),
+    radial-gradient(40rem 24rem at 50% -10%, rgba(255, 216, 115, 0.18), transparent 65%);
+  animation: orbDrift 22s ease-in-out infinite alternate;
+}
+
+@keyframes orbDrift {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
+  50% { transform: translate3d(-1.5%, -1%, 0) scale(1.04); opacity: 1; }
+  100% { transform: translate3d(1%, 1.2%, 0) scale(1.02); opacity: 0.9; }
+}
+
+/* ── Sparkle dust on the deep-wood header band ──────────────────────────── */
+.app-header {
+  position: relative;
+}
+
+.app-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 35%, rgba(255, 216, 115, 0.55), transparent 60%),
+    radial-gradient(1.5px 1.5px at 28% 78%, rgba(255, 216, 115, 0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 52% 22%, rgba(255, 180, 54, 0.45), transparent 60%),
+    radial-gradient(1.2px 1.2px at 68% 64%, rgba(255, 247, 239, 0.4), transparent 60%),
+    radial-gradient(1.6px 1.6px at 84% 30%, rgba(255, 216, 115, 0.5), transparent 60%),
+    radial-gradient(1.4px 1.4px at 92% 70%, rgba(255, 180, 54, 0.45), transparent 60%);
+  opacity: 0.7;
+  animation: sparkleTwinkle 6s ease-in-out infinite alternate;
+}
+
+@keyframes sparkleTwinkle {
+  0% { opacity: 0.35; transform: translateY(-1px); }
+  50% { opacity: 0.85; transform: translateY(1px); }
+  100% { opacity: 0.55; transform: translateY(0); }
+}
+
+/* ── Sticky header with backdrop blur ───────────────────────────────────── */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.app-header__inner {
+  position: relative;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+body.is-scrolled .app-header__inner {
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Brand mark — gentle pulse, hover lift ──────────────────────────────── */
+.brand-mark {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s ease;
+}
+
+.brand-mark::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 26px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 216, 115, 0),
+    rgba(255, 216, 115, 0.7),
+    rgba(235, 81, 48, 0.55),
+    rgba(255, 216, 115, 0)
+  );
+  filter: blur(8px);
+  opacity: 0.55;
+  animation: brandHalo 7s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes brandHalo {
+  to { transform: rotate(360deg); }
+}
+
+.brand:hover .brand-mark {
+  transform: rotate(-3deg) scale(1.05);
+}
+
+/* ── Nav links — subtle underline glow ──────────────────────────────────── */
+.main-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.95rem;
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.main-nav a i[data-lucide],
+.main-nav a .lucide {
+  opacity: 0.85;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.main-nav a:hover i[data-lucide],
+.main-nav a.is-active i[data-lucide] {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  height: 2px;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand-amber), var(--brand-red));
+  transform: translateX(-50%);
+  transition: width 0.25s ease;
+}
+
+.main-nav a:hover::after,
+.main-nav a.is-active::after {
+  width: 56%;
+}
+
+/* ── Header CTA — shimmer sweep ─────────────────────────────────────────── */
+.header-cta {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.header-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.header-cta:hover::before {
+  transform: translateX(120%);
+}
+
+/* ── Section panels — refined shadow, gentle hover lift ─────────────────── */
+.section-panel {
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease;
+}
+
+.section-panel:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-strong);
+  transform: translateY(-2px);
+}
+
+/* ── Reusable polish utilities ──────────────────────────────────────────── */
+.glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 252, 247, 0.4));
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 28px 60px rgba(53, 30, 20, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--brand-red), var(--brand-amber) 55%, var(--brand-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red), var(--brand-rose));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.shine-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.5) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+  pointer-events: none;
+}
+
+.shine-button:hover::after {
+  transform: translateX(120%);
+}
+
+.lift-on-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lift-on-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 60px rgba(53, 30, 20, 0.18);
+}
+
+.float-on-hover {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.float-on-hover:hover {
+  transform: translateY(-6px) scale(1.01);
+}
+
+.tilt-3d {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.tilt-3d:hover {
+  transform: perspective(900px) rotateX(2deg) rotateY(-2deg) translateZ(8px);
+}
+
+/* ── Reveal on scroll ───────────────────────────────────────────────────── */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-up.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-up.delay-1 { transition-delay: 0.08s; }
+.reveal-up.delay-2 { transition-delay: 0.16s; }
+.reveal-up.delay-3 { transition-delay: 0.24s; }
+.reveal-up.delay-4 { transition-delay: 0.32s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up,
+  .reveal-up.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  body::after,
+  .app-header::after,
+  .brand-mark::before {
+    animation: none !important;
+  }
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.app-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.app-footer::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 216, 115, 0.55), transparent);
+}
+
+/* ── Support dock — gradient launcher + glow ────────────────────────────── */
+.support-dock__launcher {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red)) !important;
+  color: #2a160b !important;
+  box-shadow:
+    0 18px 36px rgba(235, 81, 48, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em;
+  position: relative;
+  overflow: hidden;
+}
+
+.support-dock__launcher::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 216, 115, 0),
+    rgba(255, 216, 115, 0.5),
+    rgba(255, 106, 19, 0.5),
+    rgba(255, 216, 115, 0)
+  );
+  filter: blur(10px);
+  opacity: 0.5;
+  animation: brandHalo 6s linear infinite;
+  z-index: -1;
+  border-radius: inherit;
+}
+
+/* ── Site alerts — animated entrance ────────────────────────────────────── */
+.site-alert {
+  animation: slideInTop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+
+.site-alert::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-amber), var(--brand-red), var(--brand-amber));
+  background-size: 200% 100%;
+  animation: alertSheen 2.6s linear infinite;
+}
+
+@keyframes slideInTop {
+  from { opacity: 0; transform: translateY(-14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes alertSheen {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ── Forms — friendly focus states ──────────────────────────────────────── */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(255, 106, 19, 0.55);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(255, 180, 54, 0.18);
+  transition: box-shadow 0.2s ease, outline-color 0.2s ease;
+}
+
+/* ── Image polish ───────────────────────────────────────────────────────── */
+.polish-image {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 22px 50px rgba(53, 30, 20, 0.18);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.polish-image:hover {
+  transform: scale(1.02);
+}
+
+.polish-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.polish-image:hover img {
+  transform: scale(1.06);
+}
+
+/* ── Skeleton chip for empty states ─────────────────────────────────────── */
+.chip-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 180, 54, 0.18);
+  color: #8a4500;
+  border: 1px solid rgba(255, 180, 54, 0.35);
+}
+
+.chip-pill--cool {
+  background: rgba(0, 111, 116, 0.14);
+  color: var(--brand-teal);
+  border-color: rgba(0, 111, 116, 0.32);
+}
+
+.chip-pill--success {
+  background: rgba(40, 114, 77, 0.18);
+  color: var(--brand-green);
+  border-color: rgba(40, 114, 77, 0.32);
+}
+
+/* ── Mobile nav drawer enhancement ──────────────────────────────────────── */
+@media (max-width: 880px) {
+  .main-nav {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+}
+
+/* ── Lucide icons inherit color ─────────────────────────────────────────── */
+[data-lucide],
+.lucide {
+  vertical-align: -2px;
+}
+
+/* ── Best-seller / menu cards — gentle lift + image zoom ────────────────── */
+.gallery-card {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease, border-color 0.3s ease !important;
+  position: relative;
+  isolation: isolate;
+}
+
+.gallery-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent 55%, rgba(43, 22, 12, 0.6));
+  opacity: 0.85;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.gallery-card:hover::after {
+  opacity: 0.7;
+}
+
+.gallery-card img {
+  transition: transform 0.55s ease, filter 0.35s ease;
+  position: relative;
+  z-index: -1;
+}
+
+.gallery-card:hover img {
+  transform: scale(1.06);
+  filter: saturate(1.1) brightness(1.02);
+}
+
+.gallery-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 28px 60px rgba(53, 30, 20, 0.22) !important;
+}
+
+.gallery-card__body {
+  position: relative;
+  z-index: 1;
+}
+
+.gallery-card__price {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red)) !important;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: 900 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* ── Homepage flow steps — animated number + ring ───────────────────────── */
+.homepage-flow__step {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.3s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.homepage-flow__step::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 180, 54, 0.55), rgba(235, 81, 48, 0.4), rgba(255, 216, 115, 0));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.homepage-flow__step:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 22px 44px rgba(53, 30, 20, 0.16) !important;
+}
+
+.homepage-flow__step:hover::before {
+  opacity: 1;
+}
+
+.homepage-flow__number {
+  transition: transform 0.3s ease, background 0.3s ease !important;
+}
+
+.homepage-flow__step:hover .homepage-flow__number {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+/* ── Hero trust badge — sheen ──────────────────────────────────────────── */
+.hero-trust-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-trust-badge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: heroBadgeShine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes heroBadgeShine {
+  0% { transform: translateX(-120%); }
+  35%, 100% { transform: translateX(120%); }
+}
+
+/* ── Hero visual — refined drop shadow ──────────────────────────────────── */
+.hero-visual {
+  filter: drop-shadow(0 30px 60px rgba(53, 30, 20, 0.22));
+}
+
+/* ── Smooth scroll for in-page anchors ──────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+/* ── Menu cards — soft lift, image zoom, gradient price ─────────────────── */
+.menu-card {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.3s ease !important;
+  position: relative;
+}
+
+.menu-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 30px 60px rgba(53, 30, 20, 0.2) !important;
+}
+
+.menu-card__media img {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.menu-card:hover .menu-card__media img {
+  transform: scale(1.07);
+}
+
+.menu-card__price {
+  background:
+    linear-gradient(135deg, rgba(255, 216, 115, 0.32), rgba(255, 106, 19, 0.18)),
+    rgba(255, 247, 239, 0.88) !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--brand-red) !important;
+  font-weight: 900 !important;
+}
+
+/* Menu flow toggles + utility links — shimmer on active state */
+.menu-flow__mode.is-active,
+.menu-utility__link--accent {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-flow__mode.is-active::before,
+.menu-utility__link--accent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: heroBadgeShine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Category tabs — clearer active state ──────────────────────────────── */
+.menu-tab.is-active,
+.menu-category-pill.is-active {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red)) !important;
+  color: #2a160b !important;
+  font-weight: 800 !important;
+  box-shadow: 0 10px 22px rgba(255, 106, 19, 0.32) !important;
+}
+
+/* ── Cart / Checkout polish ─────────────────────────────────────────────── */
+.cart-line,
+.cart-line-item,
+.cart-summary,
+.checkout-card,
+.checkout-section {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.cart-line:hover,
+.cart-line-item:hover {
+  transform: translateX(2px);
+  border-color: var(--line-strong);
+}
+
+.cart-summary,
+.checkout-card,
+.checkout-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sticky summary on checkout */
+.checkout-summary.is-sticky,
+.cart-summary--sticky {
+  position: sticky;
+  top: 7.5rem;
+}
+
+/* ── Auth pages enhancement ─────────────────────────────────────────────── */
+.auth-card,
+.auth-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-card::before,
+.auth-shell::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(40rem 24rem at 20% 20%, rgba(255, 180, 54, 0.16), transparent 60%),
+    radial-gradient(36rem 22rem at 80% 80%, rgba(235, 81, 48, 0.12), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Tables — soft borders, hover rows ──────────────────────────────────── */
+.admin-table,
+table.admin-table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.admin-table thead th,
+table.admin-table thead th {
+  background: linear-gradient(135deg, #2c201b, #1b1412) !important;
+  color: #fff7ef !important;
+}
+
+.admin-table tbody tr,
+table.admin-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.admin-table tbody tr:hover,
+table.admin-table tbody tr:hover {
+  background: rgba(255, 180, 54, 0.08) !important;
+}
+
+/* ── Admin shell card styling — already exists, enhance ─────────────────── */
+.admin-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.25s ease !important;
+}
+
+.admin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 50px rgba(53, 30, 20, 0.14) !important;
+  border-color: var(--line-strong) !important;
+}
+
+.admin-stat strong {
+  background: linear-gradient(135deg, var(--brand-amber), var(--brand-red));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 1.7rem !important;
+}
+
+/* ── Button overrides (generic) ─────────────────────────────────────────── */
+.button.button--primary,
+.button-primary,
+.checkout-submit,
+.cart-checkout {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.button.button--primary::before,
+.button-primary::before,
+.checkout-submit::before,
+.cart-checkout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.button.button--primary:hover::before,
+.button-primary:hover::before,
+.checkout-submit:hover::before,
+.cart-checkout:hover::before {
+  transform: translateX(120%);
+}

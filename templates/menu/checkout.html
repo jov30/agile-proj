@@ -919,24 +919,24 @@
   <section class="checkout-hero section-panel">
     <div class="checkout-hero__grid">
       <div class="checkout-hero__copy">
-        <p class="eyebrow">Checkout orchestration</p>
-        <h1 class="section-title checkout-hero__title">Instant queue or scheduled pickup, in one checkout flow.</h1>
+        <p class="eyebrow inline-flex items-center gap-1.5"><i data-lucide="credit-card" class="!w-3.5 !h-3.5"></i>Checkout orchestration</p>
+        <h1 class="section-title checkout-hero__title">Instant queue or scheduled pickup, in <span class="gradient-text">one checkout flow</span>.</h1>
         <p class="section-copy">
           Choose instant online ordering to receive a live queue number at the counter, or keep the scheduled
           planner for time-slot pickup. Both flows share the same payment, receipt, and order history logic.
         </p>
         <div class="checkout-steps">
-          <a href="{{ url_for('orders.checkout') }}" class="checkout-step {% if entry_step == 'checkout' %}is-active{% endif %}">
-            <strong>1</strong> Review
+          <a href="{{ url_for('orders.checkout') }}" class="checkout-step {% if entry_step == 'checkout' %}is-active{% endif %} inline-flex items-center gap-2">
+            <strong>1</strong> <i data-lucide="clipboard-list" class="!w-3.5 !h-3.5"></i> Review
           </a>
-          <a href="{{ url_for('orders.payment') }}" class="checkout-step {% if entry_step == 'payment' %}is-active{% endif %}">
-            <strong>2</strong> Payment
+          <a href="{{ url_for('orders.payment') }}" class="checkout-step {% if entry_step == 'payment' %}is-active{% endif %} inline-flex items-center gap-2">
+            <strong>2</strong> <i data-lucide="credit-card" class="!w-3.5 !h-3.5"></i> Payment
           </a>
-          <a href="{{ url_for('orders.pickup_planner') }}" class="checkout-step {% if entry_step == 'pickup' %}is-active{% endif %}">
-            <strong>3</strong> Pickup
+          <a href="{{ url_for('orders.pickup_planner') }}" class="checkout-step {% if entry_step == 'pickup' %}is-active{% endif %} inline-flex items-center gap-2">
+            <strong>3</strong> <i data-lucide="map-pin" class="!w-3.5 !h-3.5"></i> Pickup
           </a>
-          <a href="{{ url_for('orders.receipt') }}" class="checkout-step">
-            <strong>4</strong> Receipt
+          <a href="{{ url_for('orders.receipt') }}" class="checkout-step inline-flex items-center gap-2">
+            <strong>4</strong> <i data-lucide="check-circle-2" class="!w-3.5 !h-3.5"></i> Receipt
           </a>
         </div>
         <div class="pill-row">
@@ -1372,16 +1372,29 @@
 
             <div class="checkout-aside__actions">
               <button
-                class="button button--primary checkout-submit"
+                class="button button--primary checkout-submit shine-button"
                 type="submit"
                 form="checkout-form"
                 id="checkout-submit"
                 data-grand-total="{{ grand_total_display }}"
               >
-                <span class="checkout-submit__idle" id="checkout-submit-idle">Pay {{ grand_total_display }} & Confirm Order</span>
-                <span class="checkout-submit__busy">Processing payment...</span>
+                <span class="checkout-submit__idle inline-flex items-center justify-center gap-2" id="checkout-submit-idle">
+                  <i data-lucide="lock" class="!w-4 !h-4"></i>
+                  Pay {{ grand_total_display }} &amp; Confirm Order
+                </span>
+                <span class="checkout-submit__busy inline-flex items-center justify-center gap-2">
+                  <i data-lucide="loader-2" class="!w-4 !h-4 animate-spin"></i>
+                  Processing payment...
+                </span>
               </button>
-              <a href="{{ url_for('orders.cart') }}" class="button button--secondary">Full cart view</a>
+              <a href="{{ url_for('orders.cart') }}" class="button button--secondary inline-flex items-center justify-center gap-2">
+                <i data-lucide="shopping-cart" class="!w-4 !h-4"></i>
+                Full cart view
+              </a>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-stone-500 px-2 mt-1">
+              <span class="grid place-items-center w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-700 shrink-0"><i data-lucide="shield-check" class="!w-3.5 !h-3.5"></i></span>
+              Simulated checkout for demo purposes — no real payment is captured.
             </div>
           </div>
         </section>

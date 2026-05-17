@@ -1,0 +1,59 @@
+{% extends "checklist/_layout.html" %}
+
+{% block title %}Checklist photos | MCQ{% endblock %}
+
+{% block header_kicker %}Photo gallery{% endblock %}
+{% block header_title %}Evidence captured by the team{% endblock %}
+{% block header_meta %}
+<span class="checklist-header__pill">{{ date_filter }}</span>
+{% endblock %}
+
+{% block checklist_body %}
+<form class="checklist-toolbar" method="get">
+  <label style="font-size:0.78rem;color:var(--text-muted)">Date</label>
+  <input type="date" name="date" value="{{ date_filter }}">
+  <label style="font-size:0.78rem;color:var(--text-muted)">Station</label>
+  <select name="type">
+    <option value="all" {% if chk_type == 'all' %}selected{% endif %}>All stations</option>
+    {% for key, chk in checklists.items() %}
+    <option value="{{ key }}" {% if chk_type == key %}selected{% endif %}>{{ chk.title }}</option>
+    {% endfor %}
+  </select>
+  <button class="checklist-btn checklist-btn--sm" type="submit">Filter</button>
+</form>
+
+{% if dates_with_photos %}
+<section class="checklist-section">
+  <h2><small>Recent days with photos</small>Quick links</h2>
+  <div class="checklist-toolbar" style="background:transparent;border:0;padding:0">
+    {% for d in dates_with_photos %}
+    <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.photo_gallery') }}?date={{ d }}&type={{ chk_type }}">{{ d }}</a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if sessions %}
+<div class="checklist-card-grid" style="grid-template-columns: 1fr">
+  {% for bucket in sessions %}
+  <article class="checklist-photo-card" style="border-left:4px solid {{ bucket.session.accent }}">
+    <div class="checklist-card__row" style="justify-content:space-between">
+      <div>
+        <strong>{{ bucket.session.type_title }}</strong>
+        <span class="checklist-pill checklist-pill--info">{{ bucket.session.section|title }}</span>
+        <span class="checklist-pill checklist-pill--pending">{{ bucket.session.date }}</span>
+      </div>
+      <a class="checklist-btn checklist-btn--ghost checklist-btn--sm" href="{{ url_for('checklist.session_view', session_id=bucket.session.id) }}">Open record</a>
+    </div>
+    <div class="checklist-photo-card__grid">
+      {% for photo in bucket.photos %}
+      <img src="{{ photo.url }}" alt="Photo {{ photo.photo_number + 1 }}" onclick="openChecklistLightbox('{{ photo.url }}')">
+      {% endfor %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="checklist-empty">No photo evidence found for the selected filters.</div>
+{% endif %}
+{% endblock %}

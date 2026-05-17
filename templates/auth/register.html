@@ -241,20 +241,50 @@
           <form method="post" class="auth-form" novalidate>
             <input type="hidden" name="next" value="{{ next_url }}" />
             <div class="field">
-              <label for="name">Full name</label>
-              <input id="name" name="name" type="text" value="{{ form_data.name }}" autocomplete="name" required />
+              <label for="name" class="inline-flex items-center gap-1.5"><i data-lucide="user" class="!w-4 !h-4 text-stone-500"></i>Full name</label>
+              <div class="relative">
+                <i data-lucide="contact" class="!w-4 !h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input id="name" name="name" type="text" value="{{ form_data.name }}" autocomplete="name" required style="padding-left: 2.5rem" />
+              </div>
             </div>
             <div class="field">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" value="{{ form_data.email }}" autocomplete="email" required />
+              <label for="email" class="inline-flex items-center gap-1.5"><i data-lucide="mail" class="!w-4 !h-4 text-stone-500"></i>Email</label>
+              <div class="relative">
+                <i data-lucide="at-sign" class="!w-4 !h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input id="email" name="email" type="email" value="{{ form_data.email }}" autocomplete="email" required style="padding-left: 2.5rem" />
+              </div>
             </div>
             <div class="field">
-              <label for="password">Password</label>
-              <input id="password" name="password" type="password" autocomplete="new-password" required />
+              <label for="password" class="inline-flex items-center gap-1.5"><i data-lucide="lock" class="!w-4 !h-4 text-stone-500"></i>Password</label>
+              <div class="relative">
+                <i data-lucide="key-round" class="!w-4 !h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input id="password" name="password" type="password" autocomplete="new-password" required style="padding-left: 2.5rem" />
+              </div>
+              <p class="text-xs text-stone-500 inline-flex items-center gap-1.5"><i data-lucide="info" class="!w-3 !h-3"></i>Minimum 6 characters.</p>
             </div>
-            <button type="submit" class="button button--primary">{{ submit_label }}</button>
-            <a href="{{ alternate_href }}" class="button button--secondary">{{ alternate_label }}</a>
+            <button type="submit" class="button button--primary shine-button inline-flex items-center justify-center gap-2">
+              <i data-lucide="user-plus" class="!w-4 !h-4"></i>
+              {{ submit_label }}
+            </button>
+            <a href="{{ alternate_href }}" class="button button--secondary inline-flex items-center justify-center gap-2">
+              <i data-lucide="log-in" class="!w-4 !h-4"></i>
+              {{ alternate_label }}
+            </a>
           </form>
+          <div class="grid grid-cols-3 gap-2 pt-2">
+            <div class="rounded-xl bg-amber-50 ring-1 ring-amber-200/60 p-2 text-center">
+              <i data-lucide="trophy" class="!w-5 !h-5 text-amber-600 mx-auto mb-1"></i>
+              <div class="text-[0.7rem] font-bold text-stone-700">Lantern tier</div>
+            </div>
+            <div class="rounded-xl bg-orange-50 ring-1 ring-orange-200/60 p-2 text-center">
+              <i data-lucide="zap" class="!w-5 !h-5 text-orange-600 mx-auto mb-1"></i>
+              <div class="text-[0.7rem] font-bold text-stone-700">Instant queue</div>
+            </div>
+            <div class="rounded-xl bg-rose-50 ring-1 ring-rose-200/60 p-2 text-center">
+              <i data-lucide="heart" class="!w-5 !h-5 text-rose-600 mx-auto mb-1"></i>
+              <div class="text-[0.7rem] font-bold text-stone-700">Community</div>
+            </div>
+          </div>
         </div>
       </article>
 
@@ -264,10 +294,10 @@
           <h2 class="auth-side__heading">Your first order is one tap away.</h2>
           <p class="auth-side__sub">Create an account and every order gets faster.</p>
           <div class="auth-side__pills">
-            <span class="auth-side__pill">Faster checkout</span>
-            <span class="auth-side__pill">Live order tracking</span>
-            <span class="auth-side__pill">PDF receipts</span>
-            <span class="auth-side__pill">Loyalty rewards</span>
+            <span class="auth-side__pill"><i data-lucide="rocket" class="!w-3.5 !h-3.5"></i>Faster checkout</span>
+            <span class="auth-side__pill"><i data-lucide="bell-ring" class="!w-3.5 !h-3.5"></i>Live order tracking</span>
+            <span class="auth-side__pill"><i data-lucide="file-text" class="!w-3.5 !h-3.5"></i>PDF receipts</span>
+            <span class="auth-side__pill"><i data-lucide="sparkles" class="!w-3.5 !h-3.5"></i>Loyalty rewards</span>
           </div>
         </div>
       </aside>
