@@ -12,6 +12,7 @@ from sqlalchemy import func
 
 from menu_catalog import format_aud, load_enriched_menu
 from models import CommunityComment, CommunityCommentVote, CommunityPost, CommunityReaction, CommunitySave, Order, User, db
+from routes.api_errors import api_error_response
 from routes.auth import current_user
 from routes.helpers import render_feature_page
 from datetime import date as date_type
@@ -1385,7 +1386,7 @@ def support_chat():
     body = request.get_json(silent=True) or {}
     message = body.get("message", "")
     if not isinstance(message, str) or not message.strip():
-        return jsonify({"error": "message is required"}), 400
+        return api_error_response("message is required", status=400, code="missing_message")
 
     cleaned_message = " ".join(message.strip().split())
     history = _support_history()

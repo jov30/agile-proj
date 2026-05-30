@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from functools import wraps
 
-from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import User, db
+from routes.api_errors import api_error_response
 
 
 auth_bp = Blueprint("auth", __name__)
@@ -37,7 +38,12 @@ def admin_required(view_func):
         next_url = request.full_path.rstrip("?")
         login_url = url_for("auth.login", next=next_url)
         if request.path.startswith("/api/"):
-            return jsonify({"error": "admin access required", "login_url": login_url}), 403
+            return api_error_response(
+                "admin access required",
+                status=403,
+                code="admin_required",
+                extra={"login_url": login_url},
+            )
         return redirect(login_url)
 
     return wrapped
